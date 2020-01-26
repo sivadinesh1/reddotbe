@@ -44,10 +44,12 @@ router.get("/search-customer/:centerid/:searchstr", (req, res) => {
 	let centerid = req.params.centerid;
 
 	let sql = `
-	select *
+	select *, s.code, s.description
   from 
-  customer c
-  where 
+	customer c,
+	state s
+	where 
+	c.state_id = s.id and
   c.center_id = '${centerid}' and
   c.isactive = 'A' and
   ( c.name like '%${searchstr}%') limit 50 `;
