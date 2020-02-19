@@ -4,11 +4,82 @@ const router = express.Router();
 const mysql = require("mysql");
 const moment = require("moment");
 
+const { createInvoice } = require("./createInvoice.js");
+
 const connection = mysql.createConnection({
 	host: "localhost",
 	user: "root",
 	password: "filia",
 	database: "reddotdb"
+});
+
+const invoice = {
+	shipping: {
+		name: "John Doe",
+		address: "1234 Main Street",
+		city: "San Francisco",
+		state: "CA",
+		country: "US",
+		postal_code: 94111
+	},
+	items: [
+		{
+			item: "TC 100",
+			description: "Toner Cartridge",
+			quantity: 2,
+			amount: 6000
+		},
+		{
+			item: "USB_EXT",
+			description: "USB Cable Extender",
+			quantity: 1,
+			amount: 2000
+		}
+	],
+	subtotal: 8000,
+	paid: 0,
+	invoice_nr: 1234
+};
+
+router.get("/sample-pdf", (req, res) => {
+	createInvoice(invoice, "invoice.pdf", res);
+});
+
+router.get("/search-product/:centerid/:customerid/:orderdate/:searchstr", (req, res) => {
+	let searchstr = req.params.searchstr;
+	let centerid = req.params.centerid;
+	let customerid = req.params.customerid;
+	let orderdate = req.params.orderdate;
+
+	let sql = `select a.product_code as product_code, a.description, a.mrp, a.taxrate, b.available_stock,
+	a.packetsize, a.unit_price, a.id, b.id as stock_pk,
+	
+(	  select concat(value,'~',type) from discount where   str_to_date('${orderdate}','%d-%m-%Y')  between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') and
+  customer_id = '${customerid}' and
+  gst_slab = a.taxrate
+) as disc_info
+	
+	
+  from 
+  product a, 
+  stock b
+  where 
+  a.id = b.product_id and
+  a.center_id = '${centerid}' and
+  ( a.product_code like '%${searchstr}%' or
+  a.description like '%${searchstr}%' ) limit 50 
+  
+ `;
+
+	console.log("query TESTing > " + sql);
+
+	connection.query(sql, function(err, data) {
+		if (err) {
+			console.log("object error " + err);
+		} else {
+			res.json(data);
+		}
+	});
 });
 
 //mgt
@@ -17,7 +88,7 @@ router.get("/search-product/:centerid/:searchstr", (req, res) => {
 	let centerid = req.params.centerid;
 
 	let sql = `select a.product_code as product_code, a.description, a.mrp, a.taxrate, b.available_stock,
-	a.packetsize, a.unit_price, a.id
+	a.packetsize, a.unit_price, a.id, b.id as stock_pk
   from 
   product a, 
   stock b
@@ -28,7 +99,7 @@ router.get("/search-product/:centerid/:searchstr", (req, res) => {
   a.description like '%${searchstr}%' ) limit 50 
  `;
 
-	console.log("query > " + sql);
+	//	console.log("query > " + sql);
 
 	connection.query(sql, function(err, data) {
 		if (err) {
@@ -43,18 +114,24 @@ router.get("/search-customer/:centerid/:searchstr", (req, res) => {
 	let searchstr = req.params.searchstr;
 	let centerid = req.params.centerid;
 
-	let sql = `
-	select *, s.code, s.description
-  from 
+	let sql = `select c.id, c.center_id, c.name, c.address1, c.address2, c.district, s.code, s.description,
+	c.pin, c.gst, c.phone, c.mobile, c.mobile2, c.whatsapp,  c.email, c.isactive, c.billingstatus
+	from 
 	customer c,
 	state s
 	where 
-	c.state_id = s.id and
-  c.center_id = '${centerid}' and
-  c.isactive = 'A' and
-  ( c.name like '%${searchstr}%') limit 50 `;
+	c.state_id = s.id and isactive = 'A' and center_id = '${centerid}' and ( c.name like '%${searchstr}%') limit 50`;
 
-	console.log("query > " + sql);
+	// let sql = `
+	// select *, s.code, s.description
+	// from
+	// customer c,
+	// state s
+	// where
+	// c.state_id = s.id and
+	// c.center_id = '${centerid}' and
+	// c.isactive = 'A' and
+	// ( c.name like '%${searchstr}%') limit 50 `;
 
 	connection.query(sql, function(err, data) {
 		if (err) {
@@ -83,8 +160,6 @@ router.get("/inventory/all", (req, res) => {
 
 //mgt
 router.get("/all-clients", (req, res) => {
-	// let sql = `select * from party_master where status = 'A'`;
-
 	let sql = `select * from customer where isactive = 'A'`;
 
 	connection.query(sql, function(err, data) {
@@ -102,7 +177,7 @@ router.get("/all-active-vendors/:centerid", (req, res) => {
 	// let sql = `select * from vendor where isactive = 'A' and center_id = ${centerid}`;
 
 	let sql = `select v.id, v.center_id, v.name, v.address1, v.address2, v.district, s.code, s.description,
-	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp, v.discount, v.email, v.isactive, v.billingstatus  from 
+	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp, v.email, v.isactive, v.billingstatus  from 
 	vendor v,
 	state s
 	where 
@@ -121,7 +196,7 @@ router.get("/all-active-customers/:centerid", (req, res) => {
 	let centerid = req.params.centerid;
 
 	let sql = `select c.id, c.center_id, c.name, c.address1, c.address2, c.district, s.code, s.description,
-	c.pin, c.gst, c.phone, c.mobile, c.mobile2, c.whatsapp, c.discount, c.email, c.isactive, c.billingstatus  from 
+	c.pin, c.gst, c.phone, c.mobile, c.mobile2, c.whatsapp, c.email, c.isactive, c.billingstatus  from 
 	customer c,
 	state s
 	where 
@@ -132,35 +207,6 @@ router.get("/all-active-customers/:centerid", (req, res) => {
 			console.log("sql exec failed.... " + err);
 		} else {
 			res.json(data);
-		}
-	});
-});
-
-router.get("/add-enquiry-master/:customerid", (req, res) => {
-	//	let partycode = req.params.partycode;
-	//	console.log(" inside apply jobs CODE ..." + customerid);
-
-	var today = new Date();
-	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
-	let query = `INSERT INTO enquiry ( customer_id, enquiry_date) values ( '${customerid}','${today}')`;
-
-	let yourJsonObj = req.body;
-
-	connection.query(query, function(err, data) {
-		if (err) {
-			console.log("object..." + err);
-			res.status(500).json({
-				result: "NOTOK",
-				message: `ERROR While updating.`
-			});
-		} else {
-			let tmpid = data.insertId;
-			console.log("object inside else ..." + tmpid);
-
-			res.json({
-				result: "OK",
-				enquiryid: tmpid
-			});
 		}
 	});
 });
@@ -242,15 +288,13 @@ router.post("/insert-purchase-details", (req, res) => {
 	var day = moment().format("D");
 	var year = moment().format("YYYY");
 
-	let billingno = "P" + seqnce++ + year + month + day;
-
 	let query = `
-	INSERT INTO purchase ( bill_no, center_id, vendor_id, invoice_no, invoice_date, 
+	INSERT INTO purchase ( center_id, vendor_id, invoice_no, invoice_date, 
 		lr_no, lr_date, received_date, purchase_type, order_no, 
 		order_date, total_qty, no_of_items, taxable_value, cgst, sgst, igst, 
 		total_value, transport_charges, unloading_charges, misc_charges, net_total, no_of_boxes)
 		VALUES
-			( '${billingno}', 1, '${vendorValue.id}', '${invoiceno}', '${invoicedate}', '${lr_no}', '${lr_date}', 
+			( 1, '${vendorValue.id}', '${invoiceno}', '${invoicedate}', '${lr_no}', '${lr_date}', 
 			'${received_date}', 
 			'GST Inovoice',
 			'${order_no}', 
@@ -332,97 +376,91 @@ router.post("/insert-purchase-details", (req, res) => {
 });
 
 router.post("/insert-sale-details", (req, res) => {
-	console.log(" inside apply jobs ...");
 	let yourJsonObj = req.body;
 
-	const customerValue = yourJsonObj["customer"];
-	const invoiceno = yourJsonObj["invoiceno"];
+	console.log(" insert-sale-details ..." + JSON.stringify(yourJsonObj));
 
+	const customerValue = yourJsonObj["customer"];
+
+	let invoiceyear = "";
 	let invoicedate = yourJsonObj["invoicedate"];
 	if (yourJsonObj["invoicedate"] !== "") {
 		invoicedate = moment(yourJsonObj["invoicedate"]).format("YYYY-MM-DD");
+		invoiceyear = moment(yourJsonObj["invoicedate"]).format("YY");
 	}
-
-	let order_date = yourJsonObj["orderdate"];
-
-	if (yourJsonObj["orderdate"] !== "") {
-		order_date = moment(yourJsonObj["orderdate"]).format("YYYY-MM-DD");
-	}
-
-	let lr_date = yourJsonObj["lrdate"];
-	if (yourJsonObj["lrdate"] !== "") {
-		lr_date = moment(yourJsonObj["lrdate"]).format("YYYY-MM-DD");
-	}
-
-	const no_of_boxes = yourJsonObj["noofboxes"];
-	let received_date = yourJsonObj["orderrcvddt"];
-
-	if (yourJsonObj["orderrcvddt"] !== "") {
-		received_date = moment(yourJsonObj["orderrcvddt"]).format("YYYY-MM-DD");
-	}
-
-	const lr_no = yourJsonObj["lrno"];
-	const order_no = yourJsonObj["orderno"];
 
 	const no_of_items = yourJsonObj["noofitems"];
 	const total_qty = yourJsonObj["totalqty"];
 	const taxable_value = yourJsonObj["taxable_value"];
 	const total_value = yourJsonObj["totalvalue"];
 	const product_arr = yourJsonObj["productarr"];
-	const transport_charges = yourJsonObj["transport_charges"];
-	const unloading_charges = yourJsonObj["unloading_charges"];
-	const misc_charges = yourJsonObj["misc_charges"];
-	const net_total = yourJsonObj["net_total"];
+
+	// const net_total = yourJsonObj["net_total"];
 
 	const igst = yourJsonObj["igst"];
 	const cgst = yourJsonObj["cgst"];
 	const sgst = yourJsonObj["sgst"];
-
-	// product_arr.forEach(function(k) {
-
-	// });
+	const enqref = yourJsonObj["enqref"];
 
 	var month = moment().format("M");
 	var day = moment().format("D");
 	var year = moment().format("YYYY");
+	var syear = moment().format("YY");
 
-	let billingno = "P" + seqnce++ + year + month + day;
+	connection.beginTransaction(function(err) {
+		if (err) {
+			throw err;
+		}
 
-	let query = `
-	INSERT INTO sale ( bill_no, center_id, customer_id, invoice_no, invoice_date, 
-		lr_no, lr_date, received_date, sale_type, order_no, 
-		order_date, total_qty, no_of_items, taxable_value, cgst, sgst, igst, 
-		total_value, transport_charges, unloading_charges, misc_charges, net_total, no_of_boxes)
+		let qryUpdateSqnc = `
+	update financialyear set invseq = invseq + 1 where 
+	center_id = '1' and  
+	CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y')
+	`;
+
+		connection.query(qryUpdateSqnc, function(err, data) {
+			if (err) {
+				console.log("object..." + err);
+			}
+		});
+
+		let query = `
+	INSERT INTO sale (  center_id, customer_id, invoice_no, invoice_date, 
+	 sale_type,  total_qty, no_of_items, taxable_value, cgst, sgst, igst, 
+		total_value, net_total)
 		VALUES
-			( '${billingno}', 1, '${customerValue.id}', '${invoiceno}', '${invoicedate}', '${lr_no}', '${lr_date}', 
-			'${received_date}', 
+			(1, '${customerValue.id}', 
+			
+			(select concat('${invoiceyear}', "/", "1", "/", lpad(invseq, 5, "0")) from financialyear 
+where 
+center_id = 1 and  
+CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y'))
+			
+			, '${invoicedate}', 
 			'GST Inovoice',
-			'${order_no}', 
-			'${order_date}', 
+		
 			'${total_qty}', 
-			'${no_of_items}', 
+			'${no_of_items}',  
 			'${taxable_value}', 
 			'${cgst}', 
 			'${sgst}', 
 			'${igst}', 
 			'${total_value}', 
-			'${transport_charges}', 
-			'${unloading_charges}', 
-			'${misc_charges}', 
-			'${net_total}', 
-			'${no_of_boxes}'
+	
+			'${total_value}'
+			
 			)`;
 
-	connection.query(query, function(err, data) {
-		if (err) {
-			console.log("object..." + err);
-		} else {
-			console.log("object..DATA." + JSON.stringify(data));
+		connection.query(query, function(err, data) {
+			if (err) {
+				return connection.rollback(function() {
+					throw error;
+				});
+			}
+
 			let newPK = data.insertId;
 
 			product_arr.forEach(function(k) {
-				console.log("what >> " + k.product_code);
-
 				let query1 = `
 
 				INSERT INTO sale_detail(sale_id, product_id, qty, unit_price, mrp, batchdate, tax,
@@ -435,45 +473,56 @@ router.post("/insert-sale-details", (req, res) => {
 				connection.query(query1, function(err, data) {
 					if (err) {
 						console.log("object..." + err);
-					} else {
-						console.log("object... success");
+					}
 
-						let query2 = `
+					let query2 = `
 							update stock set available_stock =  available_stock - '${k.qty}'
-	where product_id = '${k.product_id}' and mrp = '${k.mrp}' `;
+	where product_id = '${k.product_id}' and id = '${k.stock_pk}' `;
 
-						connection.query(query2, function(err, data) {
+					connection.query(query2, function(err, data) {
+						if (err) {
+							console.log("object..." + err);
+						}
+
+						let query3 = `
+								update product set currentstock = (
+									select sum(available_stock) from stock where product_id = '${k.product_id}')
+									 `;
+						connection.query(query3, function(err, data) {
 							if (err) {
 								console.log("object..." + err);
-							} else {
-								console.log("object..stock update .");
 							}
+						});
+					});
+				});
+			});
+
+			if (enqref !== 0) {
+				let uenqsaleidqry = `update enquiry set 
+				estatus = 'E',
+				sale_id = '${newPK}'
+				where 
+				id =  '${enqref}' `;
+
+				connection.query(uenqsaleidqry, function(err, data) {
+					if (err) {
+						console.log("object..." + err);
+					} else {
+						res.json({
+							result: "success"
 						});
 					}
 				});
-			});
-		}
-	});
-	// 	});
-});
-
-router.get("/all-active-enquiries", (req, res) => {
-	let sql = `select em.id id, em.enquiry_date, pm.name 
-  from 
-  enquiry em, 
-  party pm 
-  where 
-  em.partycode = pm.partycode and
-  estatus = 'A'
-  order by
-  enquiry_date desc`;
-
-	connection.query(sql, function(err, data) {
-		if (err) {
-			console.log("object error " + err);
-		} else {
-			res.json(data);
-		}
+			}
+		});
+		connection.commit(function(err) {
+			if (err) {
+				return connection.rollback(function() {
+					throw err;
+				});
+			}
+			console.log("success!");
+		});
 	});
 });
 
@@ -503,17 +552,17 @@ router.get("/get-enquiry/:enquiryid", (req, res) => {
 	});
 });
 
-router.get("/get-party-details/:enquiryid", (req, res) => {
+router.get("/get-customer-details/:enquiryid", (req, res) => {
 	let enquiryid = req.params.enquiryid;
 
 	console.log("object error......... " + enquiryid);
 
-	let sql = `     select pm.*
+	let sql = `     select c.*
   from 
   enquiry em, 
-party pm
+customer c
 where
-em.partycode = pm.partycode and
+em.customer_id = c.id and
 em.id = ${enquiryid}`;
 
 	connection.query(sql, function(err, data) {

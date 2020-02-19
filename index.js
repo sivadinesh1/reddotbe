@@ -44,6 +44,9 @@ app.use(
 
 // general api routes
 app.use("/api", require("./routes/api/general"));
+app.use("/api/enquiry", require("./routes/api/enquiry"));
+app.use("/api/auth", require("./routes/api/auth"));
+app.use("/api/admin", require("./routes/api/admin"));
 
 app.get("/openCV/:id/:filename", function(req, res) {
 	console.log("object ..SEND ME PDF.." + req.params.id);
