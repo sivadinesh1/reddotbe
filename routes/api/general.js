@@ -174,10 +174,9 @@ router.get("/all-clients", (req, res) => {
 //mgt
 router.get("/all-active-vendors/:centerid", (req, res) => {
 	let centerid = req.params.centerid;
-	// let sql = `select * from vendor where isactive = 'A' and center_id = ${centerid}`;
 
-	let sql = `select v.id, v.center_id, v.name, v.address1, v.address2, v.district, s.code, s.description,
-	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp, v.email, v.isactive, v.billingstatus  from 
+	let sql = `select v.id, v.center_id, v.name, v.address1, v.address2, v.district, s.id as state_id, s.code, s.description,
+	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp, v.email, v.isactive  from 
 	vendor v,
 	state s
 	where 
@@ -196,7 +195,7 @@ router.get("/all-active-customers/:centerid", (req, res) => {
 	let centerid = req.params.centerid;
 
 	let sql = `select c.id, c.center_id, c.name, c.address1, c.address2, c.district, s.code, s.description,
-	c.pin, c.gst, c.phone, c.mobile, c.mobile2, c.whatsapp, c.email, c.isactive, c.billingstatus  from 
+	c.pin, c.gst, c.phone, c.mobile, c.mobile2, c.whatsapp, c.email, c.isactive  from 
 	customer c,
 	state s
 	where 
