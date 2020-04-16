@@ -1,24 +1,11 @@
 const express = require("express");
 const authRoute = express.Router();
 
-const mysql = require("mysql");
-const moment = require("moment");
-
-const connection = mysql.createConnection({
-	host: "localhost",
-	user: "root",
-	password: "filia",
-	database: "reddotdb"
-});
+var pool = require("./../helpers/db");
+const { handleError, ErrorHandler } = require("./../helpers/error");
 
 authRoute.post("/login", (req, res) => {
-	let jsonObj = req.body;
-
-	const username = jsonObj["username"];
-	const password = jsonObj["password"];
-
-	console.log("object" + username);
-	console.log("object " + password);
+	const [username, password] = Object.values(req.body);
 
 	let query = `select u.id as userid, u.username, u.firstname, r.name as role, c.id as center_id, c.name as center_name, cm.id as company_id,
 	cm.name as company_name, s.code
@@ -38,30 +25,18 @@ authRoute.post("/login", (req, res) => {
 	username='${username}' and
 	userpass='${password}' `;
 
-	connection.query(query, function(err, data) {
+	pool.query(query, function(err, data) {
 		if (err) {
-			console.log("object..." + err);
-			res.status(500).json({
-				result: "NOTOK",
-				message: `ERROR While updating.`
-			});
-		}
-
-		if (data.length > 0) {
-			console.log("object pass match" + JSON.stringify(data));
-			console.log("object..." + data[0].userId);
-			res.json({
-				message: "SUCCESS",
+			return handleError(new ErrorHandler("100", "Error while authenticating."), res);
+		} else if (data.length > 0) {
+			return res.status(200).json({
+				result: "success",
 				role: data[0].role,
 				userid: data[0].userid,
 				obj: data[0]
 			});
 		} else {
-			console.log("object pass mismatch");
-			res.json({
-				message: "FAILURE",
-				additionalinfo: "INVALID_CREDENTIALS"
-			});
+			return handleError(new ErrorHandler("600", "Invalid Credentials."), res);
 		}
 	});
 });

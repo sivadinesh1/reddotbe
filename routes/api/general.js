@@ -4,14 +4,10 @@ const router = express.Router();
 const mysql = require("mysql");
 const moment = require("moment");
 
-const { createInvoice } = require("./createInvoice.js");
+const { handleError, ErrorHandler } = require("./../helpers/error");
 
-const connection = mysql.createConnection({
-	host: "localhost",
-	user: "root",
-	password: "filia",
-	database: "reddotdb"
-});
+const { createInvoice } = require("./createInvoice.js");
+var pool = require("./../helpers/db");
 
 const invoice = {
 	shipping: {
@@ -20,39 +16,41 @@ const invoice = {
 		city: "San Francisco",
 		state: "CA",
 		country: "US",
-		postal_code: 94111
+		postal_code: 94111,
 	},
 	items: [
 		{
 			item: "TC 100",
 			description: "Toner Cartridge",
 			quantity: 2,
-			amount: 6000
+			amount: 6000,
 		},
 		{
 			item: "USB_EXT",
 			description: "USB Cable Extender",
 			quantity: 1,
-			amount: 2000
-		}
+			amount: 2000,
+		},
 	],
 	subtotal: 8000,
 	paid: 0,
-	invoice_nr: 1234
+	invoice_nr: 1234,
 };
 
 router.get("/sample-pdf", (req, res) => {
 	createInvoice(invoice, "invoice.pdf", res);
 });
 
-router.get("/search-product/:centerid/:customerid/:orderdate/:searchstr", (req, res) => {
-	let searchstr = req.params.searchstr;
-	let centerid = req.params.centerid;
-	let customerid = req.params.customerid;
-	let orderdate = req.params.orderdate;
+router.post("/search-product-information", (req, res) => {
+	// let searchstr = req.params.searchstr;
+	// let centerid = req.params.centerid;
+	// let customerid = req.params.customerid;
+	// let orderdate = req.params.orderdate;
+
+	const [centerid, customerid, orderdate, searchstr] = Object.values(req.body);
 
 	let sql = `select a.product_code as product_code, a.description, a.mrp, a.taxrate, b.available_stock,
-	a.packetsize, a.unit_price, a.id, b.id as stock_pk,
+	a.packetsize, a.unit_price, a.id as product_id, b.id as stock_pk,
 	
 (	  select concat(value,'~',type) from discount where   str_to_date('${orderdate}','%d-%m-%Y')  between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') and
   customer_id = '${customerid}' and
@@ -73,39 +71,65 @@ router.get("/search-product/:centerid/:customerid/:orderdate/:searchstr", (req, 
 
 	console.log("query TESTing > " + sql);
 
-	connection.query(sql, function(err, data) {
+	pool.query(sql, function (err, data) {
 		if (err) {
-			console.log("object error " + err);
+			return handleError(new ErrorHandler("500", "Error fetching search products."), res);
 		} else {
-			res.json(data);
+			return res.json(data);
 		}
 	});
 });
 
 //mgt
-router.get("/search-product/:centerid/:searchstr", (req, res) => {
-	let searchstr = req.params.searchstr;
-	let centerid = req.params.centerid;
+// router.get("/search-product/:centerid/:searchstr", (req, res) => {
+// 	let searchstr = req.params.searchstr;
+// 	let centerid = req.params.centerid;
+
+// 	let sql = `select a.product_code as product_code, a.description, a.mrp, a.taxrate, b.available_stock,
+// 	a.packetsize, a.unit_price, a.id as product_id, b.id as stock_pk, a.packetsize as qty
+//   from
+// 	product a
+// 	LEFT outer JOIN   stock b
+// 	ON b.product_id = a.id
+//   where
+//   a.center_id = '${centerid}' and
+//   ( a.product_code like '%${searchstr}%' or
+//   a.description like '%${searchstr}%' ) limit 50
+//  `;
+
+// 	console.log("query > " + sql);
+
+// 	pool.query(sql, function (err, data) {
+// 		if (err) {
+// 			return handleError(new ErrorHandler("500", "Error fetching search products."), res);
+// 		} else {
+// 			return res.json(data);
+// 		}
+// 	});
+// });
+
+router.post("/search-product", (req, res) => {
+	const [centerid, searchstr] = Object.values(req.body);
 
 	let sql = `select a.product_code as product_code, a.description, a.mrp, a.taxrate, b.available_stock,
-	a.packetsize, a.unit_price, a.id, b.id as stock_pk
+	a.packetsize, a.unit_price, a.id as product_id, b.id as stock_pk, a.packetsize as qty
   from 
-  product a, 
-  stock b
+	product a
+	LEFT outer JOIN   stock b
+	ON b.product_id = a.id
   where 
-  a.id = b.product_id and
   a.center_id = '${centerid}' and
   ( a.product_code like '%${searchstr}%' or
   a.description like '%${searchstr}%' ) limit 50 
  `;
 
-	//	console.log("query > " + sql);
+	console.log("query > " + sql);
 
-	connection.query(sql, function(err, data) {
+	pool.query(sql, function (err, data) {
 		if (err) {
-			console.log("object error " + err);
+			return handleError(new ErrorHandler("500", "Error fetching search products."), res);
 		} else {
-			res.json(data);
+			return res.json(data);
 		}
 	});
 });
@@ -115,7 +139,7 @@ router.get("/search-customer/:centerid/:searchstr", (req, res) => {
 	let centerid = req.params.centerid;
 
 	let sql = `select c.id, c.center_id, c.name, c.address1, c.address2, c.district, s.code, s.description,
-	c.pin, c.gst, c.phone, c.mobile, c.mobile2, c.whatsapp,  c.email, c.isactive, c.billingstatus
+	c.pin, c.gst, c.phone, c.mobile, c.mobile2, c.whatsapp,  c.email, c.isactive
 	from 
 	customer c,
 	state s
@@ -133,11 +157,11 @@ router.get("/search-customer/:centerid/:searchstr", (req, res) => {
 	// c.isactive = 'A' and
 	// ( c.name like '%${searchstr}%') limit 50 `;
 
-	connection.query(sql, function(err, data) {
+	pool.query(sql, function (err, data) {
 		if (err) {
-			console.log("object error " + err);
+			return handleError(new ErrorHandler("500", "Error fetching search customers."), res);
 		} else {
-			res.json(data);
+			return res.json(data);
 		}
 	});
 });
@@ -149,11 +173,11 @@ router.get("/inventory/all", (req, res) => {
        stock s 
   where p.product_code= s.product_code`;
 
-	connection.query(sql, function(err, data) {
+	pool.query(sql, function (err, data) {
 		if (err) {
-			console.log("object error " + err);
+			return handleError(new ErrorHandler("500", "Error fetching inventory"), res);
 		} else {
-			res.json(data);
+			return res.json(data);
 		}
 	});
 });
@@ -162,11 +186,11 @@ router.get("/inventory/all", (req, res) => {
 router.get("/all-clients", (req, res) => {
 	let sql = `select * from customer where isactive = 'A'`;
 
-	connection.query(sql, function(err, data) {
+	pool.query(sql, function (err, data) {
 		if (err) {
-			console.log("object error " + err);
+			return handleError(new ErrorHandler("500", "Error fetching all clients."), res);
 		} else {
-			res.json(data);
+			return res.json(data);
 		}
 	});
 });
@@ -175,16 +199,18 @@ router.get("/all-clients", (req, res) => {
 router.get("/all-active-vendors/:centerid", (req, res) => {
 	let centerid = req.params.centerid;
 
-	let sql = `select v.id, v.center_id, v.name, v.address1, v.address2, v.district, s.id as state_id, s.code, s.description,
+	let sql = `select v.id, v.center_id, v.name, v.address1, v.address2, v.address3, v.district, s.id as state_id, s.code, s.description as state,
 	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp, v.email, v.isactive  from 
 	vendor v,
 	state s
 	where 
-	v.state_id = s.id and isactive = 'A' and center_id = ${centerid}`;
+	v.state_id = s.id and isactive = 'A' and center_id = ${centerid} order by v.name`;
 
-	connection.query(sql, function(err, data) {
+	console.log("all-active-vendors" + sql);
+
+	pool.query(sql, function (err, data) {
 		if (err) {
-			console.log("sql exec failed.... " + err);
+			return handleError(new ErrorHandler("500", "Error fetching active vendors."), res);
 		} else {
 			res.json(data);
 		}
@@ -201,11 +227,11 @@ router.get("/all-active-customers/:centerid", (req, res) => {
 	where 
 	c.state_id = s.id and isactive = 'A' and center_id = ${centerid}`;
 
-	connection.query(sql, function(err, data) {
+	pool.query(sql, function (err, data) {
 		if (err) {
-			console.log("sql exec failed.... " + err);
+			return handleError(new ErrorHandler("500", "Error fetching inventory"), res);
 		} else {
-			res.json(data);
+			return res.json(data);
 		}
 	});
 });
@@ -215,7 +241,7 @@ router.post("/add-parts-details-enquiry", (req, res) => {
 	let yourJsonObj = req.body;
 
 	var objectKeysArray = Object.keys(yourJsonObj);
-	objectKeysArray.forEach(function(objKey) {
+	objectKeysArray.forEach(function (objKey) {
 		console.log("object..KEY..." + JSON.stringify(objKey));
 		var objValue = yourJsonObj[objKey];
 		console.log("object..VAL." + JSON.stringify(objValue));
@@ -224,42 +250,46 @@ router.post("/add-parts-details-enquiry", (req, res) => {
 		today = moment(today).format("YYYY-MM-DD HH:mm:ss");
 		let query = `INSERT INTO enquiry_detail ( enquiry_id, item_code, qty) values ( '${objValue.enquiryid}','${objValue.partno}','${objValue.quantity}')`;
 
-		connection.query(query, function(err, data) {
+		pool.query(query, function (err, data) {
 			if (err) {
-				console.log("object..." + err);
+				return handleError(new ErrorHandler("500", "Error fetching inventory"), res);
 			}
 		});
 	});
 });
 
 router.post("/insert-purchase-details", (req, res) => {
-	console.log(" inside apply jobs ...");
 	let yourJsonObj = req.body;
 
+	console.log("dinesh *** " + JSON.stringify(yourJsonObj));
+
+	const purchase_id = yourJsonObj["purchaseid"];
+
 	const vendorValue = yourJsonObj["vendor"];
+
 	const invoiceno = yourJsonObj["invoiceno"];
 
 	let invoicedate = yourJsonObj["invoicedate"];
 	if (yourJsonObj["invoicedate"] !== "") {
-		invoicedate = moment(yourJsonObj["invoicedate"]).format("YYYY-MM-DD");
+		invoicedate = moment(yourJsonObj["invoicedate"]).format("DD-MM-YYYY");
 	}
 
 	let order_date = yourJsonObj["orderdate"];
 
 	if (yourJsonObj["orderdate"] !== "") {
-		order_date = moment(yourJsonObj["orderdate"]).format("YYYY-MM-DD");
+		order_date = moment(yourJsonObj["orderdate"]).format("DD-MM-YYYY");
 	}
 
 	let lr_date = yourJsonObj["lrdate"];
 	if (yourJsonObj["lrdate"] !== "") {
-		lr_date = moment(yourJsonObj["lrdate"]).format("YYYY-MM-DD");
+		lr_date = moment(yourJsonObj["lrdate"]).format("DD-MM-YYYY");
 	}
 
 	const no_of_boxes = yourJsonObj["noofboxes"];
 	let received_date = yourJsonObj["orderrcvddt"];
 
 	if (yourJsonObj["orderrcvddt"] !== "") {
-		received_date = moment(yourJsonObj["orderrcvddt"]).format("YYYY-MM-DD");
+		received_date = moment(yourJsonObj["orderrcvddt"]).format("DD-MM-YYYY");
 	}
 
 	const lr_no = yourJsonObj["lrno"];
@@ -279,19 +309,20 @@ router.post("/insert-purchase-details", (req, res) => {
 	const cgst = yourJsonObj["cgst"];
 	const sgst = yourJsonObj["sgst"];
 
-	// product_arr.forEach(function(k) {
+	const status = yourJsonObj["status"];
 
-	// });
+	var today = new Date();
+	today = moment(today).format("DD-MM-YYYY");
 
 	var month = moment().format("M");
 	var day = moment().format("D");
 	var year = moment().format("YYYY");
 
-	let query = `
+	let insQry = `
 	INSERT INTO purchase ( center_id, vendor_id, invoice_no, invoice_date, 
 		lr_no, lr_date, received_date, purchase_type, order_no, 
 		order_date, total_qty, no_of_items, taxable_value, cgst, sgst, igst, 
-		total_value, transport_charges, unloading_charges, misc_charges, net_total, no_of_boxes)
+		total_value, transport_charges, unloading_charges, misc_charges, net_total, no_of_boxes, status, stock_inwards_datetime)
 		VALUES
 			( 1, '${vendorValue.id}', '${invoiceno}', '${invoicedate}', '${lr_no}', '${lr_date}', 
 			'${received_date}', 
@@ -309,36 +340,98 @@ router.post("/insert-purchase-details", (req, res) => {
 			'${unloading_charges}', 
 			'${misc_charges}', 
 			'${net_total}', 
-			'${no_of_boxes}'
+			'${no_of_boxes}', '${status}' , '${today}'
 			)`;
 
-	connection.query(query, function(err, data) {
+	let updQry = `
+	update purchase 
+	set
+	center_id = 1,
+	vendor_id = '${vendorValue.id}',
+	invoice_no = '${invoiceno}',
+	invoice_date = '${invoicedate}',
+	lr_no = '${lr_no}',
+	lr_date = '${lr_date}',
+	received_date = '${received_date}', 
+	purchase_type = 'GST Inovoice',
+	order_no = '${order_no}', 
+	order_date = '${order_date}', 
+	total_qty = '${total_qty}', 
+	no_of_items = '${no_of_items}', 
+	taxable_value = '${taxable_value}', 
+	cgst = '${cgst}', 
+	sgst = '${sgst}', 
+	igst = '${igst}', 
+	total_value = '${total_value}', 
+	transport_charges = '${transport_charges}', 
+	unloading_charges = '${unloading_charges}', 
+	misc_charges = '${misc_charges}', 
+	net_total = '${net_total}', 
+	no_of_boxes = '${no_of_boxes}',
+	status =  '${status}', 
+	stock_inwards_datetime =  '${today}'
+	where
+		id = '${purchase_id}'
+
+	`;
+
+	if (purchase_id === "") {
+		query = insQry;
+	} else if (purchase_id != "") {
+		query = updQry;
+	}
+
+	console.log("Query type ++ " + query);
+
+	pool.query(query, function (err, data) {
 		if (err) {
-			console.log("object..." + err);
+			console.log("print error 1 " + err);
+			return handleError(new ErrorHandler("500", "Error inserting purchase"), res);
 		} else {
-			console.log("object..DATA." + JSON.stringify(data));
-			let newPK = data.insertId;
+			if (purchase_id === "") {
+				newPK = data.insertId;
+			} else if (purchase_id != "") {
+				newPK = purchase_id;
+			}
 
-			product_arr.forEach(function(k) {
-				console.log("what >> " + k.product_code);
-
-				let query1 = `
+			product_arr.forEach(function (k) {
+				let insQuery1 = `
 
 				INSERT INTO purchase_detail(purchase_id, product_id, qty, unit_price, mrp, batchdate, tax,
 					igst, cgst, sgst, taxable_value, total_value)
 				VALUES
-					( '${newPK}', '${k.product_id}', '${k.qty}', '${k.unit_price}', '${k.mrp}', '2020-01-16', '${k.taxrate}', '${k.igst}', '${k.cgst}', '${k.sgst}', '${k.taxable_value}', '${k.total_value}')
+					( '${newPK}', '${k.product_id}', '${k.qty}', '${k.unit_price}', '${k.mrp}', '${today}', '${k.taxrate}', '${k.igst}', '${k.cgst}', '${k.sgst}', '${k.taxable_value}', '${k.total_value}')
 				
 					`;
 
-				connection.query(query1, function(err, data) {
+				let updQuery1 = `
+
+					update purchase_detail
+					set purchase_id = '${k.purchase_id}', 
+					product_id = '${k.product_id}', 
+					qty = '${k.qty}', 
+					unit_price = '${k.unit_price}', 
+					mrp = '${k.mrp}', 
+					batchdate = '${k.batchdate}', 
+					tax = '${k.taxrate}',
+					igst = '${k.igst}', 
+					cgst = '${k.cgst}', 
+					sgst = '${k.sgst}', 
+					taxable_value =  '${k.taxable_value}', 
+					total_value = '${k.total_value}'
+					where
+					id = '${k.pur_det_id}' `;
+
+				if (k.pur_det_id === "") {
+					query1 = insQuery1;
+				} else {
+					query1 = updQuery1;
+				}
+
+				pool.query(query1, function (err, data) {
 					if (err) {
-						console.log("object..." + err);
+						return handleError(new ErrorHandler("500", "Error inserting purchase"), res);
 					} else {
-						console.log("object... success");
-
-						console.log("mrp_change_flag..." + `${k.mrp_change_flag}`);
-
 						if (`${k.mrp_change_flag}` === "Y") {
 							let upDate = new Date();
 							todayYYMMDD = moment(upDate).format("YYYY-MM-DD");
@@ -346,28 +439,38 @@ router.post("/insert-purchase-details", (req, res) => {
 							insert into stock (product_id, mrp, available_stock, open_stock, updateddate)
 							values ('${k.product_id}', '${k.mrp}', '${k.qty}', 0, '${todayYYMMDD}')`;
 
-							connection.query(query2, function(err, data) {
+							pool.query(query2, function (err, data) {
 								if (err) {
-									console.log("object..." + err);
+									return handleError(new ErrorHandler("500", "Error Inserting purchase"), res);
 								} else {
 									console.log("object..stock update .");
 								}
 							});
 						} else {
-							let query2 = `
-							update stock set available_stock =  available_stock + '${k.qty}'
-	where product_id = '${k.product_id}' and mrp = '${k.mrp}' `;
+							if (status === "C") {
+								let qty_to_update = k.qty - k.old_val;
+								console.log("old val > " + k.old_val);
+								console.log("qty val > " + k.qty);
 
-							connection.query(query2, function(err, data) {
-								if (err) {
-									console.log("object..." + err);
-								} else {
-									console.log("object..stock update .");
-								}
-							});
+								let query2 = `
+
+								update stock set available_stock =  available_stock + '${qty_to_update}'
+		where product_id = '${k.product_id}' and mrp = '${k.mrp}' `;
+
+								pool.query(query2, function (err, data) {
+									if (err) {
+										console.log("object..." + err);
+									} else {
+										console.log("object..stock update .");
+									}
+								});
+							}
 						}
 					}
 				});
+			});
+			return res.json({
+				result: "success",
 			});
 		}
 	});
@@ -376,8 +479,6 @@ router.post("/insert-purchase-details", (req, res) => {
 
 router.post("/insert-sale-details", (req, res) => {
 	let yourJsonObj = req.body;
-
-	console.log(" insert-sale-details ..." + JSON.stringify(yourJsonObj));
 
 	const customerValue = yourJsonObj["customer"];
 
@@ -406,9 +507,9 @@ router.post("/insert-sale-details", (req, res) => {
 	var year = moment().format("YYYY");
 	var syear = moment().format("YY");
 
-	connection.beginTransaction(function(err) {
+	pool.beginTransaction(function (err) {
 		if (err) {
-			throw err;
+			return handleError(new ErrorHandler("404", "User with the specified email does not exists"), res);
 		}
 
 		let qryUpdateSqnc = `
@@ -417,9 +518,9 @@ router.post("/insert-sale-details", (req, res) => {
 	CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y')
 	`;
 
-		connection.query(qryUpdateSqnc, function(err, data) {
+		pool.query(qryUpdateSqnc, function (err, data) {
 			if (err) {
-				console.log("object..." + err);
+				return handleError(new ErrorHandler("500", "Updating financial year"), res);
 			}
 		});
 
@@ -450,46 +551,46 @@ CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%
 			
 			)`;
 
-		connection.query(query, function(err, data) {
+		pool.query(query, function (err, data) {
 			if (err) {
-				return connection.rollback(function() {
-					throw error;
+				return pool.rollback(function () {
+					return handleError(new ErrorHandler("404", "User with the specified email does not exists"), res);
 				});
 			}
 
 			let newPK = data.insertId;
 
-			product_arr.forEach(function(k) {
+			product_arr.forEach(function (k) {
 				let query1 = `
 
 				INSERT INTO sale_detail(sale_id, product_id, qty, unit_price, mrp, batchdate, tax,
 					igst, cgst, sgst, taxable_value, total_value)
 				VALUES
-					( '${newPK}', '${k.product_id}', '${k.qty}', '${k.unit_price}', '${k.mrp}', '2020-01-16', '${k.taxrate}', '${k.igst}', '${k.cgst}', '${k.sgst}', '${k.taxable_value}', '${k.total_value}')
+					( '${newPK}', '${k.product_id}', '${k.qty}', '${k.unit_price}', '${k.mrp}', '${today}', '${k.taxrate}', '${k.igst}', '${k.cgst}', '${k.sgst}', '${k.taxable_value}', '${k.total_value}')
 				
 					`;
 
-				connection.query(query1, function(err, data) {
+				pool.query(query1, function (err, data) {
 					if (err) {
-						console.log("object..." + err);
+						return handleError(new ErrorHandler("500", "Insert in to sale details"), res);
 					}
 
 					let query2 = `
 							update stock set available_stock =  available_stock - '${k.qty}'
 	where product_id = '${k.product_id}' and id = '${k.stock_pk}' `;
 
-					connection.query(query2, function(err, data) {
+					pool.query(query2, function (err, data) {
 						if (err) {
-							console.log("object..." + err);
+							return handleError(new ErrorHandler("500", "Error updaitng available stock"), res);
 						}
 
 						let query3 = `
 								update product set currentstock = (
 									select sum(available_stock) from stock where product_id = '${k.product_id}')
 									 `;
-						connection.query(query3, function(err, data) {
+						pool.query(query3, function (err, data) {
 							if (err) {
-								console.log("object..." + err);
+								return handleError(new ErrorHandler("500", "Error updating product"), res);
 							}
 						});
 					});
@@ -503,21 +604,21 @@ CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%
 				where 
 				id =  '${enqref}' `;
 
-				connection.query(uenqsaleidqry, function(err, data) {
+				pool.query(uenqsaleidqry, function (err, data) {
 					if (err) {
-						console.log("object..." + err);
+						return handleError(new ErrorHandler("500", "Error update enquiry"), res);
 					} else {
-						res.json({
-							result: "success"
+						return res.json({
+							result: "success",
 						});
 					}
 				});
 			}
 		});
-		connection.commit(function(err) {
+		pool.commit(function (err) {
 			if (err) {
-				return connection.rollback(function() {
-					throw err;
+				return pool.rollback(function () {
+					return handleError(new ErrorHandler("404", "User with the specified email does not exists"), res);
 				});
 			}
 			console.log("success!");
@@ -542,19 +643,18 @@ router.get("/get-enquiry/:enquiryid", (req, res) => {
   ed.enquiry_id = ${enquiryid}
   `;
 
-	connection.query(sql, function(err, data) {
+	pool.query(sql, function (err, data) {
 		if (err) {
 			console.log("object error " + err);
+			return handleError(new ErrorHandler("500", "Error fetching get enquiry"), res);
 		} else {
-			res.json(data);
+			return res.json(data);
 		}
 	});
 });
 
 router.get("/get-customer-details/:enquiryid", (req, res) => {
 	let enquiryid = req.params.enquiryid;
-
-	console.log("object error......... " + enquiryid);
 
 	let sql = `     select c.*
   from 
@@ -564,11 +664,53 @@ where
 em.customer_id = c.id and
 em.id = ${enquiryid}`;
 
-	connection.query(sql, function(err, data) {
+	pool.query(sql, function (err, data) {
 		if (err) {
-			console.log("object error " + err);
+			return handleError(new ErrorHandler("404", "Error fetching get customer details"), res);
 		} else {
-			res.json(data);
+			return res.json(data);
 		}
 	});
+});
+
+router.post("/update-taxrate", (req, res) => {
+	let taxrate = req.body.taxrate;
+	let id = req.body.productid;
+
+	console.log("object>>> update-giveqty-enquiry-details");
+
+	let query = `update product 
+	set 
+	taxrate = '${taxrate}' 
+	where id = '${id}' `;
+
+	pool.query(query, function (err, data) {
+		if (err) {
+			return handleError(new ErrorHandler("500", "Error updating update tax rate"), res);
+		} else {
+		}
+	});
+});
+
+router.get("/purchase/:purchaseid/:status", (req, res) => {
+	try {
+		let centerid = req.params.centerid;
+
+		let sql = `select c.id, c.center_id, c.name, c.address1, c.address2, c.district, s.code, s.description,
+	c.pin, c.gst, c.phone, c.mobile, c.mobile2, c.whatsapp, c.email, c.isactive  from 
+	customer c,
+	state s
+	where 
+	c.state_id = s.id and isactive = 'A' and center_id = ${centerid}`;
+
+		pool.query(sql, function (err, data) {
+			if (err) {
+				return handleError(new ErrorHandler("500", "Error fetching purchase"), res);
+			} else {
+				res.json(data);
+			}
+		});
+	} catch (error) {
+		return handleError(new ErrorHandler("500", "Error processing request"), res);
+	}
 });

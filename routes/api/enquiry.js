@@ -1,42 +1,71 @@
 const express = require("express");
 const enquiryRoute = express.Router();
+const { handleError, ErrorHandler } = require("./../helpers/error");
 
-const mysql = require("mysql");
+var pool = require("./../helpers/db");
 const moment = require("moment");
-
-const connection = mysql.createConnection({
-	host: "localhost",
-	user: "root",
-	password: "filia",
-	database: "reddotdb"
-});
 
 // body = body.append("productid", productid);
 // body = body.append("status", status);
 // body = body.append("enqdetailid", enqdetailid);
 
-enquiryRoute.post("/update-productinfo-enquiry-details", (req, res) => {
-	let product_id = req.body.productid;
-	let stock_id = req.body.stockid;
-	let status = req.body.status;
-	let id = req.body.enqdetailid;
+// enquiryRoute.post("/update-productinfo-enquiry-details", (req, res) => {
+// 	let product_id = req.body.productid;
+// 	let stock_id = req.body.stockid;
+// 	let status = req.body.status;
+// 	let id = req.body.enqdetailid;
 
-	let query = `update enquiry_detail
-	set
-	product_id = '${product_id}',
-	stock_id = '${stock_id}',
-	status = '${status}'
-	where id = '${id}' `;
+// 	let query = `update enquiry_detail
+// 	set
+// 	product_id = '${product_id}',
+// 	stock_id = '${stock_id}',
+// 	status = '${status}'
+// 	where id = '${id}' `;
 
-	connection.query(query, function(err, data) {
-		if (err) {
-			console.log("object..." + err);
-			res.status(500).json({
-				result: "NOTOK",
-				message: `ERROR While updating.`
-			});
-		} else {
-		}
+// 	pool.query(query, function(err, data) {
+// 		if (err) {
+// 			return handleError(new ErrorHandler("500", "Error Updating product info enquiry details."), res);
+// 		} else {
+// 		}
+// 	});
+// });
+
+enquiryRoute.post("/draft-enquiry", (req, res) => {
+	let jsonObj = req.body;
+
+	console.log("object>>> move-to-sale");
+	let today = new Date();
+
+	let now = new Date();
+
+	today = moment(today).format("DD-MM-YYYY");
+
+	now = moment(now).format("YYYY-MM-DD HH:mm:ss");
+
+	var objectKeysArray = Object.keys(jsonObj);
+	objectKeysArray.forEach(function (objKey) {
+		var objValue = jsonObj[objKey];
+		console.log("object..MAIN VAL." + JSON.stringify(objValue));
+
+		let upQuery1 = `update enquiry_detail
+		set
+		product_id = '${objValue.product_id}',
+		stock_id = '${objValue.stockid}',
+		giveqty = '${objValue.giveqty}',
+		processed = '${objValue.processed}',
+		status = 'D'
+		where id = '${objValue.id}' `;
+
+		console.log("object upQuery1 a> g " + upQuery1);
+		pool.query(upQuery1, function (err, data) {
+			if (err) {
+				return handleError(new ErrorHandler("500", "Error Updating draft-enquiry."), res);
+			}
+		});
+	});
+
+	res.json({
+		result: "success",
 	});
 });
 
@@ -53,11 +82,13 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 	now = moment(now).format("YYYY-MM-DD HH:mm:ss");
 
 	var objectKeysArray = Object.keys(jsonObj);
-	objectKeysArray.forEach(function(objKey) {
+	objectKeysArray.forEach(function (objKey) {
 		var objValue = jsonObj[objKey];
-		console.log("object..VAL." + JSON.stringify(objValue));
+		console.log("object..MAIN VAL." + JSON.stringify(objValue));
 
-		if (objValue.product_id === "") {
+		console.log("(objValue.product_id " + objValue.product_id);
+
+		if (objValue.product_id === "" || objValue.product_id === null) {
 			console.log("this is a back order ");
 			// b - full back order
 			// updt enq_det_tbl status as B , giveqty = 0
@@ -69,18 +100,18 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 			status = 'B'
 			where id = '${objValue.id}' `;
 
-			connection.query(upQuery, function(err, data) {
+			pool.query(upQuery, function (err, data) {
 				if (err) {
-					console.log("object..." + err);
+					return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
 				}
 			});
 
 			let insQry = `INSERT INTO backorder (center_id, enquiry_detail_id, qty, reason, status, order_date)
 			VALUES ('${objValue.center_id}', '${objValue.id}', '${objValue.askqty}', 'Product Code Not found', 'O', '${today}') `;
 
-			connection.query(insQry, function(err, data) {
+			pool.query(insQry, function (err, data) {
 				if (err) {
-					console.log("object..." + err);
+					return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
 				}
 			});
 		}
@@ -97,14 +128,15 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 			product_id = '${objValue.product_id}',
 			stock_id = '${objValue.stockid}',
 			giveqty = '${objValue.giveqty}',
+			processed = '${objValue.processed}',
 			status = 'P'
 			where id = '${objValue.id}' `;
 
 			console.log("object upQuery1 a> g " + upQuery1);
 
-			connection.query(upQuery1, function(err, data) {
+			pool.query(upQuery1, function (err, data) {
 				if (err) {
-					console.log("object..." + err);
+					return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
 				}
 			});
 
@@ -113,14 +145,14 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 
 			console.log("object insQry2 a>g " + insQry2);
 
-			connection.query(insQry2, function(err, data) {
+			pool.query(insQry2, function (err, data) {
 				if (err) {
-					console.log("object..." + err);
+					return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
 				}
 			});
 		}
 
-		if (objValue.giveqty >= objValue.askqty && objValue.product_id !== "") {
+		if (objValue.giveqty >= objValue.askqty && objValue.product_id !== "" && objValue.product_id !== null) {
 			// F- fullfilled
 			// updt enq_det_tbl status as F, give qty = actual given
 
@@ -129,14 +161,13 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 			product_id = '${objValue.product_id}',
 			stock_id = '${objValue.stockid}',
 			giveqty = '${objValue.giveqty}',
+			processed = '${objValue.processed}',
 			status = 'F'
 			where id = '${objValue.id}' `;
 
-			console.log(".....G > A " + upQuery3);
-
-			connection.query(upQuery3, function(err, data) {
+			pool.query(upQuery3, function (err, data) {
 				if (err) {
-					console.log("object..." + err);
+					return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
 				}
 			});
 		}
@@ -146,15 +177,15 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 		estatus = 'P', processed_date = '${now}'
 		where id = '${objValue.enquiry_id}' `;
 
-		connection.query(upQuery4, function(err, data) {
+		pool.query(upQuery4, function (err, data) {
 			if (err) {
-				console.log("object..." + err);
+				return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
 			}
 		});
 	});
 
 	res.json({
-		result: "success"
+		result: "success",
 	});
 });
 
@@ -162,20 +193,14 @@ enquiryRoute.post("/update-giveqty-enquiry-details", (req, res) => {
 	let giveqty = req.body.giveqty;
 	let id = req.body.enqdetailid;
 
-	console.log("object>>> update-giveqty-enquiry-details");
-
 	let query = `update enquiry_detail
 	set
 	giveqty = '${giveqty}'
 	where id = '${id}' `;
 
-	connection.query(query, function(err, data) {
+	pool.query(query, function (err, data) {
 		if (err) {
-			console.log("object..." + err);
-			res.status(500).json({
-				result: "NOTOK",
-				message: `ERROR While updating.`
-			});
+			return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
 		} else {
 		}
 	});
@@ -184,10 +209,6 @@ enquiryRoute.post("/update-giveqty-enquiry-details", (req, res) => {
 enquiryRoute.post("/update-status-enquiry-details", (req, res) => {
 	let status = req.body.status;
 	let id = req.body.enqdetailid;
-
-	console.log("object>>> update-status-enquiry-details )) > " + JSON.stringify(req.body));
-
-	console.log("object>>> update-status-enquiry-details > " + status);
 
 	if (status === "B") {
 		let query = `update enquiry_detail
@@ -198,13 +219,9 @@ enquiryRoute.post("/update-status-enquiry-details", (req, res) => {
 
 		console.log("object>><<" + query);
 
-		connection.query(query, function(err, data) {
+		pool.query(query, function (err, data) {
 			if (err) {
-				console.log("object..." + err);
-				res.status(500).json({
-					result: "NOTOK",
-					message: `ERROR While updating.`
-				});
+				return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
 			} else {
 			}
 		});
@@ -215,10 +232,8 @@ enquiryRoute.post("/update-enquiry-details", (req, res) => {
 	let jsonObj = req.body;
 
 	var objectKeysArray = Object.keys(jsonObj);
-	objectKeysArray.forEach(function(objKey) {
-		console.log("object..KEY..." + JSON.stringify(objKey));
+	objectKeysArray.forEach(function (objKey) {
 		var objValue = jsonObj[objKey];
-		console.log("object..VAL." + JSON.stringify(objValue));
 	});
 
 	// var today = new Date();
@@ -230,7 +245,7 @@ enquiryRoute.post("/update-enquiry-details", (req, res) => {
 	// status = 'P'
 	// where id = '7'`;
 
-	// connection.query(query, function (err, data) {
+	// pool.query(query, function (err, data) {
 	// 	if (err) {
 	// 		console.log("object..." + err);
 	// 		res.status(500).json({
@@ -244,20 +259,15 @@ enquiryRoute.post("/update-enquiry-details", (req, res) => {
 
 enquiryRoute.post("/insert-enquiry-details", (req, res) => {
 	let jsonObj = req.body;
-	console.log("TCL: yourJsonObj", JSON.stringify(jsonObj));
 
 	var today = new Date();
 	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
 	let query = `INSERT INTO enquiry ( center_id, customer_id, enquiry_date, estatus, remarks) 
 							values ( '${jsonObj.centerid}', '${jsonObj.customer.id}', '${today}', 'O','${jsonObj.remarks}')`;
 
-	connection.query(query, function(err, data) {
+	pool.query(query, function (err, data) {
 		if (err) {
-			console.log("object..." + err);
-			res.status(500).json({
-				result: "NOTOK",
-				message: `ERROR While updating.`
-			});
+			return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
 		} else {
 			let tmpid = data.insertId;
 			console.log("TCL: tmpid", tmpid);
@@ -265,17 +275,13 @@ enquiryRoute.post("/insert-enquiry-details", (req, res) => {
 			const prodArr = jsonObj["productarr"];
 			console.log("TCL: prodArr", prodArr);
 
-			prodArr.forEach(function(k) {
+			prodArr.forEach(function (k) {
 				console.log(".........xx..." + k.notes);
-				let query1 = `INSERT INTO enquiry_detail ( enquiry_id, askqty, notes, status)
-							values ( '${tmpid}', '${k.quantity}', '${k.notes}', 'O')`;
-				connection.query(query1, function(err, data) {
+				let query1 = `INSERT INTO enquiry_detail ( enquiry_id, product_id, askqty, product_code, notes, status)
+							values ( '${tmpid}', (select id from product where product_code='${k.product_code}'), '${k.quantity}', '${k.product_code}', '${k.notes}', 'O')`;
+				pool.query(query1, function (err, data) {
 					if (err) {
-						console.log("object..." + err);
-						res.status(500).json({
-							result: "NOTOK",
-							message: `ERROR While updating.`
-						});
+						return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
 					} else {
 					}
 				});
@@ -283,7 +289,7 @@ enquiryRoute.post("/insert-enquiry-details", (req, res) => {
 		}
 	});
 	res.json({
-		result: "success"
+		result: "success",
 	});
 });
 
@@ -302,11 +308,11 @@ enquiryRoute.get("/open-enquiries/:centerid/:status", (req, res) => {
 	order by 
 	enquiry_date desc`;
 
-	connection.query(sql, function(err, data) {
+	pool.query(sql, function (err, data) {
 		if (err) {
-			console.log("object error " + err);
+			return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
 		} else {
-			res.json(data);
+			return res.json(data);
 		}
 	});
 });
@@ -315,42 +321,59 @@ enquiryRoute.get("/get-enquiry-details/:enqid", (req, res) => {
 	let enqid = req.params.enqid;
 	console.log("TCL: enqid", enqid);
 
-	let sql = `select ed.*, c.name, e.remarks from 
-	enquiry e,
-	enquiry_detail ed,
-	customer c
-	where
-	e.id = ed.enquiry_id and
-	e.customer_id = c.id and e.id = ${enqid}
-	`;
+	let sql = `
+	
 
-	connection.query(sql, function(err, data) {
+select orig.*, s.available_stock, s.id as stock_pk
+from
+(select ed.*, c.name, c.address1, c.address2, c.district, c.pin, c.gst, c.mobile2, e.remarks, 
+	p.id as pid, p.center_id, p.vendor_id, p.product_code as pcode, p.description as pdesc, p.unit, p.packetsize, p.hsncode,
+	p.currentstock, p.unit_price, p.mrp, p.purchaseprice,
+	p.salesprice, p.rackno, p.location, p.maxdiscount, p.taxrate, 
+	p.minqty, p.itemdiscount, p.reorderqty, p.avgpurprice,
+	p.avgsaleprice, p.margin
+	from 
+	enquiry e,
+	customer c,
+	enquiry_detail ed
+	LEFT outer JOIN product p
+	ON p.id = ed.product_id where
+	e.id = ed.enquiry_id and
+	e.customer_id = c.id and e.id =  ${enqid}) as orig
+	LEFT outer JOIN stock s
+	ON orig.product_id = s.product_id and
+	s.mrp = orig.mrp
+	`;
+	console.log("get enq details " + sql);
+
+	pool.query(sql, function (err, data) {
 		if (err) {
-			console.log("object error " + err);
+			return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
 		} else {
-			res.json(data);
+			return res.json(data);
 		}
 	});
 });
 
 enquiryRoute.get("/get-customer-data/:enqid", (req, res) => {
 	let enqid = req.params.enqid;
-	console.log("TCL: enqid", enqid);
 
-	let sql = `select c.* 
+	let sql = `select c.*, s.code 
 	from
 	customer c,
-	enquiry e
+	enquiry e,
+	state s
 	where
 	e.customer_id = c.id and
+	s.id = c.state_id and
 	e.id = ${enqid}
 	`;
 
-	connection.query(sql, function(err, data) {
+	pool.query(sql, function (err, data) {
 		if (err) {
-			console.log("object error " + err);
+			return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
 		} else {
-			res.json(data);
+			return res.json(data);
 		}
 	});
 });
@@ -383,14 +406,12 @@ enquiryRoute.get("/get-enquired-product-data/:centerid/:customerid/:enqid/:invdt
 	ed.status in ('P', 'F')  and
 	e.id = ${enqid}
 	`;
-
-	console.log("SHOW THE QRY " + sql);
-
-	connection.query(sql, function(err, data) {
+	console.log("object # get-enquired-product-data " + sql);
+	pool.query(sql, function (err, data) {
 		if (err) {
-			console.log("object error " + err);
+			return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
 		} else {
-			res.json(data);
+			return res.json(data);
 		}
 	});
 });
@@ -423,11 +444,11 @@ enquiryRoute.get("/back-order/:centerid", (req, res) => {
 
 	console.log("SHOW THE QRY " + sql);
 
-	connection.query(sql, function(err, data) {
+	pool.query(sql, function (err, data) {
 		if (err) {
-			console.log("object error " + err);
+			return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
 		} else {
-			res.json(data);
+			return res.json(data);
 		}
 	});
 });

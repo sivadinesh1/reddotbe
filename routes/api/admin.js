@@ -1,15 +1,9 @@
 const express = require("express");
 const adminRoute = express.Router();
 
-const mysql = require("mysql");
+var pool = require("./../helpers/db");
 const moment = require("moment");
-
-const connection = mysql.createConnection({
-	host: "localhost",
-	user: "root",
-	password: "filia",
-	database: "reddotdb"
-});
+const { handleError, ErrorHandler } = require("./../helpers/error");
 
 adminRoute.get("/view-products-count/:centerid", (req, res) => {
 	let center_id = req.params.centerid;
@@ -17,18 +11,18 @@ adminRoute.get("/view-products-count/:centerid", (req, res) => {
 	let sql = `select count(*) as count from product p where 
 	p.center_id = '${center_id}' `;
 
-	connection.query(sql, function(err, data) {
+	pool.query(sql, function(err, data) {
 		if (err) {
-			console.log("object error " + err);
+			return handleError(new ErrorHandler("500", "Error fetching product count."), res);
 		} else {
-			res.json(data);
+			return res.status(200).json(data);
 		}
 	});
 });
 
-adminRoute.get("/view-product-info/:centerid/:product_id", (req, res) => {
+adminRoute.get("/view-product-info/:centerid/:productid", (req, res) => {
 	let center_id = req.params.centerid;
-	let product_id = req.params.product_id;
+	let product_id = req.params.productid;
 
 	let sql = `select p.*, v.name as vendor_name, v.id as vendar_id  
 	from 
@@ -41,26 +35,23 @@ adminRoute.get("/view-product-info/:centerid/:product_id", (req, res) => {
 
 	console.log("object view-product-info " + sql);
 
-	connection.query(sql, function(err, data) {
+	pool.query(sql, function(err, data) {
 		if (err) {
-			console.log("object error " + err);
+			return handleError(new ErrorHandler("500", "Error fetching product info."), res);
 		} else {
-			res.json(data);
+			return res.status(200).json(data);
 		}
 	});
 });
 
-adminRoute.post("/add-product", (req, res) => {
+adminRoute.post("/add-product", (req, res, next) => {
 	let jsonObj = req.body;
-
-	console.log(" inside add purchase ..." + JSON.stringify(jsonObj));
 
 	var objValue = jsonObj["formArray"];
 
 	const basic_info = objValue[0];
 	const general_info = objValue[1];
 	const addl_info = objValue[2];
-	console.log("object>>" + basic_info);
 
 	const center_id = basic_info["center_id"];
 	const vendor_id = basic_info["vendorid"];
@@ -107,12 +98,18 @@ adminRoute.post("/add-product", (req, res) => {
 			 '${minqty}', '${itemdiscount}', '${reorderqty}', '${avgpurprice}', '${avgsaleprice}', '${margin}');
 			`;
 
-	connection.query(query, function(err, data) {
+	pool.query(query, function(err, data) {
 		if (err) {
-			console.log("object..." + err);
+			let errTxt = err.message;
+
+			if (errTxt.indexOf("pcode_center_fk") > -1) {
+				return handleError(new ErrorHandler("555", "Duplicate product code"), res);
+			}
 		} else {
 			let newPK = data.insertId;
-			console.log("object..newPK." + newPK);
+			return res.status(200).json({
+				result: "success"
+			});
 		}
 	});
 });
@@ -120,14 +117,11 @@ adminRoute.post("/add-product", (req, res) => {
 adminRoute.post("/update-product", (req, res) => {
 	let jsonObj = req.body;
 
-	console.log(" inside add purchase ..." + JSON.stringify(jsonObj));
-
 	var objValue = jsonObj["formArray"];
 
 	const basic_info = objValue[0];
 	const general_info = objValue[1];
 	const addl_info = objValue[2];
-	console.log("object>>" + basic_info);
 
 	const product_id = basic_info["product_id"];
 	const center_id = basic_info["center_id"];
@@ -173,15 +167,11 @@ salesprice = '${salesprice}', rackno = '${rackno}',location = '${location}',
 id = '${product_id}'
 	`;
 
-	connection.query(query, function(err, data) {
+	pool.query(query, function(err, data) {
 		if (err) {
-			console.log("object..." + err);
-			res.status(500).json({
-				result: "NOTOK",
-				message: `ERROR While updating.`
-			});
+			return handleError(new ErrorHandler("500", "Error Updating product"), res);
 		} else {
-			res.json({
+			res.status(200).json({
 				result: "success"
 			});
 		}
@@ -192,16 +182,22 @@ id = '${product_id}'
 adminRoute.get("/get-vendor-details/:centerid/:vendorid", (req, res) => {
 	let center_id = req.params.centerid;
 	let vendor_id = req.params.vendorid;
-	console.log("inside get vendor details");
-	let sql = `select * from vendor v where 
-	v.id = '${vendor_id}' and
-	v.center_id = '${center_id}' `;
 
-	connection.query(sql, function(err, data) {
+	let sql = `select v.*, s.code as code,
+	 s.description as state 
+	from vendor v, 
+	state s where 
+	s.id = v.state_id and
+	v.id = '${vendor_id}' and
+	v.center_id = '${center_id}' order by v.name`;
+
+	console.log("get-vendor-details >> " + sql);
+
+	pool.query(sql, function(err, data) {
 		if (err) {
-			console.log("object error " + err);
+			return handleError(new ErrorHandler("500", "Error fetching vendor details"), res);
 		} else {
-			res.json(data);
+			return res.status(200).json(data);
 		}
 	});
 });
@@ -211,28 +207,26 @@ adminRoute.get("/get-states", (req, res) => {
 	console.log("inside get vendor details");
 	let sql = `select * from state `;
 
-	connection.query(sql, function(err, data) {
+	pool.query(sql, function(err, data) {
 		if (err) {
-			console.log("object error " + err);
+			return handleError(new ErrorHandler("500", "Error fetching get status"), res);
 		} else {
-			res.json(data);
+			return res.status(200).json(data);
 		}
 	});
 });
 
 // vendor
 
-adminRoute.post("/update-vendor", (req, res) => {
+adminRoute.put("/update-vendor/:id", (req, res) => {
+	let id = req.params.id;
 	let jsonObj = req.body;
-
-	console.log(" inside add purchase ..." + JSON.stringify(jsonObj));
 
 	var objValue = jsonObj["formArray"];
 
 	const basic_info = objValue[0];
 	const general_info = objValue[1];
 	const addl_info = objValue[2];
-	console.log("object>>" + basic_info);
 
 	const center_id = basic_info["center_id"];
 	const vendor_id = basic_info["vendor_id"];
@@ -253,7 +247,7 @@ adminRoute.post("/update-vendor", (req, res) => {
 	const mobile2 = general_info["mobile2"];
 	const whatsapp = general_info["whatsapp"];
 
-	const email = addl_info["email"];
+	const email = general_info["email"];
 
 	let query = `
 	update vendor set center_id = '${center_id}',
@@ -265,15 +259,11 @@ adminRoute.post("/update-vendor", (req, res) => {
 	id = '${vendor_id}'
 	`;
 
-	connection.query(query, function(err, data) {
+	pool.query(query, function(err, data) {
 		if (err) {
-			console.log("object..." + err);
-			res.status(500).json({
-				result: "NOTOK",
-				message: `ERROR While updating.`
-			});
+			return handleError(new ErrorHandler("500", "Error updating vendor details"), res);
 		} else {
-			res.json({
+			return res.status(200).json({
 				result: "success"
 			});
 		}
@@ -284,14 +274,12 @@ adminRoute.post("/update-vendor", (req, res) => {
 adminRoute.post("/add-vendor", (req, res) => {
 	let jsonObj = req.body;
 
-	console.log(" inside add purchase ..." + JSON.stringify(jsonObj));
+	console.log(" addvendor ..." + JSON.stringify(jsonObj));
 
 	var objValue = jsonObj["formArray"];
 
 	const basic_info = objValue[0];
 	const general_info = objValue[1];
-	const addl_info = objValue[2];
-	console.log("object>>" + basic_info);
 
 	const center_id = basic_info["center_id"];
 
@@ -310,8 +298,7 @@ adminRoute.post("/add-vendor", (req, res) => {
 	const mobile = general_info["mobile"];
 	const mobile2 = general_info["mobile2"];
 	const whatsapp = general_info["whatsapp"];
-
-	const email = addl_info["email"];
+	const email = general_info["email"];
 
 	var today = new Date();
 	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
@@ -326,15 +313,11 @@ adminRoute.post("/add-vendor", (req, res) => {
 
 	console.log("query >>>> " + query);
 
-	connection.query(query, function(err, data) {
+	pool.query(query, function(err, data) {
 		if (err) {
-			console.log("object..." + err);
-			res.status(500).json({
-				result: "NOTOK",
-				message: `ERROR While updating.`
-			});
+			return handleError(new ErrorHandler("500", "Error adding vendor details"), res);
 		} else {
-			res.json({
+			return res.status(200).json({
 				result: "success"
 			});
 		}
@@ -350,11 +333,11 @@ adminRoute.get("/get-customer-details/:centerid/:customerid", (req, res) => {
 	c.id = '${customer_id}' and
 	c.center_id = '${center_id}' `;
 
-	connection.query(sql, function(err, data) {
+	pool.query(sql, function(err, data) {
 		if (err) {
-			console.log("object error " + err);
+			return handleError(new ErrorHandler("500", "Error fetching customer details."), res);
 		} else {
-			res.json(data);
+			return res.status(200).json(data);
 		}
 	});
 });
@@ -363,8 +346,6 @@ adminRoute.get("/get-customer-details/:centerid/:customerid", (req, res) => {
 
 adminRoute.post("/update-customer", (req, res) => {
 	let jsonObj = req.body;
-
-	console.log(" inside add purchase ..." + JSON.stringify(jsonObj));
 
 	var objValue = jsonObj["formArray"];
 
@@ -406,15 +387,12 @@ adminRoute.post("/update-customer", (req, res) => {
 
 	console.log("print the val " + query);
 
-	connection.query(query, function(err, data) {
+	pool.query(query, function(err, data) {
 		if (err) {
 			console.log("object..." + err);
-			res.status(500).json({
-				result: "NOTOK",
-				message: `ERROR While updating.`
-			});
+			return handleError(new ErrorHandler("500", "Error Updating center."), res);
 		} else {
-			res.json({
+			return res.status(200).json({
 				result: "success"
 			});
 		}
@@ -423,8 +401,6 @@ adminRoute.post("/update-customer", (req, res) => {
 
 adminRoute.post("/add-customer", (req, res) => {
 	let jsonObj = req.body;
-
-	console.log(" inside add purchase ..." + JSON.stringify(jsonObj));
 
 	var objValue = jsonObj["formArray"];
 
@@ -464,17 +440,11 @@ adminRoute.post("/add-customer", (req, res) => {
 			'${gst}', '${phone}', '${mobile}', '${mobile2}', '${whatsapp}', '${email}', '${today}', 'A'
 			) `;
 
-	console.log("query >>>> " + query);
-
-	connection.query(query, function(err, data) {
+	pool.query(query, function(err, data) {
 		if (err) {
-			console.log("object..." + err);
-			res.status(500).json({
-				result: "NOTOK",
-				message: `ERROR While updating.`
-			});
+			return handleError(new ErrorHandler("500", "Error adding customer."), res);
 		} else {
-			res.json({
+			res.status(200).json({
 				result: "success"
 			});
 		}
@@ -489,11 +459,11 @@ adminRoute.get("/get-center-details/:centerid", (req, res) => {
 	let sql = `select * from center c where 
 	c.id = '${center_id}'  `;
 
-	connection.query(sql, function(err, data) {
+	pool.query(sql, function(err, data) {
 		if (err) {
-			console.log("object error " + err);
+			return handleError(new ErrorHandler("500", "Error fetching center details."), res);
 		} else {
-			res.json(data);
+			res.status(200).json(data);
 		}
 	});
 });
@@ -548,15 +518,11 @@ adminRoute.post("/update-center", (req, res) => {
 
 	console.log("print the val " + query);
 
-	connection.query(query, function(err, data) {
+	pool.query(query, function(err, data) {
 		if (err) {
-			console.log("object..." + err);
-			res.status(500).json({
-				result: "NOTOK",
-				message: `ERROR While updating.`
-			});
+			return handleError(new ErrorHandler("500", "Error Updating center."), res);
 		} else {
-			res.json({
+			return res.status(200).json({
 				result: "success"
 			});
 		}
@@ -567,3 +533,20 @@ module.exports = adminRoute;
 
 // select * from `financialyear` where center_id = '1' and  CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y')
 // select * from `financialyear` where center_id = '1' and  str_to_date('01-05-2019','%d-%m-%Y') between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y')
+
+adminRoute.get("/prod-exists/:pcode", (req, res) => {
+	let pcode = req.params.pcode;
+
+	let sql = `select * from product p where 
+	p.product_code = '${pcode}' `;
+
+	pool.query(sql, function(err, data) {
+		if (err) {
+			return handleError(new ErrorHandler("500", "Error fetching product count."), res);
+		} else {
+			return res.status(200).json({
+				result: data
+			});
+		}
+	});
+});
