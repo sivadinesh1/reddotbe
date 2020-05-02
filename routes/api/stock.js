@@ -204,6 +204,7 @@ stock s
 where
 p.id = sd.product_id and
 s.product_id = p.id and
+s.id = sd.stock_id and
 sd.sale_id = '${sale_id}'
 	 `;
 

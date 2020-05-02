@@ -526,6 +526,7 @@ router.post("/insert-sale-details", (req, res) => {
 	const status = yourJsonObj["status"];
 
 	const sales_id = yourJsonObj["salesid"];
+	const revision = yourJsonObj["revision"];
 
 	const lr_no = yourJsonObj["lrno"];
 
@@ -533,6 +534,11 @@ router.post("/insert-sale-details", (req, res) => {
 	var day = moment().format("D");
 	var year = moment().format("YYYY");
 	var syear = moment().format("YY");
+
+	let revisionCnt = 0;
+	if (status === "C") {
+		revisionCnt = revision + 1;
+	}
 
 	// Update Sequence in financial Year tbl when its fresh sale insert
 	let qryUpdateSqnc = `
@@ -570,7 +576,7 @@ router.post("/insert-sale-details", (req, res) => {
 			taxable_value = '${taxable_value}', cgst = '${cgst}', sgst = '${sgst}', igst = '${igst}',
 			total_value = '${total_value}', net_total = '${net_total}', transport_charges = '${transport_charges}', 
 			unloading_charges = '${unloading_charges}', misc_charges = '${misc_charges}', status = '${status}',
-			sale_datetime = '${moment().format("DD-MM-YYYY")}'
+			sale_datetime = '${moment().format("DD-MM-YYYY")}', revision = '${revisionCnt}'
 			where id= '${sales_id}' `;
 
 	if (sales_id === "") {
@@ -608,22 +614,22 @@ router.post("/insert-sale-details", (req, res) => {
 		// if sale master insert success, then insert in invoice details.
 		product_arr.forEach(function (k) {
 			let insQuery100 = `INSERT INTO sale_detail(sale_id, product_id, qty, unit_price, mrp, batchdate, tax,
-												igst, cgst, sgst, taxable_value, total_value) VALUES
+												igst, cgst, sgst, taxable_value, total_value, stock_id) VALUES
 												( '${newPK}', '${k.product_id}', '${k.qty}', '${k.unit_price}', '${k.mrp}', 
 												'${moment().format("DD-MM-YYYY")}', '${k.taxrate}', '${k.igst}', 
-												'${k.cgst}', '${k.sgst}', '${k.taxable_value}', '${k.total_value}')`;
+												'${k.cgst}', '${k.sgst}', '${k.taxable_value}', '${k.total_value}', '${k.stock_pk}')`;
 
 			let upQuery100 = `update sale_detail set product_id = '${k.product_id}', qty = '${k.qty}', 
 												unit_price = '${k.unit_price}', mrp = '${k.mrp}', 
 												batchdate = '${moment().format("DD-MM-YYYY")}', tax = '${k.taxrate}',
 												igst = '${k.igst}', cgst = '${k.cgst}', sgst = '${k.sgst}', 
-												taxable_value = '${k.taxable_value}', total_value = '${k.total_value}'
+												taxable_value = '${k.taxable_value}', total_value = '${k.total_value}', stock_id = '${k.stock_pk}'
 												where
 												id = '${k.sale_det_id}' `;
 
 			if (k.sale_det_id === "") {
 				query100 = insQuery100;
-			} else {
+			} else if (k.sale_det_id !== "") {
 				query100 = upQuery100;
 			}
 			console.log(" update || Ins of Sale Detail Tbl " + query100);

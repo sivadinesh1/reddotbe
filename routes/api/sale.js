@@ -11,7 +11,9 @@ var pool = require("../helpers/db");
 saleRouter.get("/get-next-sale-invoice-no/:centerid", (req, res) => {
 	let center_id = req.params.centerid;
 
-	let sql = `	select invseq + 1 as NxtInvNo from financialyear where 
+	let invoiceyear = moment().format("YY");
+
+	let sql = `	select concat('${invoiceyear}', "/", "1", "/", lpad(invseq + 1, 5, "0")) as NxtInvNo from financialyear  where 
 	center_id = '${center_id}' and  
 	CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
 
@@ -61,19 +63,19 @@ saleRouter.post("/delete-sales-details", (req, res) => {
 			if (err) {
 				return handleError(new ErrorHandler("500", "Error adding sale audit."), res);
 			}
+
+			let query = `
+			delete from sale_detail where id = '${id}' `;
+			console.log("delete sale details " + query);
+			pool.query(query, function (err, data) {
+				if (err) {
+					return handleError(new ErrorHandler("500", "Error deleting sale details"), res);
+				} else {
+					return res.json({
+						result: "success",
+					});
+				}
+			});
 		});
 	}
-
-	let query = `
-	delete from sale_detail where id = '${id}' `;
-	console.log("delete sale details " + query);
-	pool.query(query, function (err, data) {
-		if (err) {
-			return handleError(new ErrorHandler("500", "Error deleting sale details"), res);
-		} else {
-			return res.json({
-				result: "success",
-			});
-		}
-	});
 });
