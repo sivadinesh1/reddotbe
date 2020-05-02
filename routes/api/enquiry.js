@@ -1,3 +1,5 @@
+/** @format */
+
 const express = require("express");
 const enquiryRoute = express.Router();
 const { handleError, ErrorHandler } = require("./../helpers/error");
@@ -47,6 +49,16 @@ enquiryRoute.post("/draft-enquiry", (req, res) => {
 		var objValue = jsonObj[objKey];
 		console.log("object..MAIN VAL." + JSON.stringify(objValue));
 
+		// first update enquiry table with STATUS = 'D'
+		let upQry1 = `update enquiry set estatus = 'D' where id = '${objValue.enquiry_id}' `;
+
+		pool.query(upQry1, function (err, data) {
+			if (err) {
+				return handleError(new ErrorHandler("500", "Error Updating draft-enquiry."), res);
+			}
+		});
+
+		// then update enquiry details table with STATUS = 'D' & with updated values
 		let upQuery1 = `update enquiry_detail
 		set
 		product_id = '${objValue.product_id}',
@@ -56,8 +68,19 @@ enquiryRoute.post("/draft-enquiry", (req, res) => {
 		status = 'D'
 		where id = '${objValue.id}' `;
 
-		console.log("object upQuery1 a> g " + upQuery1);
-		pool.query(upQuery1, function (err, data) {
+		let upQuery2 = `update enquiry_detail
+			set
+			product_id = null,
+			stock_id = null,
+			giveqty = '${objValue.giveqty}',
+			processed = '${objValue.processed}',
+			status = 'D'
+			where id = '${objValue.id}' `;
+
+		let uQrys = objValue.product_id === null ? upQuery2 : upQuery1;
+
+		console.log("object upQuery1 a> g " + uQrys);
+		pool.query(uQrys, function (err, data) {
 			if (err) {
 				return handleError(new ErrorHandler("500", "Error Updating draft-enquiry."), res);
 			}
@@ -326,7 +349,7 @@ enquiryRoute.get("/get-enquiry-details/:enqid", (req, res) => {
 
 select orig.*, s.available_stock, s.id as stock_pk
 from
-(select ed.*, c.name, c.address1, c.address2, c.district, c.pin, c.gst, c.mobile2, e.remarks, 
+(select ed.*, c.name, c.address1, c.address2, c.district, c.pin, c.gst, c.mobile2, e.remarks, e.estatus,
 	p.id as pid, p.center_id, p.vendor_id, p.product_code as pcode, p.description as pdesc, p.unit, p.packetsize, p.hsncode,
 	p.currentstock, p.unit_price, p.mrp, p.purchaseprice,
 	p.salesprice, p.rackno, p.location, p.maxdiscount, p.taxrate, 
@@ -384,10 +407,11 @@ enquiryRoute.get("/get-enquired-product-data/:centerid/:customerid/:enqid/:invdt
 	let enqid = req.params.enqid;
 	let orderdate = req.params.invdt;
 
+	// fetch values only of enq detail status in {P - processed, F - fullfilled} B- backorder is ignored
 	let sql = `select a.product_code as product_code, a.description, a.mrp, a.taxrate, b.available_stock,
-	ed.giveqty as qty, a.unit_price, a.id, b.id as stock_pk,
+	ed.giveqty as qty, a.unit_price, a.id as product_id, b.id as stock_pk, e.enquiry_date,
 	
-	(	  select concat(value,'~',type) from discount where   str_to_date('${orderdate}','%d-%m-%Y')  between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') and
+	(	  select concat(value,'~',type) from discount where   str_to_date(e.enquiry_date,'%d-%m-%Y')  between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') and
   customer_id = '${customerid}' and
   gst_slab = a.taxrate
 ) as disc_info
@@ -447,6 +471,63 @@ enquiryRoute.get("/back-order/:centerid", (req, res) => {
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
+		} else {
+			return res.json(data);
+		}
+	});
+});
+
+enquiryRoute.get("/search-enquiries/:centerid/:customerid/:status/:fromdate/:todate", (req, res) => {
+	let center_id = req.params.centerid;
+	let status = req.params.status;
+	let customer_id = req.params.customerid;
+	let from_date = req.params.fromdate;
+	let to_date = req.params.todate;
+
+	if (from_date !== "") {
+		from_date = moment(req.params.fromdate).format("DD-MM-YYYY");
+	}
+
+	if (to_date !== "") {
+		to_date = moment(req.params.todate).format("DD-MM-YYYY");
+	}
+
+	let custsql = `and e.customer_id = '${customer_id}' `;
+
+	let sql = `select e.*, c.id as customer_id, c.name as customer_name,
+    	case e.estatus
+				when 'O' then 'New'
+				when 'D' then 'Draft'
+				when 'E' then 'Executed'
+				when 'P' then 'Invoice Ready'
+        when 'C' then 'Completed'
+    end as status_txt,
+	(select count(*) from enquiry_detail where enquiry_id = e.id)
+	as noofitems
+	from
+	enquiry e,
+	customer c
+	where
+	c.id = e.customer_id and
+
+	e.center_id =  '${center_id}' and
+	str_to_date(DATE_FORMAT(enquiry_date,'%d-%m-%YYYY') , '%d-%m-%YYYY') between
+	str_to_date('${from_date}', '%d-%m-%YYYY') and
+	str_to_date('${to_date}', '%d-%m-%YYYY')  `;
+
+	if (customer_id !== "all") {
+		sql = sql + custsql;
+	}
+
+	if (status !== "all") {
+		sql = sql + ` and e.estatus =  '${status}' `;
+	}
+
+	console.log("search enquiry >> " + sql);
+
+	pool.query(sql, function (err, data) {
+		if (err) {
+			return handleError(new ErrorHandler("500", "Error fetching search enquiry"), res);
 		} else {
 			return res.json(data);
 		}

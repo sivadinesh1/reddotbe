@@ -11,7 +11,7 @@ adminRoute.get("/view-products-count/:centerid", (req, res) => {
 	let sql = `select count(*) as count from product p where 
 	p.center_id = '${center_id}' `;
 
-	pool.query(sql, function(err, data) {
+	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error fetching product count."), res);
 		} else {
@@ -35,7 +35,7 @@ adminRoute.get("/view-product-info/:centerid/:productid", (req, res) => {
 
 	console.log("object view-product-info " + sql);
 
-	pool.query(sql, function(err, data) {
+	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error fetching product info."), res);
 		} else {
@@ -98,7 +98,7 @@ adminRoute.post("/add-product", (req, res, next) => {
 			 '${minqty}', '${itemdiscount}', '${reorderqty}', '${avgpurprice}', '${avgsaleprice}', '${margin}');
 			`;
 
-	pool.query(query, function(err, data) {
+	pool.query(query, function (err, data) {
 		if (err) {
 			let errTxt = err.message;
 
@@ -108,7 +108,7 @@ adminRoute.post("/add-product", (req, res, next) => {
 		} else {
 			let newPK = data.insertId;
 			return res.status(200).json({
-				result: "success"
+				result: "success",
 			});
 		}
 	});
@@ -167,12 +167,12 @@ salesprice = '${salesprice}', rackno = '${rackno}',location = '${location}',
 id = '${product_id}'
 	`;
 
-	pool.query(query, function(err, data) {
+	pool.query(query, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error Updating product"), res);
 		} else {
 			res.status(200).json({
-				result: "success"
+				result: "success",
 			});
 		}
 	});
@@ -193,7 +193,7 @@ adminRoute.get("/get-vendor-details/:centerid/:vendorid", (req, res) => {
 
 	console.log("get-vendor-details >> " + sql);
 
-	pool.query(sql, function(err, data) {
+	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error fetching vendor details"), res);
 		} else {
@@ -207,7 +207,7 @@ adminRoute.get("/get-states", (req, res) => {
 	console.log("inside get vendor details");
 	let sql = `select * from state `;
 
-	pool.query(sql, function(err, data) {
+	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error fetching get status"), res);
 		} else {
@@ -259,12 +259,12 @@ adminRoute.put("/update-vendor/:id", (req, res) => {
 	id = '${vendor_id}'
 	`;
 
-	pool.query(query, function(err, data) {
+	pool.query(query, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error updating vendor details"), res);
 		} else {
 			return res.status(200).json({
-				result: "success"
+				result: "success",
 			});
 		}
 	});
@@ -313,12 +313,12 @@ adminRoute.post("/add-vendor", (req, res) => {
 
 	console.log("query >>>> " + query);
 
-	pool.query(query, function(err, data) {
+	pool.query(query, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error adding vendor details"), res);
 		} else {
 			return res.status(200).json({
-				result: "success"
+				result: "success",
 			});
 		}
 	});
@@ -328,12 +328,12 @@ adminRoute.post("/add-vendor", (req, res) => {
 adminRoute.get("/get-customer-details/:centerid/:customerid", (req, res) => {
 	let center_id = req.params.centerid;
 	let customer_id = req.params.customerid;
-	console.log("inside get vendor details");
+
 	let sql = `select * from customer c where 
 	c.id = '${customer_id}' and
 	c.center_id = '${center_id}' `;
 
-	pool.query(sql, function(err, data) {
+	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error fetching customer details."), res);
 		} else {
@@ -387,13 +387,13 @@ adminRoute.post("/update-customer", (req, res) => {
 
 	console.log("print the val " + query);
 
-	pool.query(query, function(err, data) {
+	pool.query(query, function (err, data) {
 		if (err) {
 			console.log("object..." + err);
 			return handleError(new ErrorHandler("500", "Error Updating center."), res);
 		} else {
 			return res.status(200).json({
-				result: "success"
+				result: "success",
 			});
 		}
 	});
@@ -440,12 +440,12 @@ adminRoute.post("/add-customer", (req, res) => {
 			'${gst}', '${phone}', '${mobile}', '${mobile2}', '${whatsapp}', '${email}', '${today}', 'A'
 			) `;
 
-	pool.query(query, function(err, data) {
+	pool.query(query, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error adding customer."), res);
 		} else {
 			res.status(200).json({
-				result: "success"
+				result: "success",
 			});
 		}
 	});
@@ -459,7 +459,7 @@ adminRoute.get("/get-center-details/:centerid", (req, res) => {
 	let sql = `select * from center c where 
 	c.id = '${center_id}'  `;
 
-	pool.query(sql, function(err, data) {
+	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error fetching center details."), res);
 		} else {
@@ -518,12 +518,12 @@ adminRoute.post("/update-center", (req, res) => {
 
 	console.log("print the val " + query);
 
-	pool.query(query, function(err, data) {
+	pool.query(query, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error Updating center."), res);
 		} else {
 			return res.status(200).json({
-				result: "success"
+				result: "success",
 			});
 		}
 	});
@@ -540,12 +540,12 @@ adminRoute.get("/prod-exists/:pcode", (req, res) => {
 	let sql = `select * from product p where 
 	p.product_code = '${pcode}' `;
 
-	pool.query(sql, function(err, data) {
+	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error fetching product count."), res);
 		} else {
 			return res.status(200).json({
-				result: data
+				result: data,
 			});
 		}
 	});

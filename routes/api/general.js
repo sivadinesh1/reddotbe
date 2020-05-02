@@ -1,3 +1,5 @@
+/** @format */
+
 const express = require("express");
 const router = express.Router();
 
@@ -400,7 +402,9 @@ router.post("/insert-purchase-details", (req, res) => {
 				INSERT INTO purchase_detail(purchase_id, product_id, qty, unit_price, mrp, batchdate, tax,
 					igst, cgst, sgst, taxable_value, total_value)
 				VALUES
-					( '${newPK}', '${k.product_id}', '${k.qty}', '${k.unit_price}', '${k.mrp}', '${today}', '${k.taxrate}', '${k.igst}', '${k.cgst}', '${k.sgst}', '${k.taxable_value}', '${k.total_value}')
+					( '${newPK}', '${k.product_id}', '${k.qty}', '${k.unit_price}', '${k.mrp}', '${moment().format("DD-MM-YYYY")}', '${k.taxrate}', '${k.igst}', '${
+					k.cgst
+				}', '${k.sgst}', '${k.taxable_value}', '${k.total_value}')
 				
 					`;
 
@@ -480,6 +484,8 @@ router.post("/insert-purchase-details", (req, res) => {
 router.post("/insert-sale-details", (req, res) => {
 	let yourJsonObj = req.body;
 
+	console.log("object dinesh " + JSON.stringify(yourJsonObj));
+
 	const customerValue = yourJsonObj["customer"];
 
 	let invoiceyear = "";
@@ -489,140 +495,179 @@ router.post("/insert-sale-details", (req, res) => {
 		invoiceyear = moment(yourJsonObj["invoicedate"]).format("YY");
 	}
 
+	let lr_date = yourJsonObj["lrdate"];
+	if (yourJsonObj["lrdate"] !== "") {
+		lr_date = moment(yourJsonObj["lrdate"]).format("DD-MM-YYYY");
+	}
+
+	const center_id = yourJsonObj["center_id"];
 	const no_of_items = yourJsonObj["noofitems"];
 	const total_qty = yourJsonObj["totalqty"];
 	const taxable_value = yourJsonObj["taxable_value"];
 	const total_value = yourJsonObj["totalvalue"];
-	const product_arr = yourJsonObj["productarr"];
+	const net_total = yourJsonObj["net_total"];
 
-	// const net_total = yourJsonObj["net_total"];
+	const product_arr = yourJsonObj["productarr"];
 
 	const igst = yourJsonObj["igst"];
 	const cgst = yourJsonObj["cgst"];
 	const sgst = yourJsonObj["sgst"];
 	const enqref = yourJsonObj["enqref"];
+	const orderno = yourJsonObj["orderno"];
+	let orderdate = yourJsonObj["orderdate"];
+
+	if (yourJsonObj["orderdate"] !== "") {
+		orderdate = moment(yourJsonObj["orderdate"]).format("DD-MM-YYYY");
+	}
+
+	const transport_charges = yourJsonObj["transport_charges"];
+	const unloading_charges = yourJsonObj["unloading_charges"];
+	const misc_charges = yourJsonObj["misc_charges"];
+	const status = yourJsonObj["status"];
+
+	const sales_id = yourJsonObj["salesid"];
+
+	const lr_no = yourJsonObj["lrno"];
 
 	var month = moment().format("M");
 	var day = moment().format("D");
 	var year = moment().format("YYYY");
 	var syear = moment().format("YY");
 
-	pool.beginTransaction(function (err) {
+	// Update Sequence in financial Year tbl when its fresh sale insert
+	let qryUpdateSqnc = `
+	update financialyear set invseq = invseq + 1 where 
+	center_id = '${center_id}' and  
+	CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y')
+	`;
+
+	pool.query(qryUpdateSqnc, function (err, data) {
+		if (err) {
+			return handleError(new ErrorHandler("500", "Updating financial year"), res);
+		}
+	});
+
+	// create a invoice number and save in sale master
+	let insQry = `
+			INSERT INTO sale (center_id, customer_id, invoice_no, invoice_date, order_no, order_date, 
+			lr_no, lr_date, sale_type,  total_qty, no_of_items, taxable_value, cgst, sgst, igst, 
+			total_value, net_total, transport_charges, unloading_charges, misc_charges, status, sale_datetime)
+			VALUES
+			('${center_id}', '${customerValue.id}', 
+			(select concat('${invoiceyear}', "/", "1", "/", lpad(invseq, 5, "0")) from financialyear 
+			where 
+			center_id = '${center_id}' and  
+			CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y')),
+			'${invoicedate}', '${orderno}', '${orderdate}', '${lr_no}', '${lr_date}', 'GST Inovoice','${total_qty}', 
+			'${no_of_items}', '${taxable_value}', '${cgst}', '${sgst}', '${igst}', '${total_value}', 
+			'${net_total}', '${transport_charges}', '${unloading_charges}', '${misc_charges}', '${status}',
+			'${moment().format("DD-MM-YYYY")}'
+			)`;
+
+	let upQry = `
+			UPDATE sale set center_id = '${center_id}', customer_id = '${customerValue.id}', lr_no = '${lr_no}',
+			lr_date = '${lr_date}', total_qty = '${total_qty}', no_of_items = '${no_of_items}',
+			taxable_value = '${taxable_value}', cgst = '${cgst}', sgst = '${sgst}', igst = '${igst}',
+			total_value = '${total_value}', net_total = '${net_total}', transport_charges = '${transport_charges}', 
+			unloading_charges = '${unloading_charges}', misc_charges = '${misc_charges}', status = '${status}',
+			sale_datetime = '${moment().format("DD-MM-YYYY")}'
+			where id= '${sales_id}' `;
+
+	if (sales_id === "") {
+		query = insQry;
+	} else if (sales_id != "") {
+		query = upQry;
+	}
+
+	console.log(" SALE dinesh #" + query);
+	pool.query(query, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("404", "User with the specified email does not exists"), res);
 		}
 
-		let qryUpdateSqnc = `
-	update financialyear set invseq = invseq + 1 where 
-	center_id = '1' and  
-	CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y')
-	`;
-
-		pool.query(qryUpdateSqnc, function (err, data) {
-			if (err) {
-				return handleError(new ErrorHandler("500", "Updating financial year"), res);
-			}
-		});
-
-		let query = `
-	INSERT INTO sale (  center_id, customer_id, invoice_no, invoice_date, 
-	 sale_type,  total_qty, no_of_items, taxable_value, cgst, sgst, igst, 
-		total_value, net_total)
-		VALUES
-			(1, '${customerValue.id}', 
-			
-			(select concat('${invoiceyear}', "/", "1", "/", lpad(invseq, 5, "0")) from financialyear 
-where 
-center_id = 1 and  
-CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y'))
-			
-			, '${invoicedate}', 
-			'GST Inovoice',
-		
-			'${total_qty}', 
-			'${no_of_items}',  
-			'${taxable_value}', 
-			'${cgst}', 
-			'${sgst}', 
-			'${igst}', 
-			'${total_value}', 
-	
-			'${total_value}'
-			
-			)`;
-
-		pool.query(query, function (err, data) {
-			if (err) {
-				return pool.rollback(function () {
-					return handleError(new ErrorHandler("404", "User with the specified email does not exists"), res);
-				});
-			}
-
-			let newPK = data.insertId;
-
-			product_arr.forEach(function (k) {
-				let query1 = `
-
-				INSERT INTO sale_detail(sale_id, product_id, qty, unit_price, mrp, batchdate, tax,
-					igst, cgst, sgst, taxable_value, total_value)
-				VALUES
-					( '${newPK}', '${k.product_id}', '${k.qty}', '${k.unit_price}', '${k.mrp}', '${today}', '${k.taxrate}', '${k.igst}', '${k.cgst}', '${k.sgst}', '${k.taxable_value}', '${k.total_value}')
-				
-					`;
-
-				pool.query(query1, function (err, data) {
-					if (err) {
-						return handleError(new ErrorHandler("500", "Insert in to sale details"), res);
-					}
-
-					let query2 = `
-							update stock set available_stock =  available_stock - '${k.qty}'
-	where product_id = '${k.product_id}' and id = '${k.stock_pk}' `;
-
-					pool.query(query2, function (err, data) {
-						if (err) {
-							return handleError(new ErrorHandler("500", "Error updaitng available stock"), res);
-						}
-
-						let query3 = `
-								update product set currentstock = (
-									select sum(available_stock) from stock where product_id = '${k.product_id}')
-									 `;
-						pool.query(query3, function (err, data) {
-							if (err) {
-								return handleError(new ErrorHandler("500", "Error updating product"), res);
-							}
-						});
-					});
-				});
-			});
-
+		if (sales_id === "") {
+			newPK = data.insertId;
+			// if sale came from enquiry, then update the enq table with the said id {status = E (executed)}
 			if (enqref !== 0) {
 				let uenqsaleidqry = `update enquiry set 
-				estatus = 'E',
-				sale_id = '${newPK}'
-				where 
-				id =  '${enqref}' `;
-
+					estatus = 'E',
+					sale_id = '${newPK}'
+					where 
+					id =  '${enqref}' `;
+				console.log("dinesh >> " + uenqsaleidqry);
 				pool.query(uenqsaleidqry, function (err, data) {
 					if (err) {
 						return handleError(new ErrorHandler("500", "Error update enquiry"), res);
-					} else {
-						return res.json({
-							result: "success",
-						});
 					}
 				});
 			}
-		});
-		pool.commit(function (err) {
-			if (err) {
-				return pool.rollback(function () {
-					return handleError(new ErrorHandler("404", "User with the specified email does not exists"), res);
-				});
+		} else if (sales_id != "") {
+			newPK = sales_id;
+		}
+
+		// if sale master insert success, then insert in invoice details.
+		product_arr.forEach(function (k) {
+			let insQuery100 = `INSERT INTO sale_detail(sale_id, product_id, qty, unit_price, mrp, batchdate, tax,
+												igst, cgst, sgst, taxable_value, total_value) VALUES
+												( '${newPK}', '${k.product_id}', '${k.qty}', '${k.unit_price}', '${k.mrp}', 
+												'${moment().format("DD-MM-YYYY")}', '${k.taxrate}', '${k.igst}', 
+												'${k.cgst}', '${k.sgst}', '${k.taxable_value}', '${k.total_value}')`;
+
+			let upQuery100 = `update sale_detail set product_id = '${k.product_id}', qty = '${k.qty}', 
+												unit_price = '${k.unit_price}', mrp = '${k.mrp}', 
+												batchdate = '${moment().format("DD-MM-YYYY")}', tax = '${k.taxrate}',
+												igst = '${k.igst}', cgst = '${k.cgst}', sgst = '${k.sgst}', 
+												taxable_value = '${k.taxable_value}', total_value = '${k.total_value}'
+												where
+												id = '${k.sale_det_id}' `;
+
+			if (k.sale_det_id === "") {
+				query100 = insQuery100;
+			} else {
+				query100 = upQuery100;
 			}
-			console.log("success!");
+			console.log(" update || Ins of Sale Detail Tbl " + query100);
+
+			pool.query(query100, function (err, data) {
+				if (err) {
+					return handleError(new ErrorHandler("500", "Insert in to sale details"), res);
+				}
+
+				// update available stock (as this is sale, reduce available stock)
+
+				if (status === "C" || status === "D") {
+					let qty_to_update = k.qty - k.old_val;
+					console.log("old val > " + k.old_val);
+					console.log("qty val > " + k.qty);
+
+					let query2 = `update stock set available_stock =  available_stock + '${qty_to_update}'
+												where product_id = '${k.product_id}' and id = '${k.stock_pk}'  `;
+
+					console.log("dinesh + query2 " + query2);
+
+					pool.query(query2, function (err, data) {
+						if (err) {
+							console.log("object..." + err);
+						} else {
+							console.log("object..stock update .");
+							// update current stock in product table
+							let query300 = `
+								update product set currentstock = (
+									select sum(available_stock) from stock where product_id = '${k.product_id}')
+									 `;
+							pool.query(query300, function (err, data) {
+								if (err) {
+									return handleError(new ErrorHandler("500", "Error updating product"), res);
+								}
+							});
+						}
+					});
+				}
+			});
 		});
+	});
+	return res.json({
+		result: "success",
 	});
 });
 
