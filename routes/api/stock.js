@@ -35,6 +35,10 @@ stockRouter.get("/search-all-draft-purchase/:centerid", (req, res) => {
 	});
 });
 
+// str_to_date(stock_inwards_datetime, '%Y-%m-%d %T') between
+// str_to_date('2020-05-01 00:00:00', '%Y-%m-%d %T') and
+// str_to_date('2020-05-08 23:59:00', '%Y-%m-%d %T')
+
 stockRouter.get("/search-purchase/:centerid/:vendorid/:status/:fromdate/:todate", (req, res) => {
 	let center_id = req.params.centerid;
 	let status = req.params.status;
@@ -43,11 +47,11 @@ stockRouter.get("/search-purchase/:centerid/:vendorid/:status/:fromdate/:todate"
 	let to_date = req.params.todate;
 
 	if (from_date !== "") {
-		from_date = moment(req.params.fromdate).format("DD-MM-YYYY");
+		from_date = moment(req.params.fromdate).format("DD-MM-YYYY") + " 00:00:00";
 	}
 
 	if (to_date !== "") {
-		to_date = moment(req.params.todate).format("DD-MM-YYYY");
+		to_date = moment(req.params.todate).format("DD-MM-YYYY") + " 23:59:00";
 	}
 
 	let vendsql = `and p.vendor_id = '${vendor_id}' `;
@@ -61,9 +65,13 @@ stockRouter.get("/search-purchase/:centerid/:vendorid/:status/:fromdate/:todate"
 	v.id = p.vendor_id and
 	
 	p.center_id = '${center_id}' and
-	str_to_date(stock_inwards_datetime, '%d-%m-%YYYY') between
-	str_to_date('${from_date}', '%d-%m-%YYYY') and
-	str_to_date('${to_date}', '%d-%m-%YYYY') `;
+	str_to_date(stock_inwards_datetime,  '%d-%m-%Y %T') between
+	str_to_date('${from_date}',  '%d-%m-%Y %T') and
+	str_to_date('${to_date}',  '%d-%m-%Y %T') `;
+
+	// str_to_date(stock_inwards_datetime,  '%Y-%m-%d %T') between
+	// str_to_date('${from_date}',  '%Y-%m-%d %T') and
+	// str_to_date('${to_date}',  '%Y-%m-%d %T') `;
 
 	if (vendor_id !== "all") {
 		sql = sql + vendsql;
@@ -91,12 +99,20 @@ stockRouter.get("/search-sales/:centerid/:customerid/:status/:fromdate/:todate",
 	let from_date = req.params.fromdate;
 	let to_date = req.params.todate;
 
+	// if (from_date !== "") {
+	// 	from_date = moment(req.params.fromdate).format("DD-MM-YYYY");
+	// }
+
+	// if (to_date !== "") {
+	// 	to_date = moment(req.params.todate).format("DD-MM-YYYY");
+	// }
+
 	if (from_date !== "") {
-		from_date = moment(req.params.fromdate).format("DD-MM-YYYY");
+		from_date = moment(req.params.fromdate).format("DD-MM-YYYY") + " 00:00:00";
 	}
 
 	if (to_date !== "") {
-		to_date = moment(req.params.todate).format("DD-MM-YYYY");
+		to_date = moment(req.params.todate).format("DD-MM-YYYY") + " 23:59:00";
 	}
 
 	let custsql = `and s.customer_id = '${customer_id}' `;
@@ -109,10 +125,15 @@ stockRouter.get("/search-sales/:centerid/:customerid/:status/:fromdate/:todate",
         where
         c.id = s.customer_id and
         
-        s.center_id = '${center_id}' and
-        str_to_date(sale_datetime, '%d-%m-%YYYY') between
-        str_to_date('${from_date}', '%d-%m-%YYYY') and
-        str_to_date('${to_date}', '%d-%m-%YYYY')  `;
+				s.center_id = '${center_id}' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('${from_date}',  '%d-%m-%Y %T') and
+				str_to_date('${to_date}',  '%d-%m-%Y %T') `;
+
+	// str_to_date(sale_datetime, '%d-%m-%YYYY') between
+	// str_to_date('${from_date}', '%d-%m-%YYYY') and
+	// str_to_date('${to_date}', '%d-%m-%YYYY')  `;
 
 	if (customer_id !== "all") {
 		sql = sql + custsql;
@@ -277,10 +298,11 @@ pd.purchase_id = '${purchase_id}'
 
 stockRouter.post("/delete-purchase-details", (req, res) => {
 	let id = req.body.id;
-	// let purchase_id = req.body.purchaseid;
+	let purchase_id = req.body.purchaseid;
 
 	let query = `
 	delete from purchase_detail where id = '${id}' `;
+	console.log("delete purchase details id > " + id);
 
 	pool.query(query, function (err, data) {
 		if (err) {

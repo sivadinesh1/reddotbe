@@ -5,9 +5,11 @@ const saleRouter = express.Router();
 
 const mysql = require("mysql");
 const moment = require("moment");
+const { handleError, ErrorHandler } = require("./../helpers/error");
 
 var pool = require("../helpers/db");
 
+// Get Possible Next Sale Invoice # (ReadOnly)
 saleRouter.get("/get-next-sale-invoice-no/:centerid", (req, res) => {
 	let center_id = req.params.centerid;
 
@@ -16,8 +18,6 @@ saleRouter.get("/get-next-sale-invoice-no/:centerid", (req, res) => {
 	let sql = `	select concat('${invoiceyear}', "/", "1", "/", lpad(invseq + 1, 5, "0")) as NxtInvNo from financialyear  where 
 	center_id = '${center_id}' and  
 	CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
-
-	console.log("sq purchase >> " + sql);
 
 	pool.query(sql, function (err, data) {
 		if (err) {
@@ -28,9 +28,10 @@ saleRouter.get("/get-next-sale-invoice-no/:centerid", (req, res) => {
 	});
 });
 
-module.exports = saleRouter;
-
-saleRouter.post("/delete-sales-details", (req, res) => {
+// delete sale details records based on sale details id
+// if audit is true, form a json string data and store in audit table
+// first entry to audit table & then call the delete query
+saleRouter.post("/delete-sales-details", async (req, res) => {
 	let id = req.body.id;
 	let sales_id = req.body.salesid;
 	let autidneeded = req.body.autidneeded;
@@ -57,25 +58,229 @@ saleRouter.post("/delete-sales-details", (req, res) => {
 			) t2)
 			, '', '${today}'
 			) `;
-		console.log("audit sale delete query " + auditQuery);
 
-		pool.query(auditQuery, function (err, data) {
-			if (err) {
-				return handleError(new ErrorHandler("500", "Error adding sale audit."), res);
-			}
-
-			let query = `
-			delete from sale_detail where id = '${id}' `;
-			console.log("delete sale details " + query);
-			pool.query(query, function (err, data) {
+		// step 1
+		let auditPromise = await new Promise(function (resolve, reject) {
+			pool.query(auditQuery, function (err, data) {
 				if (err) {
-					return handleError(new ErrorHandler("500", "Error deleting sale details"), res);
-				} else {
-					return res.json({
-						result: "success",
-					});
+					console.log("error: " + err);
+					return reject(handleError(new ErrorHandler("500", "Error adding sale audit."), res));
 				}
+				resolve(data);
 			});
 		});
 	}
+	// step 2
+	let deletePromise = await new Promise(function (resolve, reject) {
+		let query = `
+				delete from sale_detail where id = '${id}' `;
+
+		pool.query(query, function (err, data) {
+			if (err) {
+				return reject(handleError(new ErrorHandler("500", "Error deleting sale details"), res));
+			}
+			resolve(data);
+		});
+	});
+
+	if (deletePromise.affectedRows === 1) {
+		return res.json({
+			result: "success",
+		});
+	} else {
+		return res.json({
+			result: "failed",
+		});
+	}
 });
+
+// insert sale details
+// 1. Update Sequence Generator and form a formatted sale invoice
+// 2. Insert records in sale master, if sale is via enquiry, then update enq table with saleid
+// 3. Insert records in sale details
+// 4. update Stock table & then update product table with current stock details
+saleRouter.post("/insert-sale-details", async (req, res) => {
+	const cloneReq = { ...req.body };
+
+	// (1) Updates invseq in tbl financialyear, then {returns} formated sequence {YY/MM/INVSEQ}
+	await updateSequenceGenerator(cloneReq.center_id);
+	let invNo = await getSequenceNo(cloneReq);
+
+	// (2)
+	saleMasterEntry(cloneReq, invNo)
+		.then(async (data) => {
+			newPK = cloneReq.salesid === "" ? data.insertId : cloneReq.salesid;
+
+			// if sale came from enquiry, then update the enq table with the said id {status = E (executed)}
+			if (cloneReq.enqref !== 0) {
+				await updateEnquiry(newPK, cloneReq.enqref);
+			}
+
+			// (3) - updates sale details
+			let process = processItems(cloneReq, newPK);
+
+			Promise.all([process]).then(res.json({ result: "success", id: newPK, invoiceno: invNo }));
+		})
+		.catch((err) => {
+			console.log("error: " + err);
+			return handleError(new ErrorHandler("500", "Error saleMasterEntry > " + err), res);
+		});
+});
+
+// Update Sequence in financial Year tbl when its fresh sale insert
+function updateSequenceGenerator(center_id) {
+	let qryUpdateSqnc = `
+	update financialyear set invseq = invseq + 1 where 
+	center_id = '${center_id}' and  
+	CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
+
+	return new Promise(function (resolve, reject) {
+		pool.query(qryUpdateSqnc, function (err, data) {
+			if (err) {
+				reject(err);
+			}
+			resolve(data);
+		});
+	});
+}
+
+// format and send sequence #
+function getSequenceNo(cloneReq) {
+	let invNoQry = ` 
+			select concat('${moment(cloneReq.invoicedate).format("YY")}', "/", '${moment(cloneReq.invoicedate).format(
+		"MM",
+	)}', "/", lpad(invseq, 5, "0")) as invNo from financialyear 
+			where 
+			center_id = '${cloneReq.center_id}' and  
+			CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
+
+	return new Promise(function (resolve, reject) {
+		pool.query(invNoQry, function (err, data) {
+			if (err) {
+				reject(err);
+			}
+			resolve(data[0].invNo);
+		});
+	});
+}
+
+// format and send sequence #
+function saleMasterEntry(cloneReq, invNo) {
+	let revisionCnt = 0;
+	if (cloneReq.status === "C") {
+		revisionCnt = cloneReq.revision + 1;
+	}
+
+	let orderdate = cloneReq.orderdate;
+	let lrdate = cloneReq.lrdate;
+
+	orderdate = cloneReq.orderdate !== "" ? moment(orderdate).format("DD-MM-YYYY") : "";
+	lrdate = cloneReq.lrdate !== "" ? moment(lrdate).format("DD-MM-YYYY") : "";
+
+	// create a invoice number and save in sale master
+	let insQry = `
+			INSERT INTO sale (center_id, customer_id, invoice_no, invoice_date, order_no, order_date, 
+			lr_no, lr_date, sale_type,  total_qty, no_of_items, taxable_value, cgst, sgst, igst, 
+			total_value, net_total, transport_charges, unloading_charges, misc_charges, status, sale_datetime)
+			VALUES
+			('${cloneReq.center_id}', '${cloneReq.customer.id}', 
+			'${invNo}',
+			'${moment(cloneReq.invoicedate).format("DD-MM-YYYY")}', '${cloneReq.orderno}', '${orderdate}', '${cloneReq.lrno}', '${lrdate}',
+	 'GST Inovoice','${cloneReq.totalqty}', 
+			'${cloneReq.noofitems}', '${cloneReq.taxable_value}', '${cloneReq.cgst}', '${cloneReq.sgst}', '${cloneReq.igst}', '${cloneReq.totalvalue}', 
+			'${cloneReq.net_total}', '${cloneReq.transport_charges}', '${cloneReq.unloading_charges}', '${cloneReq.misc_charges}', '${cloneReq.status}',
+			'${moment().format("DD-MM-YYYY")}'
+			)`;
+
+	let upQry = `
+			UPDATE sale set center_id = '${cloneReq.center_id}', customer_id = '${cloneReq.customer.id}', 
+			order_date = '${orderdate}', lr_no = '${cloneReq.lrno}',
+			lr_date = '${lrdate}', total_qty = '${cloneReq.totalqty}', no_of_items = '${cloneReq.noofitems}',
+			taxable_value = '${cloneReq.taxable_value}', cgst = '${cloneReq.cgst}', sgst = '${cloneReq.sgst}', igst = '${cloneReq.igst}',
+			total_value = '${cloneReq.totalvalue}', net_total = '${cloneReq.net_total}', transport_charges = '${cloneReq.transport_charges}', 
+			unloading_charges = '${cloneReq.unloading_charges}', misc_charges = '${cloneReq.misc_charges}', status = '${cloneReq.status}',
+			sale_datetime = '${moment().format("DD-MM-YYYY")}', revision = '${revisionCnt}'
+			where id= '${cloneReq.salesid}' `;
+
+	return new Promise(function (resolve, reject) {
+		pool.query(cloneReq.salesid === "" ? insQry : upQry, function (err, data) {
+			if (err) {
+				reject(err);
+			}
+			resolve(data);
+		});
+	});
+}
+
+function updateEnquiry(newPK, enqref) {
+	let uenqsaleidqry = `update enquiry set 
+	estatus = 'E',
+	sale_id = '${newPK}'
+	where 
+	id =  '${enqref}' `;
+	console.log("dinesh >> " + uenqsaleidqry);
+	return new Promise(function (resolve, reject) {
+		pool.query(uenqsaleidqry, function (err, data) {
+			if (err) {
+				reject(err);
+			}
+			resolve(data);
+		});
+	});
+}
+
+function processItems(cloneReq, newPK) {
+	// if sale master insert success, then insert in invoice details.
+	cloneReq.productarr.forEach(function (k) {
+		let insQuery100 = `INSERT INTO sale_detail(sale_id, product_id, qty, unit_price, mrp, batchdate, tax,
+												igst, cgst, sgst, taxable_value, total_value, stock_id) VALUES
+												( '${newPK}', '${k.product_id}', '${k.qty}', '${k.unit_price}', '${k.mrp}', 
+												'${moment().format("DD-MM-YYYY")}', '${k.taxrate}', '${k.igst}', 
+												'${k.cgst}', '${k.sgst}', '${k.taxable_value}', '${k.total_value}', '${k.stock_pk}')`;
+
+		let upQuery100 = `update sale_detail set product_id = '${k.product_id}', qty = '${k.qty}', 
+												unit_price = '${k.unit_price}', mrp = '${k.mrp}', 
+												batchdate = '${moment().format("DD-MM-YYYY")}', tax = '${k.taxrate}',
+												igst = '${k.igst}', cgst = '${k.cgst}', sgst = '${k.sgst}', 
+												taxable_value = '${k.taxable_value}', total_value = '${k.total_value}', stock_id = '${k.stock_pk}'
+												where
+												id = '${k.sale_det_id}' `;
+
+		let saleTblPromise = new Promise(function (resolve, reject) {
+			pool.query(k.sale_det_id === "" ? insQuery100 : upQuery100, function (err, data) {
+				if (err) {
+					reject(err);
+				}
+				resolve(data);
+			});
+		});
+
+		// after sale details is updated, then update stock (as this is sale, reduce available stock) tbl & product tbl
+		let qty_to_update = k.qty - k.old_val;
+
+		let query2 = `update stock set available_stock =  available_stock + '${qty_to_update}'
+			 where product_id = '${k.product_id}' and id = '${k.stock_pk}'  `;
+
+		let stockTblPromise = new Promise(function (resolve, reject) {
+			pool.query(query2, function (err, data) {
+				if (err) {
+					reject(err);
+				}
+				resolve(data);
+			});
+		});
+
+		let productTblPromise = new Promise(function (resolve, reject) {
+			// update current stock in product table
+			let query300 = ` update product set currentstock = (select sum(available_stock) from stock where product_id = '${k.product_id}')`;
+			pool.query(query300, function (err, data) {
+				if (err) {
+					reject(err);
+				}
+				resolve(data);
+			});
+		});
+	});
+}
+
+module.exports = saleRouter;

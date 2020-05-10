@@ -49,6 +49,7 @@ app.use(
 app.use("/api", require("./routes/api/general"));
 app.use("/api/enquiry", require("./routes/api/enquiry"));
 app.use("/api/sale", require("./routes/api/sale"));
+app.use("/api/purchase", require("./routes/api/purchase"));
 app.use("/api/auth", require("./routes/api/auth"));
 app.use("/api/admin", require("./routes/api/admin"));
 app.use("/api/stock", require("./routes/api/stock"));
