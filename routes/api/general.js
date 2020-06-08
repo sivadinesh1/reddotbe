@@ -48,11 +48,11 @@ router.post("/search-product-information", (req, res) => {
 	// let centerid = req.params.centerid;
 	// let customerid = req.params.customerid;
 	// let orderdate = req.params.orderdate;
-
+	console.log("object >>>" + JSON.stringify(req.body));
 	const [centerid, customerid, orderdate, searchstr] = Object.values(req.body);
 
 	let sql = `select a.product_code as product_code, a.description, a.mrp, a.taxrate, b.available_stock,
-	a.packetsize, a.unit_price, a.id as product_id, b.id as stock_pk,
+	a.packetsize as qty, a.unit_price, a.id as product_id, b.id as stock_pk,
 	
 (	  select concat(value,'~',type) from discount where   str_to_date('${orderdate}','%d-%m-%Y')  between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') and
   customer_id = '${customerid}' and
@@ -71,7 +71,7 @@ router.post("/search-product-information", (req, res) => {
   
  `;
 
-	console.log("query TESTing > " + sql);
+	console.log("search-product-information > " + sql);
 
 	pool.query(sql, function (err, data) {
 		if (err) {

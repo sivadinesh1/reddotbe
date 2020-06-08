@@ -102,6 +102,8 @@ saleRouter.post("/delete-sales-details", async (req, res) => {
 saleRouter.post("/insert-sale-details", async (req, res) => {
 	const cloneReq = { ...req.body };
 
+	console.log("object.." + JSON.stringify(cloneReq));
+
 	// (1) Updates invseq in tbl financialyear, then {returns} formated sequence {YY/MM/INVSEQ}
 	await updateSequenceGenerator(cloneReq.center_id);
 	let invNo = await getSequenceNo(cloneReq);
@@ -110,6 +112,7 @@ saleRouter.post("/insert-sale-details", async (req, res) => {
 	saleMasterEntry(cloneReq, invNo)
 		.then(async (data) => {
 			newPK = cloneReq.salesid === "" ? data.insertId : cloneReq.salesid;
+			console.log("New PK" + newPK);
 
 			// if sale came from enquiry, then update the enq table with the said id {status = E (executed)}
 			if (cloneReq.enqref !== 0) {
@@ -232,20 +235,21 @@ function updateEnquiry(newPK, enqref) {
 function processItems(cloneReq, newPK) {
 	// if sale master insert success, then insert in invoice details.
 	cloneReq.productarr.forEach(function (k) {
-		let insQuery100 = `INSERT INTO sale_detail(sale_id, product_id, qty, unit_price, mrp, batchdate, tax,
+		let insQuery100 = `INSERT INTO sale_detail(sale_id, product_id, qty, disc_percent, disc_value, unit_price, mrp, batchdate, tax,
 												igst, cgst, sgst, taxable_value, total_value, stock_id) VALUES
-												( '${newPK}', '${k.product_id}', '${k.qty}', '${k.unit_price}', '${k.mrp}', 
+												( '${newPK}', '${k.product_id}', '${k.qty}', '${k.disc_percent}', '${k.disc_value}', '${k.unit_price}', '${k.mrp}', 
 												'${moment().format("DD-MM-YYYY")}', '${k.taxrate}', '${k.igst}', 
 												'${k.cgst}', '${k.sgst}', '${k.taxable_value}', '${k.total_value}', '${k.stock_pk}')`;
 
-		let upQuery100 = `update sale_detail set product_id = '${k.product_id}', qty = '${k.qty}', 
-												unit_price = '${k.unit_price}', mrp = '${k.mrp}', 
+		let upQuery100 = `update sale_detail set product_id = '${k.product_id}', qty = '${k.qty}', disc_percent = '${k.disc_percent}', 
+		disc_value = '${k.disc_value}',	unit_price = '${k.unit_price}', mrp = '${k.mrp}', 
 												batchdate = '${moment().format("DD-MM-YYYY")}', tax = '${k.taxrate}',
 												igst = '${k.igst}', cgst = '${k.cgst}', sgst = '${k.sgst}', 
 												taxable_value = '${k.taxable_value}', total_value = '${k.total_value}', stock_id = '${k.stock_pk}'
 												where
 												id = '${k.sale_det_id}' `;
 
+		console.log("object" + insQuery100);
 		let saleTblPromise = new Promise(function (resolve, reject) {
 			pool.query(k.sale_det_id === "" ? insQuery100 : upQuery100, function (err, data) {
 				if (err) {

@@ -35,7 +35,6 @@ function purchaseMasterEntry(cloneReq) {
 	// today = moment(today).format("YYYY-MM-DD HH:mm:ss");
 
 	today = moment(today).format("DD-MM-YYYY HH:mm:ss");
-
 	// var today = new Date();
 	// today = moment(today).format("DD-MM-YYYY");
 

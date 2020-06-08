@@ -519,9 +519,9 @@ enquiryRoute.get("/search-enquiries/:centerid/:customerid/:status/:fromdate/:tod
 		sql = sql + custsql;
 	}
 
-	if (status !== "all") {
-		sql = sql + ` and e.estatus =  '${status}' `;
-	}
+	// if (status !== "all") {
+	// 	sql = sql + ` and e.estatus =  '${status}' `;
+	// }
 
 	console.log("search enquiry >> " + sql);
 
