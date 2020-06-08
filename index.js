@@ -79,6 +79,6 @@ app.use((err, req, res) => {
 	handleError(err, res);
 });
 
-const PORT = process.env.PORT || 5060;
+const PORT = process.env.PORT || 5050;
 
 app.listen(PORT);
