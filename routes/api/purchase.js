@@ -1,5 +1,3 @@
-/** @format */
-
 const express = require("express");
 const purchaseRouter = express.Router();
 
