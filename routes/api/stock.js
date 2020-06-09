@@ -8,6 +8,8 @@ const moment = require("moment");
 
 var pool = require("./../helpers/db");
 
+const { getSalesMaster } = require("../modules/sales/sales.js");
+
 stockRouter.get("/search-all-draft-purchase/:centerid", (req, res) => {
 	let center_id = req.params.centerid;
 
@@ -154,24 +156,36 @@ stockRouter.get("/search-sales/:centerid/:customerid/:status/:fromdate/:todate",
 	});
 });
 
+// stockRouter.get("/sales-master/:id", (req, res) => {
+// 	let sales_id = req.params.id;
+
+// 	let sql = `
+// 	select s.*
+// from
+// sale s
+// where
+// s.id = '${sales_id}' `;
+
+// 	console.log("sq sales master >> " + sql);
+
+// 	pool.query(sql, function (err, data) {
+// 		if (err) {
+// 			return handleError(new ErrorHandler("500", "Error fetching sales master"), res);
+// 		} else {
+// 			return res.json(data);
+// 		}
+// 	});
+// });
+
 stockRouter.get("/sales-master/:id", (req, res) => {
 	let sales_id = req.params.id;
-
-	let sql = `
-	select s.*
-from 
-sale s
-where
-s.id = '${sales_id}' `;
-
-	console.log("sq sales master >> " + sql);
-
-	pool.query(sql, function (err, data) {
+	getSalesMaster(`${req.params.id}`, function (err, rows) {
 		if (err) {
-			return handleError(new ErrorHandler("500", "Error fetching sales master"), res);
-		} else {
-			return res.json(data);
+			console.log(err);
+			return;
 		}
+		console.log(rows);
+		return res.json(rows);
 	});
 });
 
