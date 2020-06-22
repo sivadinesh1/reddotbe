@@ -358,7 +358,7 @@ enquiryRoute.post("/add-more-enquiry-details", (req, res) => {
 					ON orig.product_id = s.product_id and
 					s.mrp = orig.mrp `;
 
-				console.log("get enq details " + sql);
+				console.log("get enq details1 " + sql);
 
 				pool.query(sql, function (err, data) {
 					if (err) {
