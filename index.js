@@ -53,6 +53,7 @@ app.use("/api/purchase", require("./routes/api/purchase"));
 app.use("/api/auth", require("./routes/api/auth"));
 app.use("/api/admin", require("./routes/api/admin"));
 app.use("/api/stock", require("./routes/api/stock"));
+app.use("/api/print", require("./routes/api/print"));
 app.use("/api/accounts", require("./routes/api/accounts"));
 
 app.get("/openCV/:id/:filename", function (req, res) {

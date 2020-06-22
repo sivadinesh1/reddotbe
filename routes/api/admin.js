@@ -5,6 +5,10 @@ var pool = require("./../helpers/db");
 const moment = require("moment");
 const { handleError, ErrorHandler } = require("./../helpers/error");
 
+const { getSalesMaster, getSalesDetails } = require("../modules/sales/sales.js");
+
+const { getCustomerDiscount, updateCustomerDiscount, insertCustomerDiscount } = require("../modules/customers/customers.js");
+
 adminRoute.get("/view-products-count/:centerid", (req, res) => {
 	let center_id = req.params.centerid;
 
@@ -326,12 +330,12 @@ adminRoute.post("/add-vendor", (req, res) => {
 
 // Customers
 adminRoute.get("/get-customer-details/:centerid/:customerid", (req, res) => {
-	let center_id = req.params.centerid;
-	let customer_id = req.params.customerid;
+	let sql = `select c.*, s.code from customer c,
+	state s  where s.id = c.state_id and
+	c.id = '${req.params.customerid}' and
+	c.center_id = '${req.params.centerid}' `;
 
-	let sql = `select * from customer c where 
-	c.id = '${customer_id}' and
-	c.center_id = '${center_id}' `;
+	console.log("get-customer-details > " + sql);
 
 	pool.query(sql, function (err, data) {
 		if (err) {
@@ -426,8 +430,24 @@ adminRoute.post("/add-customer", (req, res) => {
 	const mobile = general_info["mobile"];
 	const mobile2 = general_info["mobile2"];
 	const whatsapp = general_info["whatsapp"];
+	const email = general_info["email"];
 
-	const email = addl_info["email"];
+	const disctype = addl_info["disctype"];
+	const gstzero = addl_info["gstzero"];
+	const gstfive = addl_info["gstfive"];
+	const gsttwelve = addl_info["gsttwelve"];
+	const gsteighteen = addl_info["gsteighteen"];
+	const gsttwentyeight = addl_info["gsttwentyeight"];
+
+	// let taxSlabArr = [0, 5, 12, 18, 28];
+
+	let taxSlabArr = [
+		{ gstslab: 0, gstvalue: gstzero },
+		{ gstslab: 5, gstvalue: gstfive },
+		{ gstslab: 12, gstvalue: gsttwelve },
+		{ gstslab: 18, gstvalue: gsteighteen },
+		{ gstslab: 28, gstvalue: gsttwentyeight },
+	];
 
 	var today = new Date();
 	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
@@ -444,6 +464,22 @@ adminRoute.post("/add-customer", (req, res) => {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error adding customer."), res);
 		} else {
+			taxSlabArr.forEach((e) => {
+				let formObj = {
+					center_id: center_id,
+					customer_id: data.insertId,
+					type: disctype,
+					value: e.gstvalue,
+					gst_slab: e.gstslab,
+					startdate: moment(today).format("DD-MM-YYYY"),
+					enddate: "01-04-9999",
+				};
+
+				insertCustomerDiscount(formObj, (err, rows) => {
+					if (err) return handleError(new ErrorHandler("500", "Error fetching sales master"), res);
+				});
+			});
+
 			res.status(200).json({
 				result: "success",
 			});
@@ -548,5 +584,27 @@ adminRoute.get("/prod-exists/:pcode", (req, res) => {
 				result: data,
 			});
 		}
+	});
+});
+
+// get customer discount values
+adminRoute.get("/customer-discount/:centerid/:customerid", (req, res) => {
+	// @from Customer file
+	getCustomerDiscount(`${req.params.centerid}`, `${req.params.customerid}`, (err, rows) => {
+		if (err) return handleError(new ErrorHandler("500", "Error fetching sales master"), res);
+		return res.json(rows);
+	});
+});
+
+// get customer discount values
+adminRoute.put("/update-customer-discount", (req, res) => {
+	let jsonObj = req.body;
+
+	console.log("update-customer-discount > " + JSON.stringify(jsonObj));
+
+	// @from Customer file
+	updateCustomerDiscount(jsonObj, (err, rows) => {
+		if (err) return handleError(new ErrorHandler("500", "Error fetching sales master"), res);
+		return res.json(rows);
 	});
 });

@@ -4,7 +4,10 @@ const fs = require("fs");
 const PDFDocument = require("pdfkit");
 const blobStream = require("blob-stream");
 
-function createInvoice(invoice, path, res) {
+function createInvoice(saleMaster, saleDetails, invoice, path, res) {
+	console.log("create invoice 1 called " + JSON.stringify(saleMaster));
+	console.log("create invoice 2 called " + JSON.stringify(saleDetails));
+
 	let doc = new PDFDocument({ size: "A4", margin: 50 });
 
 	generateHeader(doc);
@@ -35,27 +38,28 @@ function createInvoice(invoice, path, res) {
 }
 
 function generateHeader(doc) {
-	doc.image("logo.png", 50, 45, { width: 50 })
+	doc
+		.image("logo.png", 20, 45, { width: 50 })
 		.fillColor("#444444")
-		.fontSize(20)
-		.text("ACME Inc.", 110, 57)
+
+		.fontSize(14)
+		.text("THE THIRUMURUGAN TRACTOR SPARES", 100, 50)
 		.fontSize(10)
-		.text("ACME Inc.", 200, 50, { align: "right" })
-		.text("123 Main Street", 200, 65, { align: "right" })
-		.text("New York, NY, 10025", 200, 80, { align: "right" })
+		.text("123 Main Street", 200, 65)
+		.text("New York, NY, 10025", 200, 80)
+		.text("PPP", 550, 80)
 		.moveDown();
 }
 
 function generateCustomerInformation(doc, invoice) {
-	doc.fillColor("#444444")
-		.fontSize(20)
-		.text("Invoice", 50, 160);
+	doc.fillColor("#444444").fontSize(20).text("Invoice", 50, 160);
 
 	generateHr(doc, 185);
 
 	const customerInformationTop = 200;
 
-	doc.fontSize(10)
+	doc
+		.fontSize(10)
 		.text("Invoice Number:", 50, customerInformationTop)
 		.font("Helvetica-Bold")
 		.text(invoice.invoice_nr, 150, customerInformationTop)
@@ -69,11 +73,7 @@ function generateCustomerInformation(doc, invoice) {
 		.text(invoice.shipping.name, 300, customerInformationTop)
 		.font("Helvetica")
 		.text(invoice.shipping.address, 300, customerInformationTop + 15)
-		.text(
-			invoice.shipping.city + ", " + invoice.shipping.state + ", " + invoice.shipping.country,
-			300,
-			customerInformationTop + 30
-		)
+		.text(invoice.shipping.city + ", " + invoice.shipping.state + ", " + invoice.shipping.country, 300, customerInformationTop + 30)
 		.moveDown();
 
 	generateHr(doc, 252);
@@ -98,7 +98,7 @@ function generateInvoiceTable(doc, invoice) {
 			item.description,
 			formatCurrency(item.amount / item.quantity),
 			item.quantity,
-			formatCurrency(item.amount)
+			formatCurrency(item.amount),
 		);
 
 		generateHr(doc, position + 20);
@@ -119,12 +119,13 @@ function generateInvoiceTable(doc, invoice) {
 function generateFooter(doc) {
 	doc.fontSize(10).text("Payment is due within 15 days. Thank you for your business.", 50, 780, {
 		align: "center",
-		width: 500
+		width: 500,
 	});
 }
 
 function generateTableRow(doc, y, item, description, unitCost, quantity, lineTotal) {
-	doc.fontSize(10)
+	doc
+		.fontSize(10)
 		.text(item, 50, y)
 		.text(description, 150, y)
 		.text(unitCost, 280, y, { width: 90, align: "right" })
@@ -133,11 +134,7 @@ function generateTableRow(doc, y, item, description, unitCost, quantity, lineTot
 }
 
 function generateHr(doc, y) {
-	doc.strokeColor("#aaaaaa")
-		.lineWidth(1)
-		.moveTo(50, y)
-		.lineTo(550, y)
-		.stroke();
+	doc.strokeColor("#aaaaaa").lineWidth(1).moveTo(50, y).lineTo(550, y).stroke();
 }
 
 function formatCurrency(cents) {
@@ -153,5 +150,5 @@ function formatDate(date) {
 }
 
 module.exports = {
-	createInvoice
+	createInvoice,
 };

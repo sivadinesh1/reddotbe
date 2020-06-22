@@ -129,8 +129,8 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 				}
 			});
 
-			let insQry = `INSERT INTO backorder (center_id, enquiry_detail_id, qty, reason, status, order_date)
-			VALUES ('${objValue.center_id}', '${objValue.id}', '${objValue.askqty}', 'Product Code Not found', 'O', '${today}') `;
+			let insQry = `INSERT INTO backorder (center_id, customer_id, enquiry_detail_id, qty, reason, status, order_date)
+			VALUES ('${objValue.center_id}', '${objValue.customer_id}', '${objValue.id}', '${objValue.askqty}', 'Product Code Not found', 'O', '${today}') `;
 
 			pool.query(insQry, function (err, data) {
 				if (err) {
@@ -316,6 +316,69 @@ enquiryRoute.post("/insert-enquiry-details", (req, res) => {
 	});
 });
 
+enquiryRoute.post("/add-more-enquiry-details", (req, res) => {
+	let jsonObj = req.body;
+
+	var today = new Date();
+	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+
+	const prodArr = jsonObj["productarr"];
+	console.log("TCL: prodArr", prodArr.length);
+
+	let newProdArr = [];
+
+	prodArr.forEach(function (k) {
+		console.log(".........xx..." + k.notes);
+		let query1 = `INSERT INTO enquiry_detail ( enquiry_id, product_id, askqty, product_code, notes, status)
+							values ( '${req.body.enquiry_id}', (select id from product where product_code='${k.product_code}'), '${k.quantity}', '${k.product_code}', '${k.notes}', 'O')`;
+		pool.query(query1, function (err, data) {
+			if (err) {
+				return handleError(new ErrorHandler("500", "Error add-more-enquiry-details."), res);
+			} else {
+				let tmpid = data.insertId;
+
+				let sql = `
+				select orig.*, s.available_stock, s.id as stock_pk
+				from
+				(select ed.*, c.id as customer_id, c.name, c.address1, c.address2, c.district, c.pin, c.gst, c.mobile2, e.remarks, e.estatus,
+					p.id as pid, p.center_id, p.vendor_id, p.product_code as pcode, p.description as pdesc, p.unit, p.packetsize, p.hsncode,
+					p.currentstock, p.unit_price, p.mrp, p.purchaseprice,
+					p.salesprice, p.rackno, p.location, p.maxdiscount, p.taxrate, 
+					p.minqty, p.itemdiscount, p.reorderqty, p.avgpurprice,
+					p.avgsaleprice, p.margin
+					from 
+					enquiry e,
+					customer c,
+					enquiry_detail ed
+					LEFT outer JOIN product p
+					ON p.id = ed.product_id where
+					e.id = ed.enquiry_id and
+					e.customer_id = c.id and ed.id =  ${tmpid}) as orig
+					LEFT outer JOIN stock s
+					ON orig.product_id = s.product_id and
+					s.mrp = orig.mrp `;
+
+				console.log("get enq details " + sql);
+
+				pool.query(sql, function (err, data) {
+					if (err) {
+						return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
+					} else {
+						newProdArr.push(data[0]);
+						console.log("pring the new prod arr " + JSON.stringify(newProdArr));
+
+						if (newProdArr.length === prodArr.length) {
+							res.json({
+								result: newProdArr,
+							});
+						}
+					}
+				});
+			}
+		});
+	});
+});
+
 enquiryRoute.get("/open-enquiries/:centerid/:status", (req, res) => {
 	let centerid = req.params.centerid;
 	let status = req.params.status;
@@ -349,7 +412,7 @@ enquiryRoute.get("/get-enquiry-details/:enqid", (req, res) => {
 
 select orig.*, s.available_stock, s.id as stock_pk
 from
-(select ed.*, c.name, c.address1, c.address2, c.district, c.pin, c.gst, c.mobile2, e.remarks, e.estatus,
+(select ed.*, c.id as customer_id, c.name, c.address1, c.address2, c.district, c.pin, c.gst, c.mobile2, e.remarks, e.estatus,
 	p.id as pid, p.center_id, p.vendor_id, p.product_code as pcode, p.description as pdesc, p.unit, p.packetsize, p.hsncode,
 	p.currentstock, p.unit_price, p.mrp, p.purchaseprice,
 	p.salesprice, p.rackno, p.location, p.maxdiscount, p.taxrate, 
@@ -410,11 +473,11 @@ enquiryRoute.get("/get-enquired-product-data/:centerid/:customerid/:enqid/:invdt
 	// fetch values only of enq detail status in {P - processed, F - fullfilled} B- backorder is ignored
 	let sql = `select a.product_code as product_code, a.description, a.mrp, a.taxrate, b.available_stock,
 	ed.giveqty as qty, a.unit_price, a.id as product_id, b.id as stock_pk, e.enquiry_date,
-	
-	(	  select concat(value,'~',type) from discount where   str_to_date(e.enquiry_date,'%d-%m-%Y')  between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') and
+	IFNULL(
+	(	  select concat(value,'~',type) from discount where   str_to_date('${orderdate}','%d-%m-%Y')  between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') and
   customer_id = '${customerid}' and
   gst_slab = a.taxrate
-) as disc_info
+	) , '0~NET') as disc_info
 	
 	
 	from 
@@ -443,25 +506,26 @@ enquiryRoute.get("/get-enquired-product-data/:centerid/:customerid/:enqid/:invdt
 enquiryRoute.get("/back-order/:centerid", (req, res) => {
 	let centerid = req.params.centerid;
 
-	let sql = `SELECT p.product_code as product_code, p.id as product_id,
+	let sql = `SELECT c.name as customer_name, p.product_code as product_code, p.id as product_id,
 	p.description as description, ed.notes, ed.askqty, ed.giveqty, b.reason, b.order_date, s.available_stock
 	FROM 
 	backorder b, 
 	enquiry_detail ed,
 	product p,
-	stock s
+	stock s, customer c
 	WHERE 
-	s.product_id = p.id and
+	s.product_id = p.id and c.id = b.customer_id and
 	b.enquiry_detail_id = ed.id and
 	p.id = ed.product_id and
 	str_to_date(order_date, '%d-%m-%YYYY') BETWEEN DATE_SUB(NOW(), INTERVAL 30 DAY) AND NOW()
 	union all
-	SELECT "N/A" as product_code, "N/A" as product_id, "N/A" as description, ed.notes, ed.askqty, ed.giveqty, b.reason, 
+	SELECT c.name as customer_name, "N/A" as product_code, "N/A" as product_id, "N/A" as description, ed.notes, ed.askqty, ed.giveqty, b.reason, 
 	b.order_date, "N/A" as available_stock FROM 
-	backorder b,
+	backorder b, customer c,
 	enquiry_detail ed
 	WHERE 
 	b.enquiry_detail_id = ed.id and
+	c.id = b.customer_id and
 	ed.product_id is null and
 	str_to_date(order_date, '%d-%m-%YYYY') BETWEEN DATE_SUB(NOW(), INTERVAL 30 DAY) AND NOW();
 	`;
@@ -519,9 +583,9 @@ enquiryRoute.get("/search-enquiries/:centerid/:customerid/:status/:fromdate/:tod
 		sql = sql + custsql;
 	}
 
-	// if (status !== "all") {
-	// 	sql = sql + ` and e.estatus =  '${status}' `;
-	// }
+	if (status !== "all") {
+		sql = sql + ` and e.estatus =  '${status}' `;
+	}
 
 	console.log("search enquiry >> " + sql);
 

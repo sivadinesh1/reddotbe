@@ -8,7 +8,7 @@ const moment = require("moment");
 
 var pool = require("./../helpers/db");
 
-const { getSalesMaster } = require("../modules/sales/sales.js");
+const { getSalesMaster, getSalesDetails } = require("../modules/sales/sales.js");
 
 stockRouter.get("/search-all-draft-purchase/:centerid", (req, res) => {
 	let center_id = req.params.centerid;
@@ -156,39 +156,6 @@ stockRouter.get("/search-sales/:centerid/:customerid/:status/:fromdate/:todate",
 	});
 });
 
-// stockRouter.get("/sales-master/:id", (req, res) => {
-// 	let sales_id = req.params.id;
-
-// 	let sql = `
-// 	select s.*
-// from
-// sale s
-// where
-// s.id = '${sales_id}' `;
-
-// 	console.log("sq sales master >> " + sql);
-
-// 	pool.query(sql, function (err, data) {
-// 		if (err) {
-// 			return handleError(new ErrorHandler("500", "Error fetching sales master"), res);
-// 		} else {
-// 			return res.json(data);
-// 		}
-// 	});
-// });
-
-stockRouter.get("/sales-master/:id", (req, res) => {
-	let sales_id = req.params.id;
-	getSalesMaster(`${req.params.id}`, function (err, rows) {
-		if (err) {
-			console.log(err);
-			return;
-		}
-		console.log(rows);
-		return res.json(rows);
-	});
-});
-
 stockRouter.get("/purchase-master/:id", (req, res) => {
 	let purchase_id = req.params.id;
 
@@ -210,50 +177,68 @@ p.id = '${purchase_id}' `;
 	});
 });
 
-stockRouter.get("/sale-details/:id", (req, res) => {
-	let sale_id = req.params.id;
-
-	let sql = `
-	select sd.*, 
-sd.id as id, 
-sd.sale_id as sale_id,
-sd.product_id as product_id,
-sd.qty as qty,
-sd.unit_price as unit_price,
-sd.mrp as mrp,
-sd.batchdate as batchdate,
-sd.tax as tax,
-sd.igst as igst,
-sd.cgst as cgst,
-sd.sgst as sgst,
-sd.taxable_value as tax_value,
-sd.total_value as total_value,
-p.product_code, p.description, p.packetsize, p.taxrate,
-s.id as stock_pk,
-s.mrp as stock_mrp,
-s.available_stock as stock_available_stock
-from 
-sale_detail sd,
-product p,
-stock s
-where
-p.id = sd.product_id and
-s.product_id = p.id and
-s.id = sd.stock_id and
-sd.sale_id = '${sale_id}'
-	 `;
-
-	console.log("sq purchase >> " + sql);
-
-	pool.query(sql, function (err, data) {
-		if (err) {
-			console.log("object error " + err);
-			return handleError(new ErrorHandler("500", "Error fetching sale master"), res);
-		} else {
-			return res.json(data);
-		}
+// get sale master records
+stockRouter.get("/sales-master/:id", (req, res) => {
+	// @from Sales file
+	getSalesMaster(`${req.params.id}`, (err, rows) => {
+		if (err) return handleError(new ErrorHandler("500", "Error fetching sales master"), res);
+		return res.json(rows);
 	});
 });
+
+// get sale details records
+stockRouter.get("/sale-details/:id", (req, res) => {
+	// @from Sales file
+	getSalesDetails(`${req.params.id}`, (err, rows) => {
+		if (err) return handleError(new ErrorHandler("500", "Error fetching sales master"), res);
+		return res.json(rows);
+	});
+});
+
+// stockRouter.get("/sale-details/:id", (req, res) => {
+// 	let sale_id = req.params.id;
+
+// 	let sql = `
+// 	select sd.*,
+// sd.id as id,
+// sd.sale_id as sale_id,
+// sd.product_id as product_id,
+// sd.qty as qty,
+// sd.unit_price as unit_price,
+// sd.mrp as mrp,
+// sd.batchdate as batchdate,
+// sd.tax as tax,
+// sd.igst as igst,
+// sd.cgst as cgst,
+// sd.sgst as sgst,
+// sd.taxable_value as tax_value,
+// sd.total_value as total_value,
+// p.product_code, p.description, p.packetsize, p.taxrate,
+// s.id as stock_pk,
+// s.mrp as stock_mrp,
+// s.available_stock as stock_available_stock
+// from
+// sale_detail sd,
+// product p,
+// stock s
+// where
+// p.id = sd.product_id and
+// s.product_id = p.id and
+// s.id = sd.stock_id and
+// sd.sale_id = '${sale_id}'
+// 	 `;
+
+// 	console.log("sq purchase >> " + sql);
+
+// 	pool.query(sql, function (err, data) {
+// 		if (err) {
+// 			console.log("object error " + err);
+// 			return handleError(new ErrorHandler("500", "Error fetching sale master"), res);
+// 		} else {
+// 			return res.json(data);
+// 		}
+// 	});
+// });
 
 stockRouter.post("/delete-sale-details", (req, res) => {
 	let id = req.body.id;
