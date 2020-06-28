@@ -282,11 +282,11 @@ enquiryRoute.post("/update-enquiry-details", (req, res) => {
 
 enquiryRoute.post("/insert-enquiry-details", (req, res) => {
 	let jsonObj = req.body;
-
+	console.log("insert enq " + JSON.stringify(jsonObj));
 	var today = new Date();
 	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
 	let query = `INSERT INTO enquiry ( center_id, customer_id, enquiry_date, estatus, remarks) 
-							values ( '${jsonObj.centerid}', '${jsonObj.customer.id}', '${today}', 'O','${jsonObj.remarks}')`;
+							values ( '${jsonObj.center_id}', '${jsonObj.customer.id}', '${today}', 'O','${jsonObj.remarks}')`;
 
 	pool.query(query, function (err, data) {
 		if (err) {

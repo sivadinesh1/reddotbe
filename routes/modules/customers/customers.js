@@ -3,7 +3,15 @@ const moment = require("moment");
 
 // fetch rows from discount tbl
 const getCustomerDiscount = (centerid, customerid, callback) => {
-	let query = ` select * from discount where center_id = ? and customer_id = ? `;
+	let query = ` select d.id as id, d.customer_id as customer_id, d.center_id as center_id, d.type, d.value, d.gst_slab, d.startdate, d.enddate,
+	c.name as customer_name
+	 from 
+	discount d,
+	customer c
+	where 
+	c.id = d.customer_id and
+	d.center_id = ? and d.customer_id =  ? `;
+
 	let values = [centerid, customerid];
 
 	pool.query(query, values, function (err, data) {

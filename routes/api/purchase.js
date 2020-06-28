@@ -58,14 +58,16 @@ function purchaseMasterEntry(cloneReq) {
 			'${cloneReq.noofboxes}', '${cloneReq.status}' , '${today}' )`;
 
 	let updQry = ` update purchase set center_id = '${cloneReq.centerid}', vendor_id = '${cloneReq.vendor.id}',
-			invoice_no = '${cloneReq.invoiceno}', invoice_date = '${cloneReq.invoicedate}', lr_no = '${cloneReq.lrno}',
+			invoice_no = '${cloneReq.invoiceno}', invoice_date = '${moment(cloneReq.invoicedate).format("DD-MM-YYYY")}', lr_no = '${cloneReq.lrno}',
 			lr_date = '${lrdate}', received_date = '${orderrcvddt}', purchase_type = 'GST Inovoice',
 			order_no = '${cloneReq.orderno}', order_date = '${orderdate}', total_qty = '${cloneReq.totalqty}', 
-			no_of_items = '${cloneReq.no_of_items}', taxable_value = '${cloneReq.taxable_value}', cgst = '${cloneReq.cgst}', 
-			sgst = '${cloneReq.sgst}', igst = '${cloneReq.igst}', total_value = '${cloneReq.total_value}', 
+			no_of_items = '${cloneReq.noofitems}', taxable_value = '${cloneReq.taxable_value}', cgst = '${cloneReq.cgst}', 
+			sgst = '${cloneReq.sgst}', igst = '${cloneReq.igst}', total_value = '${cloneReq.totalvalue}', 
 			transport_charges = '${cloneReq.transport_charges}', unloading_charges = '${cloneReq.unloading_charges}', 
 			misc_charges = '${cloneReq.misc_charges}', net_total = '${cloneReq.net_total}', no_of_boxes = '${cloneReq.noofboxes}',
 			status =  '${cloneReq.status}', stock_inwards_datetime =  '${today}' where id = '${cloneReq.purchaseid}' `;
+
+	console.log("dinesh " + updQry);
 
 	return new Promise(function (resolve, reject) {
 		pool.query(cloneReq.purchaseid === "" ? insQry : updQry, function (err, data) {
