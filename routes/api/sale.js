@@ -262,7 +262,7 @@ function processItems(cloneReq, newPK) {
 		// after sale details is updated, then update stock (as this is sale, reduce available stock) tbl & product tbl
 		let qty_to_update = k.qty - k.old_val;
 
-		let query2 = `update stock set available_stock =  available_stock + '${qty_to_update}'
+		let query2 = `update stock set available_stock =  available_stock - '${qty_to_update}'
 			 where product_id = '${k.product_id}' and id = '${k.stock_pk}'  `;
 
 		let stockTblPromise = new Promise(function (resolve, reject) {
