@@ -111,7 +111,7 @@ router.get("/search-customer/:centerid/:searchstr", (req, res) => {
 	state s
 	where 
 	c.state_id = s.id and isactive = 'A' and center_id = '${centerid}' and ( c.name like '%${searchstr}%') limit 50`;
-
+	console.log("object" + sql);
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error fetching search customers."), res);

@@ -10,6 +10,8 @@ var pool = require("../helpers/db");
 purchaseRouter.post("/insert-purchase-details", async (req, res) => {
 	const cloneReq = { ...req.body };
 
+	console.log("din " + JSON.stringify(cloneReq));
+
 	var today = new Date();
 	today = moment(today).format("DD-MM-YYYY");
 
@@ -110,9 +112,10 @@ function processItems(cloneReq, newPK) {
 					} else {
 						// else update the stock tbl, only of the status is "C - completed", draft should be ignored
 
-						if (cloneReq.status === "C") {
-							updateStock(k);
-						}
+						//	if (cloneReq.status === "C") {
+						// update stock for both status C & D (Completed & Draft)
+						updateStock(k);
+						//		}
 					}
 					resolve(true);
 				}
@@ -141,6 +144,7 @@ function updateStock(k) {
 	let qty_to_update = k.qty - k.old_val;
 	console.log("old val > " + k.old_val);
 	console.log("qty val > " + k.qty);
+	console.log("qty_to_update val > " + k.qty);
 
 	let query2 = `
 

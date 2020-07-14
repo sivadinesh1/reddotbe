@@ -7,7 +7,10 @@ const { handleError, ErrorHandler } = require("./../helpers/error");
 
 const { getSalesMaster, getSalesDetails } = require("../modules/sales/sales.js");
 
-const { getCustomerDiscount, updateCustomerDiscount, insertCustomerDiscount } = require("../modules/customers/customers.js");
+const { getCustomerDiscount, updateCustomerDiscount, insertCustomer } = require("../modules/customers/customers.js");
+
+const { insertProduct, updateProduct } = require("../modules/products/products.js");
+const { insertVendor, updateVendor } = require("../modules/vendors/vendors.js");
 
 adminRoute.get("/view-products-count/:centerid", (req, res) => {
 	let center_id = req.params.centerid;
@@ -48,61 +51,11 @@ adminRoute.get("/view-product-info/:centerid/:productid", (req, res) => {
 	});
 });
 
+// Add Product, product master
 adminRoute.post("/add-product", (req, res, next) => {
 	let jsonObj = req.body;
 
-	var objValue = jsonObj["formArray"];
-
-	const basic_info = objValue[0];
-	const general_info = objValue[1];
-	const addl_info = objValue[2];
-
-	const center_id = basic_info["center_id"];
-	const vendor_id = basic_info["vendorid"];
-
-	const product_code = basic_info["product_code"];
-	const description = basic_info["description"];
-
-	const unit = general_info["unit"];
-
-	const packetsize = general_info["packetsize"];
-	const hsncode = general_info["hsncode"];
-	const taxrate = general_info["taxrate"];
-
-	const minqty = general_info["minqty"];
-
-	const currentstock = addl_info["currentstock"];
-	const unit_price = addl_info["unit_price"];
-	const mrp = addl_info["mrp"];
-	const purchaseprice = addl_info["purchaseprice"];
-	const salesprice = addl_info["salesprice"];
-	const rackno = addl_info["rackno"];
-	const location = addl_info["location"];
-	const maxdiscount = addl_info["maxdiscount"];
-	const alternatecode = addl_info["alternatecode"];
-
-	const itemdiscount = addl_info["itemdiscount"];
-	const reorderqty = addl_info["reorderqty"];
-	const avgpurprice = addl_info["avgpurprice"];
-	const avgsaleprice = addl_info["avgsaleprice"];
-	const margin = addl_info["margin"];
-
-	var today = new Date();
-	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
-
-	let query = `INSERT INTO 
-		product 
-			(center_id, vendor_id, product_code, description, unit, packetsize, hsncode, currentstock, unit_price, mrp, 
-				purchaseprice, salesprice, rackno, location, maxdiscount, alternatecode, taxrate, 
-				minqty, itemdiscount, reorderqty, avgpurprice, avgsaleprice, margin)
-		VALUES
-			( '${center_id}', '${vendor_id}', '${product_code}', '${description}', '${unit}', 
-			'${packetsize}', '${hsncode}', '${currentstock}', '${unit_price}', '${mrp}',
-			 '${purchaseprice}', '${salesprice}', '${rackno}', '${location}', '${maxdiscount}', '${alternatecode}', '${taxrate}', 
-			 '${minqty}', '${itemdiscount}', '${reorderqty}', '${avgpurprice}', '${avgsaleprice}', '${margin}');
-			`;
-
-	pool.query(query, function (err, data) {
+	insertProduct(jsonObj, (err, data) => {
 		if (err) {
 			let errTxt = err.message;
 
@@ -118,62 +71,14 @@ adminRoute.post("/add-product", (req, res, next) => {
 	});
 });
 
+// update product master
 adminRoute.post("/update-product", (req, res) => {
 	let jsonObj = req.body;
 
-	var objValue = jsonObj["formArray"];
-
-	const basic_info = objValue[0];
-	const general_info = objValue[1];
-	const addl_info = objValue[2];
-
-	const product_id = basic_info["product_id"];
-	const center_id = basic_info["center_id"];
-	const vendor_id = basic_info["vendorid"];
-
-	const product_code = basic_info["product_code"];
-	const description = basic_info["description"];
-
-	const unit = general_info["unit"];
-
-	const packetsize = general_info["packetsize"];
-	const hsncode = general_info["hsncode"];
-	const taxrate = general_info["taxrate"];
-
-	const minqty = general_info["minqty"];
-
-	const currentstock = addl_info["currentstock"];
-	const unit_price = addl_info["unit_price"];
-	const mrp = addl_info["mrp"];
-	const purchaseprice = addl_info["purchaseprice"];
-	const salesprice = addl_info["salesprice"];
-	const rackno = addl_info["rackno"];
-	const location = addl_info["location"];
-	const maxdiscount = addl_info["maxdiscount"];
-	const alternatecode = addl_info["alternatecode"];
-
-	const itemdiscount = addl_info["itemdiscount"];
-	const reorderqty = addl_info["reorderqty"];
-	const avgpurprice = addl_info["avgpurprice"];
-	const avgsaleprice = addl_info["avgsaleprice"];
-	const margin = addl_info["margin"];
-
-	let query = `
-	update product set center_id = '${center_id}', vendor_id = '${vendor_id}',
-product_code = '${product_code}', description = '${description}',unit = '${unit}',
-packetsize = '${packetsize}', hsncode = '${hsncode}',currentstock = '${currentstock}',
-unit_price = '${unit_price}', mrp = '${mrp}',purchaseprice = '${purchaseprice}',
-salesprice = '${salesprice}', rackno = '${rackno}',location = '${location}',
-	maxdiscount = '${maxdiscount}', alternatecode = '${alternatecode}',taxrate = '${taxrate}',
-		minqty = '${minqty}', itemdiscount = '${itemdiscount}',reorderqty = '${reorderqty}',
-			avgpurprice = '${avgpurprice}', avgsaleprice = '${avgsaleprice}',margin = '${margin}'
-			where
-id = '${product_id}'
-	`;
-
-	pool.query(query, function (err, data) {
+	updateProduct(jsonObj, (err, data) => {
 		if (err) {
-			return handleError(new ErrorHandler("500", "Error Updating product"), res);
+			console.log("dinesh " + JSON.stringify(err));
+			return handleError(new ErrorHandler("500", "Error Updating product" + err.message), res);
 		} else {
 			res.status(200).json({
 				result: "success",
@@ -223,47 +128,7 @@ adminRoute.get("/get-states", (req, res) => {
 // vendor
 
 adminRoute.put("/update-vendor/:id", (req, res) => {
-	let id = req.params.id;
-	let jsonObj = req.body;
-
-	var objValue = jsonObj["formArray"];
-
-	const basic_info = objValue[0];
-	const general_info = objValue[1];
-	const addl_info = objValue[2];
-
-	const center_id = basic_info["center_id"];
-	const vendor_id = basic_info["vendor_id"];
-
-	const name = basic_info["name"];
-
-	const address1 = basic_info["address1"];
-	const address2 = basic_info["address2"];
-	const address3 = basic_info["address3"];
-	const district = basic_info["district"];
-
-	const state_id = basic_info["state_id"];
-	const pin = basic_info["pin"];
-
-	const gst = general_info["gst"];
-	const phone = general_info["phone"];
-	const mobile = general_info["mobile"];
-	const mobile2 = general_info["mobile2"];
-	const whatsapp = general_info["whatsapp"];
-
-	const email = general_info["email"];
-
-	let query = `
-	update vendor set center_id = '${center_id}',
-	name = '${name}', address1 = '${address1}',address2 = '${address2}', address3 = '${address3}',
-	district = '${district}', state_id = '${state_id}', pin = '${pin}',gst = '${gst}',
-	phone = '${phone}', mobile = '${mobile}',mobile2 = '${mobile2}', whatsapp = '${whatsapp}',
-	email = '${email}'
-	where
-	id = '${vendor_id}'
-	`;
-
-	pool.query(query, function (err, data) {
+	updateVendor(req.body, req.params.id, (err, data) => {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error updating vendor details"), res);
 		} else {
@@ -274,53 +139,15 @@ adminRoute.put("/update-vendor/:id", (req, res) => {
 	});
 });
 
-// vendor
-adminRoute.post("/add-vendor", (req, res) => {
+// Add Product, product master
+adminRoute.post("/add-vendor", (req, res, next) => {
 	let jsonObj = req.body;
 
-	console.log(" addvendor ..." + JSON.stringify(jsonObj));
-
-	var objValue = jsonObj["formArray"];
-
-	const basic_info = objValue[0];
-	const general_info = objValue[1];
-
-	const center_id = basic_info["center_id"];
-
-	const name = basic_info["name"];
-
-	const address1 = basic_info["address1"];
-	const address2 = basic_info["address2"];
-	const address3 = basic_info["address3"];
-	const district = basic_info["district"];
-
-	const state_id = basic_info["state_id"];
-	const pin = basic_info["pin"];
-
-	const gst = general_info["gst"];
-	const phone = general_info["phone"];
-	const mobile = general_info["mobile"];
-	const mobile2 = general_info["mobile2"];
-	const whatsapp = general_info["whatsapp"];
-	const email = general_info["email"];
-
-	var today = new Date();
-	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
-
-	let query = `
-		INSERT INTO vendor (center_id, name, address1, address2, address3, district, state_id, pin, 
-		gst, phone, mobile, mobile2, whatsapp, email, createdon, isactive)
-		VALUES
-			('${center_id}', '${name}', '${address1}', '${address2}', '${address3}', '${district}', '${state_id}', '${pin}',
-			'${gst}', '${phone}', '${mobile}', '${mobile2}', '${whatsapp}', '${email}', '${today}', 'A'
-			) `;
-
-	console.log("query >>>> " + query);
-
-	pool.query(query, function (err, data) {
+	insertVendor(jsonObj, (err, data) => {
 		if (err) {
-			return handleError(new ErrorHandler("500", "Error adding vendor details"), res);
+			let errTxt = err.message;
 		} else {
+			let newPK = data.insertId;
 			return res.status(200).json({
 				result: "success",
 			});
@@ -405,82 +232,12 @@ adminRoute.post("/update-customer", (req, res) => {
 
 adminRoute.post("/add-customer", (req, res) => {
 	let jsonObj = req.body;
-
-	var objValue = jsonObj["formArray"];
-
-	const basic_info = objValue[0];
-	const general_info = objValue[1];
-	const addl_info = objValue[2];
-	console.log("object>>" + basic_info);
-
-	const center_id = basic_info["center_id"];
-
-	const name = basic_info["name"];
-
-	const address1 = basic_info["address1"];
-	const address2 = basic_info["address2"];
-	const address3 = basic_info["address3"];
-	const district = basic_info["district"];
-
-	const state_id = basic_info["state_id"];
-	const pin = basic_info["pin"];
-
-	const gst = general_info["gst"];
-	const phone = general_info["phone"];
-	const mobile = general_info["mobile"];
-	const mobile2 = general_info["mobile2"];
-	const whatsapp = general_info["whatsapp"];
-	const email = general_info["email"];
-
-	const disctype = addl_info["disctype"];
-	const gstzero = addl_info["gstzero"];
-	const gstfive = addl_info["gstfive"];
-	const gsttwelve = addl_info["gsttwelve"];
-	const gsteighteen = addl_info["gsteighteen"];
-	const gsttwentyeight = addl_info["gsttwentyeight"];
-
-	// let taxSlabArr = [0, 5, 12, 18, 28];
-
-	let taxSlabArr = [
-		{ gstslab: 0, gstvalue: gstzero },
-		{ gstslab: 5, gstvalue: gstfive },
-		{ gstslab: 12, gstvalue: gsttwelve },
-		{ gstslab: 18, gstvalue: gsteighteen },
-		{ gstslab: 28, gstvalue: gsttwentyeight },
-	];
-
-	var today = new Date();
-	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
-
-	let query = `
-		INSERT INTO customer (center_id, name, address1, address2, address3, district, state_id, pin, 
-		gst, phone, mobile, mobile2, whatsapp, email, createdon, isactive)
-		VALUES
-			('${center_id}', '${name}', '${address1}', '${address2}', '${address3}', '${district}', '${state_id}', '${pin}',
-			'${gst}', '${phone}', '${mobile}', '${mobile2}', '${whatsapp}', '${email}', '${today}', 'A'
-			) `;
-
-	pool.query(query, function (err, data) {
+	insertCustomer(jsonObj, (err, data) => {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error adding customer."), res);
 		} else {
-			taxSlabArr.forEach((e) => {
-				let formObj = {
-					center_id: center_id,
-					customer_id: data.insertId,
-					type: disctype,
-					value: e.gstvalue,
-					gst_slab: e.gstslab,
-					startdate: moment(today).format("DD-MM-YYYY"),
-					enddate: "01-04-9999",
-				};
-
-				insertCustomerDiscount(formObj, (err, rows) => {
-					if (err) return handleError(new ErrorHandler("500", "Error fetching sales master"), res);
-				});
-			});
-
-			res.status(200).json({
+			console.log("dinesh");
+			return res.status(200).json({
 				result: "success",
 			});
 		}

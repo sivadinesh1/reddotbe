@@ -1,5 +1,3 @@
-/** @format */
-
 const express = require("express");
 const stockRouter = express.Router();
 
@@ -71,10 +69,6 @@ stockRouter.get("/search-purchase/:centerid/:vendorid/:status/:fromdate/:todate"
 	str_to_date('${from_date}',  '%d-%m-%Y %T') and
 	str_to_date('${to_date}',  '%d-%m-%Y %T') `;
 
-	// str_to_date(stock_inwards_datetime,  '%Y-%m-%d %T') between
-	// str_to_date('${from_date}',  '%Y-%m-%d %T') and
-	// str_to_date('${to_date}',  '%Y-%m-%d %T') `;
-
 	if (vendor_id !== "all") {
 		sql = sql + vendsql;
 	}
@@ -100,14 +94,6 @@ stockRouter.get("/search-sales/:centerid/:customerid/:status/:fromdate/:todate",
 	let customer_id = req.params.customerid;
 	let from_date = req.params.fromdate;
 	let to_date = req.params.todate;
-
-	// if (from_date !== "") {
-	// 	from_date = moment(req.params.fromdate).format("DD-MM-YYYY");
-	// }
-
-	// if (to_date !== "") {
-	// 	to_date = moment(req.params.todate).format("DD-MM-YYYY");
-	// }
 
 	if (from_date !== "") {
 		from_date = moment(req.params.fromdate).format("DD-MM-YYYY") + " 00:00:00";
@@ -195,51 +181,6 @@ stockRouter.get("/sale-details/:id", (req, res) => {
 	});
 });
 
-// stockRouter.get("/sale-details/:id", (req, res) => {
-// 	let sale_id = req.params.id;
-
-// 	let sql = `
-// 	select sd.*,
-// sd.id as id,
-// sd.sale_id as sale_id,
-// sd.product_id as product_id,
-// sd.qty as qty,
-// sd.unit_price as unit_price,
-// sd.mrp as mrp,
-// sd.batchdate as batchdate,
-// sd.tax as tax,
-// sd.igst as igst,
-// sd.cgst as cgst,
-// sd.sgst as sgst,
-// sd.taxable_value as tax_value,
-// sd.total_value as total_value,
-// p.product_code, p.description, p.packetsize, p.taxrate,
-// s.id as stock_pk,
-// s.mrp as stock_mrp,
-// s.available_stock as stock_available_stock
-// from
-// sale_detail sd,
-// product p,
-// stock s
-// where
-// p.id = sd.product_id and
-// s.product_id = p.id and
-// s.id = sd.stock_id and
-// sd.sale_id = '${sale_id}'
-// 	 `;
-
-// 	console.log("sq purchase >> " + sql);
-
-// 	pool.query(sql, function (err, data) {
-// 		if (err) {
-// 			console.log("object error " + err);
-// 			return handleError(new ErrorHandler("500", "Error fetching sale master"), res);
-// 		} else {
-// 			return res.json(data);
-// 		}
-// 	});
-// });
-
 stockRouter.post("/delete-sale-details", (req, res) => {
 	let id = req.body.id;
 
@@ -315,111 +256,6 @@ stockRouter.post("/delete-purchase-details", (req, res) => {
 });
 
 module.exports = stockRouter;
-
-// stockRouter.post("/update-purchase-master", (req, res) => {
-// 	updatePurchaseMaster(req, res);
-// });
-
-// updatePurchaseMaster = function (req, res) {
-// 	let yourJsonObj = req.body;
-// 	console.log(" check >< inside apply jobs ..." + JSON.stringify(yourJsonObj));
-
-// 	const purchase_id = yourJsonObj["purchaseid"];
-// 	console.log("dinesh" + purchase_id);
-// 	const vendorValue = yourJsonObj["vendor"];
-// 	const invoiceno = yourJsonObj["invoiceno"];
-
-// 	let invoicedate = yourJsonObj["invoicedate"];
-// 	if (yourJsonObj["invoicedate"] !== "") {
-// 		invoicedate = moment(yourJsonObj["invoicedate"]).format("DD-MM-YYYY");
-// 	}
-
-// 	let order_date = yourJsonObj["orderdate"];
-
-// 	if (yourJsonObj["orderdate"] !== "") {
-// 		order_date = moment(yourJsonObj["orderdate"]).format("DD-MM-YYYY");
-// 	}
-
-// 	let lr_date = yourJsonObj["lrdate"];
-// 	if (yourJsonObj["lrdate"] !== "") {
-// 		lr_date = moment(yourJsonObj["lrdate"]).format("DD-MM-YYYY");
-// 	}
-
-// 	const no_of_boxes = yourJsonObj["noofboxes"];
-// 	let received_date = yourJsonObj["orderrcvddt"];
-
-// 	if (yourJsonObj["orderrcvddt"] !== "") {
-// 		received_date = moment(yourJsonObj["orderrcvddt"]).format("DD-MM-YYYY");
-// 	}
-
-// 	const lr_no = yourJsonObj["lrno"];
-// 	const order_no = yourJsonObj["orderno"];
-
-// 	const no_of_items = yourJsonObj["noofitems"];
-// 	const total_qty = yourJsonObj["totalqty"];
-// 	const taxable_value = yourJsonObj["taxable_value"];
-// 	const total_value = yourJsonObj["totalvalue"];
-// 	const product_arr = yourJsonObj["productarr"];
-// 	const transport_charges = yourJsonObj["transport_charges"];
-// 	const unloading_charges = yourJsonObj["unloading_charges"];
-// 	const misc_charges = yourJsonObj["misc_charges"];
-// 	const net_total = yourJsonObj["net_total"];
-
-// 	const igst = yourJsonObj["igst"];
-// 	const cgst = yourJsonObj["cgst"];
-// 	const sgst = yourJsonObj["sgst"];
-
-// 	const status = yourJsonObj["status"];
-
-// 	var today = new Date();
-// 	today = moment(today).format("DD-MM-YYYY");
-
-// 	var month = moment().format("M");
-// 	var day = moment().format("D");
-// 	var year = moment().format("YYYY");
-
-// 	let query = `
-// 	update purchase
-// 	set
-// 	center_id = 1,
-// 	vendor_id = '${vendorValue.id}',
-// 	invoice_no = '${invoiceno}',
-// 	invoice_date = '${invoicedate}',
-// 	lr_no = '${lr_no}',
-// 	lr_date = '${lr_date}',
-// 	received_date = '${received_date}',
-// 	purchase_type = 'GST Inovoice',
-// 	order_no = '${order_no}',
-// 	order_date = '${order_date}',
-// 	total_qty = '${total_qty}',
-// 	no_of_items = '${no_of_items}',
-// 	taxable_value = '${taxable_value}',
-// 	cgst = '${cgst}',
-// 	sgst = '${sgst}',
-// 	igst = '${igst}',
-// 	total_value = '${total_value}',
-// 	transport_charges = '${transport_charges}',
-// 	unloading_charges = '${unloading_charges}',
-// 	misc_charges = '${misc_charges}',
-// 	net_total = '${net_total}',
-// 	no_of_boxes = '${no_of_boxes}',
-// 	status =  '${status}',
-// 	stock_inwards_datetime =  '${today}'
-// 	where
-// 		id = '${purchase_id}'
-
-// 	`;
-
-// 	pool.query(query, function (err, data) {
-// 		if (err) {
-// 			return handleError(new ErrorHandler("500", "Error updating purchase master"), res);
-// 		} else {
-// 			return res.json({
-// 				result: "success",
-// 			});
-// 		}
-// 	});
-// };
 
 stockRouter.delete("/delete-purchase/:id", (req, res) => {
 	let purchase_id = req.params.id;

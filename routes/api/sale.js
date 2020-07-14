@@ -259,6 +259,8 @@ function processItems(cloneReq, newPK) {
 			});
 		});
 
+		console.log("object... new qty " + k.qty + " old val " + k.old_val);
+
 		// after sale details is updated, then update stock (as this is sale, reduce available stock) tbl & product tbl
 		let qty_to_update = k.qty - k.old_val;
 
