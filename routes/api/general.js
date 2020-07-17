@@ -100,10 +100,9 @@ router.post("/search-product", (req, res) => {
 	});
 });
 
-router.get("/search-customer/:centerid/:searchstr", (req, res) => {
-	let searchstr = req.params.searchstr;
-	let centerid = req.params.centerid;
-
+router.post("/search-customer", (req, res) => {
+	const [centerid, searchstr] = Object.values(req.body);
+	console.log("object..>" + centerid, searchstr);
 	let sql = `select c.id, c.center_id, c.name, c.address1, c.address2, c.district, s.code, s.description,
 	c.pin, c.gst, c.phone, c.mobile, c.mobile2, c.whatsapp,  c.email, c.isactive
 	from 

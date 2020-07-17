@@ -286,7 +286,7 @@ enquiryRoute.post("/insert-enquiry-details", (req, res) => {
 	var today = new Date();
 	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
 	let query = `INSERT INTO enquiry ( center_id, customer_id, enquiry_date, estatus, remarks) 
-							values ( '${jsonObj.center_id}', '${jsonObj.customer.id}', '${today}', 'O','${jsonObj.remarks}')`;
+							values ( '${jsonObj.center_id}', '${jsonObj.customerctrl.id}', '${today}', 'O','${jsonObj.remarks}')`;
 
 	pool.query(query, function (err, data) {
 		if (err) {
