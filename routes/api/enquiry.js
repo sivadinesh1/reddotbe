@@ -296,6 +296,7 @@ enquiryRoute.post("/insert-enquiry-details", (req, res) => {
 			console.log("TCL: tmpid", tmpid);
 
 			const prodArr = jsonObj["productarr"];
+			prodArr.reverse();
 			console.log("TCL: prodArr", prodArr);
 
 			prodArr.forEach(function (k) {
@@ -549,11 +550,11 @@ enquiryRoute.get("/search-enquiries/:centerid/:customerid/:status/:fromdate/:tod
 	let to_date = req.params.todate;
 
 	if (from_date !== "") {
-		from_date = moment(req.params.fromdate).format("DD-MM-YYYY");
+		from_date = moment(new Date(req.params.fromdate)).format("DD-MM-YYYY");
 	}
 
 	if (to_date !== "") {
-		to_date = moment(req.params.todate).format("DD-MM-YYYY");
+		to_date = moment(new Date(req.params.todate)).format("DD-MM-YYYY");
 	}
 
 	let custsql = `and e.customer_id = '${customer_id}' `;
