@@ -296,7 +296,7 @@ enquiryRoute.post("/insert-enquiry-details", (req, res) => {
 			console.log("TCL: tmpid", tmpid);
 
 			const prodArr = jsonObj["productarr"];
-			prodArr.reverse();
+			// prodArr.reverse();
 			console.log("TCL: prodArr", prodArr);
 
 			prodArr.forEach(function (k) {

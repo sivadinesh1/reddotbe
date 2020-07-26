@@ -7,7 +7,7 @@ const { handleError, ErrorHandler } = require("./../helpers/error");
 
 const { getSalesMaster, getSalesDetails } = require("../modules/sales/sales.js");
 
-const { getCustomerDiscount, updateCustomerDiscount, insertCustomer } = require("../modules/customers/customers.js");
+const { getCustomerDiscount, updateCustomerDiscount, insertCustomer, updateCustomer } = require("../modules/customers/customers.js");
 
 const { insertProduct, updateProduct } = require("../modules/products/products.js");
 const { insertVendor, updateVendor } = require("../modules/vendors/vendors.js");
@@ -175,53 +175,10 @@ adminRoute.get("/get-customer-details/:centerid/:customerid", (req, res) => {
 
 // customers
 
-adminRoute.post("/update-customer", (req, res) => {
-	let jsonObj = req.body;
-
-	var objValue = jsonObj["formArray"];
-
-	const basic_info = objValue[0];
-	const general_info = objValue[1];
-	const addl_info = objValue[2];
-	console.log("object>>" + basic_info);
-
-	const center_id = basic_info["center_id"];
-	const customer_id = basic_info["customer_id"];
-
-	const name = basic_info["name"];
-
-	const address1 = basic_info["address1"];
-	const address2 = basic_info["address2"];
-	const address3 = basic_info["address3"];
-	const district = basic_info["district"];
-
-	const state_id = basic_info["state_id"];
-	const pin = basic_info["pin"];
-
-	const gst = general_info["gst"];
-	const phone = general_info["phone"];
-	const mobile = general_info["mobile"];
-	const mobile2 = general_info["mobile2"];
-	const whatsapp = general_info["whatsapp"];
-
-	const email = addl_info["email"];
-
-	let query = `
-	update customer set center_id = '${center_id}',
-	name = '${name}', address1 = '${address1}',address2 = '${address2}', address3 = '${address3}',
-	district = '${district}', state_id = '${state_id}', pin = '${pin}',gst = '${gst}',
-	phone = '${phone}', mobile = '${mobile}',mobile2 = '${mobile2}', whatsapp = '${whatsapp}',
-	email = '${email}'
-	where
-	id = '${customer_id}'
-	`;
-
-	console.log("print the val " + query);
-
-	pool.query(query, function (err, data) {
+adminRoute.put("/update-customer/:id", (req, res) => {
+	updateCustomer(req.body, req.params.id, (err, data) => {
 		if (err) {
-			console.log("object..." + err);
-			return handleError(new ErrorHandler("500", "Error Updating center."), res);
+			return handleError(new ErrorHandler("500", "Error updating customer details"), res);
 		} else {
 			return res.status(200).json({
 				result: "success",
@@ -230,6 +187,66 @@ adminRoute.post("/update-customer", (req, res) => {
 	});
 });
 
+// adminRoute.put("/update-customer/:id", (req, res) => {
+
+// 	let jsonObj = req.body;
+
+// 	var objValue = jsonObj["formArray"];
+
+// 	const basic_info = objValue[0];
+// 	const general_info = objValue[1];
+// 	const addl_info = objValue[2];
+// 	console.log("object>>" + basic_info);
+
+// 	const center_id = basic_info["center_id"];
+// 	const customer_id = basic_info["customer_id"];
+
+// 	const name = basic_info["name"];
+
+// 	const address1 = basic_info["address1"];
+// 	const address2 = basic_info["address2"];
+// 	const address3 = basic_info["address3"];
+// 	const district = basic_info["district"];
+
+// 	const state_id = basic_info["state_id"];
+// 	const pin = basic_info["pin"];
+
+// 	const gst = general_info["gst"];
+// 	const phone = general_info["phone"];
+// 	const mobile = general_info["mobile"];
+// 	const mobile2 = general_info["mobile2"];
+// 	const whatsapp = general_info["whatsapp"];
+
+// 	const email = addl_info["email"];
+
+// 	let query = `
+// 	update customer set center_id = '${center_id}',
+// 	name = '${name}', address1 = '${address1}',address2 = '${address2}', address3 = '${address3}',
+// 	district = '${district}', state_id = '${state_id}', pin = '${pin}',gst = '${gst}',
+// 	phone = '${phone}', mobile = '${mobile}',mobile2 = '${mobile2}', whatsapp = '${whatsapp}',
+// 	email = '${email}'
+// 	where
+// 	id = '${customer_id}'
+// 	`;
+
+// 	console.log("print the val " + query);
+
+// 	pool.query(query, function (err, data) {
+// 		if (err) {
+// 			console.log("object..." + err);
+// 			return handleError(new ErrorHandler("500", "Error Updating center."), res);
+// 		} else {
+// 			return res.status(200).json({
+// 				result: "success",
+// 			});
+// 		}
+// 	});
+// });
+
+// console.log("dinesh" + JSON.stringify(data));
+// 			let result = JSON.stringify(data);
+// return res.status(200).json(result);
+
 adminRoute.post("/add-customer", (req, res) => {
 	let jsonObj = req.body;
 	insertCustomer(jsonObj, (err, data) => {
@@ -237,8 +254,10 @@ adminRoute.post("/add-customer", (req, res) => {
 			return handleError(new ErrorHandler("500", "Error adding customer."), res);
 		} else {
 			console.log("dinesh");
+			let resdata = JSON.stringify(data);
 			return res.status(200).json({
 				result: "success",
+				id: data.id,
 			});
 		}
 	});

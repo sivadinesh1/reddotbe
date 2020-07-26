@@ -67,7 +67,6 @@ const insertCustomer = (insertValues, callback) => {
 		if (err) {
 			return callback(err);
 		} else {
-			console.log("object" + data.insertId);
 			taxSlabArr.forEach((e) => {
 				let formObj = {
 					center_id: insertValues.center_id,
@@ -78,13 +77,36 @@ const insertCustomer = (insertValues, callback) => {
 					startdate: moment(today).format("DD-MM-YYYY"),
 					enddate: "01-04-9999",
 				};
-				console.log("object " + JSON.stringify(formObj));
+
 				insertCustomerDiscount(formObj, (err, rows) => {
 					if (err) return handleError(new ErrorHandler("500", "Error fetching sales master"), res);
 				});
 			});
-			return callback(null, data);
+			return callback(null, { id: data.insertId, custdata: values });
 		}
+	});
+};
+
+const updateCustomer = (updateValues, id, callback) => {
+	console.log("object >> " + JSON.stringify(updateValues));
+	console.log("object >> " + id);
+	var today = new Date();
+	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+
+	let query = `
+	update customer set center_id = '${updateValues.center_id}',
+	name = '${updateValues.name}', address1 = '${updateValues.address1}',address2 = '${updateValues.address2}', address3 = '${updateValues.address3}',
+	district = '${updateValues.district}', state_id = '${updateValues.state_id}', pin = '${updateValues.pin}',gst = '${updateValues.gst}',
+	phone = '${updateValues.phone}', mobile = '${updateValues.mobile}',mobile2 = '${updateValues.mobile2}', whatsapp = '${updateValues.whatsapp}',
+	email = '${updateValues.email}'
+	where
+	id = '${id}'
+	`;
+	console.log("object.." + query);
+
+	pool.query(query, function (err, data) {
+		if (err) return callback(err);
+		return callback(null, data);
 	});
 };
 
@@ -150,4 +172,5 @@ module.exports = {
 	insertCustomerDiscount,
 	updateCustomerDiscount,
 	insertCustomer,
+	updateCustomer,
 };

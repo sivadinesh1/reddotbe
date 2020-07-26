@@ -174,7 +174,7 @@ router.get("/all-active-vendors/:centerid", (req, res) => {
 router.get("/all-active-customers/:centerid", (req, res) => {
 	let centerid = req.params.centerid;
 
-	let sql = `select c.id, c.center_id, c.name, c.address1, c.address2, c.district, s.code, s.description,
+	let sql = `select c.id, c.center_id, c.name, c.address1, c.address2, c.district, s.id as state_id, s.code, s.description,
 	c.pin, c.gst, c.phone, c.mobile, c.mobile2, c.whatsapp, c.email, c.isactive  from 
 	customer c,
 	state s
