@@ -1,32 +1,6 @@
 var pool = require("../../helpers/db");
 const moment = require("moment");
 
-// const center_id = basic_info["center_id"];
-
-// const name = basic_info["name"];
-
-// const address1 = basic_info["address1"];
-// const address2 = basic_info["address2"];
-// const address3 = basic_info["address3"];
-// const district = basic_info["district"];
-
-// const state_id = basic_info["state_id"];
-// const pin = basic_info["pin"];
-
-// const gst = general_info["gst"];
-// const phone = general_info["phone"];
-// const mobile = general_info["mobile"];
-// const mobile2 = general_info["mobile2"];
-// const whatsapp = general_info["whatsapp"];
-// const email = general_info["email"];
-
-// const disctype = addl_info["disctype"];
-// const gstzero = addl_info["gstzero"];
-// const gstfive = addl_info["gstfive"];
-// const gsttwelve = addl_info["gsttwelve"];
-// const gsteighteen = addl_info["gsteighteen"];
-// const gsttwentyeight = addl_info["gsttwentyeight"];
-
 // insert row in customer tbl
 const insertCustomer = (insertValues, callback) => {
 	var today = new Date();
@@ -76,13 +50,14 @@ const insertCustomer = (insertValues, callback) => {
 					gst_slab: e.gstslab,
 					startdate: moment(today).format("DD-MM-YYYY"),
 					enddate: "01-04-9999",
+					brand_id: 0,
 				};
 
 				insertCustomerDiscount(formObj, (err, rows) => {
 					if (err) return handleError(new ErrorHandler("500", "Error fetching sales master"), res);
 				});
 			});
-			return callback(null, { id: data.insertId, custdata: values });
+			return callback(null, { id: data.insertId });
 		}
 	});
 };
@@ -129,10 +104,153 @@ const getCustomerDiscount = (centerid, customerid, callback) => {
 	});
 };
 
+// fetch rows for default (brandid as zero) customer discounts from discount tbl
+const getAllCustomerDefaultDiscounts = (centerid, callback) => {
+	let query = ` 
+	SELECT 
+	c.name, 'default' as 'brand_name',   d.type, d.brand_id as brand_id, 
+     sum(if( d.gst_slab = 0, d.value, 0 ) ) AS gstzero,  
+     sum(if( d.gst_slab = 5, d.value, 0 ) ) AS gstfive, 
+     sum(if( d.gst_slab = 12, d.value, 0 ) ) AS gsttwelve, 
+     sum(if( d.gst_slab = 18, d.value, 0 ) ) AS gsteighteen, 
+		 sum(if( d.gst_slab = 28, d.value, 0 ) ) AS gsttwentyeight,
+		 c.id as id, d.startdate  
+FROM 
+	customer c,
+    discount d
+    where 
+    d.brand_id = 0 and
+		d.center_id = ? and
+    c.id = d.customer_id
+    
+    group by 
+    c.name, d.type, d.brand_id, c.id, d.startdate   
+    order by
+    c.name
+	`;
+
+	let values = [centerid];
+
+	pool.query(query, values, function (err, data) {
+		if (err) return callback(err);
+		return callback(null, data);
+	});
+};
+
+// fetch rows for default (brandid as zero) customer discounts from discount tbl
+const getDiscountsByCustomer = (centerid, customerid, callback) => {
+	let query = ` 
+	SELECT 
+	c.name, 'default' as 'brand_name',   d.type, d.brand_id as brand_id, 
+     sum(if( d.gst_slab = 0, d.value, 0 ) ) AS gstzero,  
+     sum(if( d.gst_slab = 5, d.value, 0 ) ) AS gstfive, 
+     sum(if( d.gst_slab = 12, d.value, 0 ) ) AS gsttwelve, 
+     sum(if( d.gst_slab = 18, d.value, 0 ) ) AS gsteighteen, 
+		 sum(if( d.gst_slab = 28, d.value, 0 ) ) AS gsttwentyeight,
+		 c.id as id, d.startdate  
+FROM 
+	customer c,
+    discount d
+    where 
+    d.brand_id = 0 and
+		d.center_id = ? and
+    c.id = ?
+    
+    group by 
+    c.name, d.type, d.brand_id, c.id as id, d.startdate    
+    order by
+    c.name
+	`;
+
+	let values = [centerid, customerid];
+
+	pool.query(query, values, function (err, data) {
+		if (err) return callback(err);
+		return callback(null, data);
+	});
+};
+
+// fetch rows for default (brandid as NON zero) customer discounts from discount tbl
+const getDiscountsByCustomerByBrand = (centerid, customerid, callback) => {
+	let query = ` 
+	SELECT 
+	c.name,  b.name as 'brand_name',  d.type, d.brand_id as brand_id, 
+     sum(if( d.gst_slab = 0, d.value, 0 ) ) AS gstzero,  
+     sum(if( d.gst_slab = 5, d.value, 0 ) ) AS gstfive, 
+     sum(if( d.gst_slab = 12, d.value, 0 ) ) AS gsttwelve, 
+     sum(if( d.gst_slab = 18, d.value, 0 ) ) AS gsteighteen, 
+		 sum(if( d.gst_slab = 28, d.value, 0 ) ) AS gsttwentyeight,
+		 c.id as id, d.startdate  
+FROM 
+	customer c,
+    discount d,
+    brand b
+    where 
+    d.brand_id <> 0 and
+		d.brand_id = b.id and
+		d.center_id = ? and
+		c.id = ? and
+		d.customer_id = ?
+    
+    group by 
+    c.name, d.type, d.brand_id, b.name, c.id, d.startdate      
+    order by
+    c.name, b.name
+
+	`;
+
+	console.log("object" + query);
+
+	console.log("cener id object" + centerid);
+	console.log(" customerid object" + customerid);
+
+	let values = [centerid, customerid, customerid];
+
+	pool.query(query, values, function (err, data) {
+		if (err) return callback(err);
+		return callback(null, data);
+	});
+};
+
+// fetch rows for default (brandid as NON zero) customer discounts from discount tbl
+const getDiscountsByAllCustomerByBrand = (centerid, callback) => {
+	let query = ` 
+	SELECT 
+	c.name,  b.name as 'brand_name',  d.type, d.brand_id as brand_id, 
+     sum(if( d.gst_slab = 0, d.value, 0 ) ) AS gstzero,  
+     sum(if( d.gst_slab = 5, d.value, 0 ) ) AS gstfive, 
+     sum(if( d.gst_slab = 12, d.value, 0 ) ) AS gsttwelve, 
+     sum(if( d.gst_slab = 18, d.value, 0 ) ) AS gsteighteen, 
+		 sum(if( d.gst_slab = 28, d.value, 0 ) ) AS gsttwentyeight,
+		 c.id as id, d.startdate  
+FROM 
+	customer c,
+    discount d,
+    brand b
+    where 
+    d.brand_id != 0 and
+		d.brand_id = b.id and
+		d.center_id = ? and
+    
+    group by 
+    c.name, d.type, d.brand_id, b.name, c.id, d.startdate      
+    order by
+    c.name, b.name
+
+	`;
+
+	let values = [centerid];
+
+	pool.query(query, values, function (err, data) {
+		if (err) return callback(err);
+		return callback(null, data);
+	});
+};
+
 // insert row in discount tbl
 const insertCustomerDiscount = (insertValues, callback) => {
-	let query = ` INSERT INTO discount (center_id, customer_id, type, value, gst_slab, startdate, enddate)
-  VALUES ( ?, ?, ?, ?, ?, ?, ?) `;
+	let query = ` INSERT INTO discount (center_id, customer_id, type, value, gst_slab, startdate, enddate, brand_id)
+  VALUES ( ?, ?, ?, ?, ?, ?, ?, ?) `;
 
 	let values = [
 		insertValues.center_id,
@@ -142,6 +260,7 @@ const insertCustomerDiscount = (insertValues, callback) => {
 		insertValues.gst_slab,
 		insertValues.startdate,
 		insertValues.enddate,
+		insertValues.brand_id,
 	];
 
 	pool.query(query, values, function (err, data) {
@@ -150,7 +269,7 @@ const insertCustomerDiscount = (insertValues, callback) => {
 	});
 };
 
-// update rows in discount tbl
+// update rows in discount tbl // check
 const updateCustomerDiscount = (updateValues, callback) => {
 	updateValues.forEach((element) => {
 		let stdate = moment(element.startdate).format("DD-MM-YYYY");
@@ -167,10 +286,149 @@ const updateCustomerDiscount = (updateValues, callback) => {
 	return callback(null, 1);
 };
 
+// update rows in discount tbl // check
+const updateDefaultCustomerDiscount = (updateValues, callback) => {
+	let query = ` 
+	UPDATE discount
+	SET value = (case when gst_slab = 0 then '${updateValues.gstzero}'
+	when gst_slab = 5 then '${updateValues.gstfive}'
+	when gst_slab = 12 then '${updateValues.gsttwelve}'
+	when gst_slab = 18 then '${updateValues.gsteighteen}'
+	when gst_slab = 28 then '${updateValues.gsttwentyeight}'
+
+									end),
+									startdate = '${moment(updateValues.effDiscStDate).format("DD-MM-YYYY")}',
+			type= '${updateValues.disctype}'
+	WHERE 
+	brand_id = '${updateValues.brand_id}' and
+	center_id = '${updateValues.center_id}' and
+	customer_id = '${updateValues.customer_id}'
+	`;
+	console.log("object >>>>> " + query);
+	pool.query(query, function (err, data) {
+		if (err) return callback(err);
+	});
+
+	return callback(null, 1);
+};
+
+// fetch rows from customer tbl & customer shipping addres tbl
+const getCustomerDetails = (centerid, customerid, callback) => {
+	let query = `select c.*, s.code,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	csa.state_id = s.id and
+	c.id = '${customerid}' and
+	c.center_id = '${centerid}' `;
+
+	console.log("get-customer-details > " + query);
+
+	let values = [centerid, customerid];
+
+	pool.query(query, values, function (err, data) {
+		if (err) return callback(err);
+		return callback(null, data);
+	});
+};
+
+// fetch rows from customer tbl & customer shipping addres tbl
+const getSearchCustomers = (centerid, searchstr, callback) => {
+	let query = `
+	select c.id, c.center_id, c.name, c.address1, c.address2, c.district, s.code, s.description,
+	c.pin, c.gst, c.phone, c.mobile, c.mobile2, c.whatsapp,  c.email, c.isactive,
+		csa.state_id as csa_state,
+csa.address1 as csa_address1,
+csa.address2 as csa_address2, 
+csa.address3 as csa_address3,
+csa.district as csa_district,
+csa.pin as csa_pin,
+csa.def_address as def_address,
+s1.code as csa_code
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	csa.customer_id = c.id and
+	csa.def_address = 'Y' and
+	c.state_id = s.id and isactive = 'A' and center_id = '${centerid}' and ( c.name like '%${searchstr}%') limit 50 `;
+
+	console.log("get-customer-details > " + query);
+
+	let values = [centerid, searchstr];
+
+	pool.query(query, values, function (err, data) {
+		if (err) return callback(err);
+		return callback(null, data);
+	});
+};
+
+// insert row in customer tbl
+const insertDiscountsByBrands = (insertValues, callback) => {
+	var today = new Date();
+	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+
+	let taxSlabArr = [
+		{ gstslab: 0, gstvalue: insertValues.gstzero },
+		{ gstslab: 5, gstvalue: insertValues.gstfive },
+		{ gstslab: 12, gstvalue: insertValues.gsttwelve },
+		{ gstslab: 18, gstvalue: insertValues.gsteighteen },
+		{ gstslab: 28, gstvalue: insertValues.gsttwentyeight },
+	];
+
+	console.log("dinesh KL " + taxSlabArr);
+
+	taxSlabArr.forEach((e) => {
+		let formObj = {
+			center_id: insertValues.center_id,
+			customer_id: insertValues.customer_id,
+			brand_id: insertValues.brand_id,
+			type: insertValues.disctype,
+			value: e.gstvalue,
+			gst_slab: e.gstslab,
+			startdate: moment(today).format("DD-MM-YYYY"),
+			enddate: "01-04-9999",
+		};
+
+		console.log("object..." + JSON.stringify(formObj));
+
+		insertCustomerDiscount(formObj, (err, rows) => {
+			if (err) return handleError(new ErrorHandler("500", "Error fetching sales master"), res);
+		});
+	});
+	return callback(null, "1");
+};
+
 module.exports = {
 	getCustomerDiscount,
 	insertCustomerDiscount,
 	updateCustomerDiscount,
 	insertCustomer,
 	updateCustomer,
+	getSearchCustomers,
+	getCustomerDetails,
+	getAllCustomerDefaultDiscounts,
+	getDiscountsByCustomer,
+	getDiscountsByCustomerByBrand,
+	getDiscountsByAllCustomerByBrand,
+	updateDefaultCustomerDiscount,
+	insertDiscountsByBrands,
 };

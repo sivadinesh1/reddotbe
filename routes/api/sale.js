@@ -10,15 +10,24 @@ const { handleError, ErrorHandler } = require("./../helpers/error");
 var pool = require("../helpers/db");
 
 // Get Possible Next Sale Invoice # (ReadOnly)
-saleRouter.get("/get-next-sale-invoice-no/:centerid", (req, res) => {
+saleRouter.get("/get-next-sale-invoice-no/:centerid/:invoicetype", (req, res) => {
 	let center_id = req.params.centerid;
+	let invoicetype = req.params.invoicetype;
 
 	let invoiceyear = moment().format("YY");
 
-	let sql = `	select concat('${invoiceyear}', "/", "1", "/", lpad(invseq + 1, 5, "0")) as NxtInvNo from financialyear  where 
-	center_id = '${center_id}' and  
-	CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
+	let sql = "";
 
+	if (invoicetype === "stockissue") {
+		sql = `select concat('SI',"-",'20', "/", "1", "/", lpad(stock_issue_seq + 1, 5, "0")) as NxtInvNo from financialyear  where 
+					center_id = 1 and  
+					CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
+	} else if (invoicetype === "gstinvoice") {
+		sql = `select concat('${invoiceyear}', "/", "1", "/", lpad(invseq + 1, 5, "0")) as NxtInvNo from financialyear  where 
+					center_id = '${center_id}' and  
+					CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
+	}
+	console.log("invoice type l30" + invoicetype);
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error get Nxt Sale Invoice No"), res);
@@ -105,7 +114,7 @@ saleRouter.post("/insert-sale-details", async (req, res) => {
 	console.log("object.." + JSON.stringify(cloneReq));
 
 	// (1) Updates invseq in tbl financialyear, then {returns} formated sequence {YY/MM/INVSEQ}
-	await updateSequenceGenerator(cloneReq.center_id);
+	await updateSequenceGenerator(cloneReq);
 	let invNo = await getSequenceNo(cloneReq);
 
 	// (2)
@@ -131,11 +140,20 @@ saleRouter.post("/insert-sale-details", async (req, res) => {
 });
 
 // Update Sequence in financial Year tbl when its fresh sale insert
-function updateSequenceGenerator(center_id) {
-	let qryUpdateSqnc = `
-	update financialyear set invseq = invseq + 1 where 
-	center_id = '${center_id}' and  
+function updateSequenceGenerator(cloneReq) {
+	let qryUpdateSqnc = "";
+
+	if (cloneReq.invoicetype === "gstinvoice") {
+		qryUpdateSqnc = `
+		update financialyear set invseq = invseq + 1 where 
+		center_id = '${cloneReq.center_id}' and  
+		CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
+	} else if (cloneReq.invoicetype === "stockissue") {
+		qryUpdateSqnc = `
+	update financialyear set stock_issue_seq = stock_issue_seq + 1 where 
+	center_id = '${cloneReq.center_id}' and  
 	CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
+	}
 
 	return new Promise(function (resolve, reject) {
 		pool.query(qryUpdateSqnc, function (err, data) {
@@ -149,13 +167,22 @@ function updateSequenceGenerator(center_id) {
 
 // format and send sequence #
 function getSequenceNo(cloneReq) {
-	let invNoQry = ` 
-			select concat('${moment(cloneReq.invoicedate).format("YY")}', "/", '${moment(cloneReq.invoicedate).format(
-		"MM",
-	)}', "/", lpad(invseq, 5, "0")) as invNo from financialyear 
-			where 
-			center_id = '${cloneReq.center_id}' and  
-			CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
+	let invNoQry = "";
+	if (cloneReq.invoicetype === "gstinvoice") {
+		invNoQry = ` select concat('${moment(cloneReq.invoicedate).format("YY")}', "/", '${moment(cloneReq.invoicedate).format(
+			"MM",
+		)}', "/", lpad(invseq, 5, "0")) as invNo from financialyear 
+				where 
+				center_id = '${cloneReq.center_id}' and  
+				CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
+	} else if (cloneReq.invoicetype === "stockissue") {
+		invNoQry = ` select concat('SI',"-",'${moment(cloneReq.invoicedate).format("YY")}', "/", '${moment(cloneReq.invoicedate).format(
+			"MM",
+		)}', "/", lpad(stock_issue_seq, 5, "0")) as invNo from financialyear 
+				where 
+				center_id = '${cloneReq.center_id}' and  
+				CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
+	}
 
 	return new Promise(function (resolve, reject) {
 		pool.query(invNoQry, function (err, data) {
@@ -174,9 +201,6 @@ function saleMasterEntry(cloneReq, invNo) {
 		revisionCnt = cloneReq.revision + 1;
 	}
 
-	let orderdate = cloneReq.orderdate;
-	let lrdate = cloneReq.lrdate;
-
 	orderdate = cloneReq.orderdate !== "" ? moment(orderdate).format("DD-MM-YYYY") : "";
 	lrdate = cloneReq.lrdate !== "" ? moment(lrdate).format("DD-MM-YYYY") : "";
 
@@ -186,19 +210,19 @@ function saleMasterEntry(cloneReq, invNo) {
 			lr_no, lr_date, sale_type,  total_qty, no_of_items, taxable_value, cgst, sgst, igst, 
 			total_value, net_total, transport_charges, unloading_charges, misc_charges, status, sale_datetime)
 			VALUES
-			('${cloneReq.center_id}', '${cloneReq.customer.id}', 
+			('${cloneReq.center_id}', '${cloneReq.customerctrl.id}', 
 			'${invNo}',
-			'${moment(cloneReq.invoicedate).format("DD-MM-YYYY")}', '${cloneReq.orderno}', '${orderdate}', '${cloneReq.lrno}', '${lrdate}',
-	 'GST Inovoice','${cloneReq.totalqty}', 
+			'${moment(cloneReq.invoicedate).format("DD-MM-YYYY")}', '${cloneReq.orderno}', '${cloneReq.orderdate}', '${cloneReq.lrno}', '${cloneReq.lrdate}',
+	 '${cloneReq.invoicetype}','${cloneReq.totalqty}', 
 			'${cloneReq.noofitems}', '${cloneReq.taxable_value}', '${cloneReq.cgst}', '${cloneReq.sgst}', '${cloneReq.igst}', '${cloneReq.totalvalue}', 
 			'${cloneReq.net_total}', '${cloneReq.transport_charges}', '${cloneReq.unloading_charges}', '${cloneReq.misc_charges}', '${cloneReq.status}',
 			'${moment().format("DD-MM-YYYY")}'
 			)`;
 
 	let upQry = `
-			UPDATE sale set center_id = '${cloneReq.center_id}', customer_id = '${cloneReq.customer.id}', 
-			order_date = '${orderdate}', lr_no = '${cloneReq.lrno}',
-			lr_date = '${lrdate}', total_qty = '${cloneReq.totalqty}', no_of_items = '${cloneReq.noofitems}',
+			UPDATE sale set center_id = '${cloneReq.center_id}', customer_id = '${cloneReq.customerctrl.id}', 
+			order_date = '${cloneReq.orderdate}', lr_no = '${cloneReq.lrno}', sale_type = '${cloneReq.invoicetype}',
+			lr_date = '${cloneReq.lrdate}', total_qty = '${cloneReq.totalqty}', no_of_items = '${cloneReq.noofitems}',
 			taxable_value = '${cloneReq.taxable_value}', cgst = '${cloneReq.cgst}', sgst = '${cloneReq.sgst}', igst = '${cloneReq.igst}',
 			total_value = '${cloneReq.totalvalue}', net_total = '${cloneReq.net_total}', transport_charges = '${cloneReq.transport_charges}', 
 			unloading_charges = '${cloneReq.unloading_charges}', misc_charges = '${cloneReq.misc_charges}', status = '${cloneReq.status}',
@@ -288,5 +312,27 @@ function processItems(cloneReq, newPK) {
 		});
 	});
 }
+
+saleRouter.get("/convert-sale/:center_id/:sales_id", async (req, res) => {
+	let center_id = req.params.center_id;
+	let sales_id = req.params.sales_id;
+
+	// (1) Updates invseq in tbl financialyear, then {returns} formated sequence {YY/MM/INVSEQ}
+	await updateSequenceGenerator({ invoicetype: "gstinvoice", center_id: center_id, invoicedate: moment() });
+	let invNo = await getSequenceNo({ invoicetype: "gstinvoice", center_id: center_id, invoicedate: moment() });
+
+	let sql = ` update sale set invoice_no = '${invNo}', sale_type = "gstinvoice" where id = ${sales_id} `;
+	console.log("dinesh @@ " + sql);
+	pool.query(sql, function (err, data) {
+		if (err) {
+			return handleError(new ErrorHandler("500", "Error coverting to sale invoice."), res);
+		} else {
+			return res.status(200).json({
+				result: "success",
+				invoiceNo: invNo,
+			});
+		}
+	});
+});
 
 module.exports = saleRouter;

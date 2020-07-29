@@ -475,10 +475,26 @@ enquiryRoute.get("/get-enquired-product-data/:centerid/:customerid/:enqid/:invdt
 	let sql = `select a.product_code as product_code, a.description, a.mrp, a.taxrate, b.available_stock,
 	ed.giveqty as qty, a.unit_price, a.id as product_id, b.id as stock_pk, e.enquiry_date,
 	IFNULL(
-	(	  select concat(value,'~',type) from discount where   str_to_date('${orderdate}','%d-%m-%Y')  between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') and
+	(
+	select concat(value,'~',type)
+	from discount
+	where str_to_date('${orderdate}','%d-%m-%Y')  
+	between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') and
   customer_id = '${customerid}' and
-  gst_slab = a.taxrate
-	) , '0~NET') as disc_info
+	gst_slab = a.taxrate and
+	a.brand_id = discount.brand_id and
+  discount.brand_id = a.brand_id
+	), 
+	
+	(  select concat(value,'~',type) 
+from discount 
+where str_to_date('28-07-2020','%d-%m-%Y')  
+between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') and
+customer_id = '${customerid}' and
+gst_slab = a.taxrate and
+discount.brand_id = 0 )
+	
+	) as disc_info
 	
 	
 	from 
@@ -600,10 +616,3 @@ enquiryRoute.get("/search-enquiries/:centerid/:customerid/:status/:fromdate/:tod
 });
 
 module.exports = enquiryRoute;
-
-// select * from `financialyear` where center_id = '1' and  CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y')
-// select * from `financialyear` where center_id = '1' and  str_to_date('01-05-2019','%d-%m-%Y') between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y')
-
-// INSERT INTO `backorder` (`id`, `enquiry_detail_id`, `qty`, `reason`, `status`)
-// VALUES
-// 	(1, 38, 4, 'No Stock', 'O');

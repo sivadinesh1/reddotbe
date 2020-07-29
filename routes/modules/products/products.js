@@ -7,7 +7,7 @@ const insertProduct = (insertValues, callback) => {
 
 	let query = `INSERT INTO 
 		product 
-			(center_id, vendor_id, product_code, description, unit, packetsize, hsncode, currentstock, unit_price, mrp, 
+			(center_id, brand_id, product_code, description, unit, packetsize, hsncode, currentstock, unit_price, mrp, 
 				purchaseprice, salesprice, rackno, location, maxdiscount, alternatecode, taxrate, 
 				minqty, itemdiscount, reorderqty, avgpurprice, avgsaleprice, margin)
 		VALUES
@@ -15,7 +15,7 @@ const insertProduct = (insertValues, callback) => {
 
 	let values = [
 		insertValues.center_id,
-		insertValues.vendorid,
+		insertValues.brand_id,
 		insertValues.product_code,
 		insertValues.description,
 		insertValues.unit,
@@ -46,12 +46,12 @@ const insertProduct = (insertValues, callback) => {
 };
 
 const updateProduct = (updateValues, callback) => {
-	console.log("object >> " + JSON.stringify(updateValues));
+	console.log("updateProduct >> " + JSON.stringify(updateValues));
 	var today = new Date();
 	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
 
 	let query = `
-			update product set center_id = '${updateValues.center_id}', vendor_id = '${updateValues.vendorid}',
+			update product set center_id = '${updateValues.center_id}', brand_id = '${updateValues.brand_id}',
 			product_code = '${updateValues.product_code}', description = '${updateValues.description}',unit = '${updateValues.unit}',
 			packetsize = '${updateValues.packetsize}', hsncode = '${updateValues.hsncode}',currentstock = '${updateValues.currentstock}',
 			unit_price = '${updateValues.unit_price}', mrp = '${updateValues.mrp}',purchaseprice = '${updateValues.purchaseprice}',

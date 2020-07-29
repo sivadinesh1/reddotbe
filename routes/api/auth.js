@@ -25,7 +25,7 @@ authRoute.post("/login", (req, res) => {
 	username='${username}' and
 	userpass='${password}' `;
 
-	pool.query(query, function(err, data) {
+	pool.query(query, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("100", "Error while authenticating."), res);
 		} else if (data.length > 0) {
@@ -33,7 +33,7 @@ authRoute.post("/login", (req, res) => {
 				result: "success",
 				role: data[0].role,
 				userid: data[0].userid,
-				obj: data[0]
+				obj: data[0],
 			});
 		} else {
 			return handleError(new ErrorHandler("600", "Invalid Credentials."), res);
@@ -42,16 +42,3 @@ authRoute.post("/login", (req, res) => {
 });
 
 module.exports = authRoute;
-
-// select * from `financialyear` where center_id = '1' and  CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y')
-// select * from `financialyear` where center_id = '1' and  str_to_date('01-05-2019','%d-%m-%Y') between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y')
-
-// select u.firstname, u.username, c.id as center_id, c.name as center_name, cm.id as company_id,
-// cm.name as company_name
-// from
-// users u,
-// center c,
-// company cm
-// where
-// username='admin' and
-// userpass='admin'
