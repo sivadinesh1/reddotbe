@@ -56,7 +56,29 @@ const updateVendor = (updateValues, id, callback) => {
 	});
 };
 
+// fetch rows from customer tbl & customer shipping addres tbl
+const getSearchVendors = (centerid, searchstr, callback) => {
+	let query = `
+	select v.id, v.center_id, v.name, v.address1, v.address2, v.district, 
+	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp,  v.email, v.isactive
+	from
+	vendor v,
+	state s
+	where 
+	v.state_id = s.id and isactive = 'A' and center_id = '${centerid}' and ( v.name like '%${searchstr}%') limit 50  `;
+
+	console.log("get-vendor-details > " + query);
+
+	let values = [centerid, searchstr];
+
+	pool.query(query, values, function (err, data) {
+		if (err) return callback(err);
+		return callback(null, data);
+	});
+};
+
 module.exports = {
 	insertVendor,
 	updateVendor,
+	getSearchVendors,
 };

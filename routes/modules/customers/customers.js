@@ -57,6 +57,29 @@ const insertCustomer = (insertValues, callback) => {
 					if (err) return handleError(new ErrorHandler("500", "Error fetching sales master"), res);
 				});
 			});
+
+			let query1 = `
+	INSERT INTO customer_shipping_address (customer_id, address1, address2, address3, district, state_id, pin, def_address)
+	VALUES (?, ?, ?, ?, ?, ?, ?, 'Y' ) `;
+			let values1 = [
+				data.insertId,
+
+				insertValues.address1,
+				insertValues.address2,
+				insertValues.address3,
+				insertValues.district,
+				insertValues.state_id,
+				insertValues.pin,
+			];
+
+			pool.query(query1, values1, function (err, data) {
+				if (err) {
+					return callback(err);
+				} else {
+					// do nothing
+				}
+			});
+
 			return callback(null, { id: data.insertId });
 		}
 	});
@@ -141,7 +164,7 @@ FROM
 const getDiscountsByCustomer = (centerid, customerid, callback) => {
 	let query = ` 
 	SELECT 
-	c.name, 'default' as 'brand_name',   d.type, d.brand_id as brand_id, 
+	c.name,  '' as 'brand_name',  d.type, d.brand_id as brand_id, 
      sum(if( d.gst_slab = 0, d.value, 0 ) ) AS gstzero,  
      sum(if( d.gst_slab = 5, d.value, 0 ) ) AS gstfive, 
      sum(if( d.gst_slab = 12, d.value, 0 ) ) AS gsttwelve, 
@@ -154,15 +177,15 @@ FROM
     where 
     d.brand_id = 0 and
 		d.center_id = ? and
-    c.id = ?
-    
+		c.id = ? and
+		d.customer_id = ?
     group by 
-    c.name, d.type, d.brand_id, c.id as id, d.startdate    
+    c.name, d.type, d.brand_id,c.id, d.startdate      
     order by
     c.name
 	`;
-
-	let values = [centerid, customerid];
+	console.log("latest > " + query);
+	let values = [centerid, customerid, customerid, customerid];
 
 	pool.query(query, values, function (err, data) {
 		if (err) return callback(err);
@@ -230,7 +253,7 @@ FROM
     where 
     d.brand_id != 0 and
 		d.brand_id = b.id and
-		d.center_id = ? and
+		d.center_id = ? 
     
     group by 
     c.name, d.type, d.brand_id, b.name, c.id, d.startdate      
@@ -417,6 +440,104 @@ const insertDiscountsByBrands = (insertValues, callback) => {
 	return callback(null, "1");
 };
 
+// SHIPPING ADDRESS
+// fetch rows from customer shipping address tbl
+const getCustomerShippingAddress = (customerid, callback) => {
+	let query = ` select csa.*, s.description as state_name
+from 
+customer_shipping_address csa,
+state s 
+where 
+csa.state_id = s.id and
+customer_id = ? `;
+
+	let values = [customerid];
+
+	pool.query(query, values, function (err, data) {
+		if (err) return callback(err);
+		return callback(null, data);
+	});
+};
+
+const insertCustomerShippingAddress = (insertValues, callback) => {
+	if (updateValues.def_address) {
+		let sql = `update customer_shipping_address set def_address = 'N' where customer_id = '${insertValues.customer_id}' `;
+
+		pool.query(sql, function (err, data1) {
+			if (err) return callback(err);
+		});
+	}
+
+	let query1 = `
+	INSERT INTO customer_shipping_address (customer_id, address1, address2, address3, district, state_id, pin, def_address)
+	VALUES (?, ?, ?, ?, ?, ?, ?, ? ) `;
+	let values1 = [
+		insertValues.customer_id,
+
+		insertValues.address1,
+		insertValues.address2,
+		insertValues.address3,
+		insertValues.district,
+		insertValues.state_id,
+		insertValues.pin,
+		insertValues.def_address === true ? "Y" : "N",
+	];
+
+	pool.query(query1, values1, function (err, data) {
+		if (err) {
+			return callback(err);
+		} else {
+			return callback(null, { id: data.insertId });
+		}
+	});
+};
+
+const updateCustomerShippingAddress = (updateValues, id, callback) => {
+	console.log("object >> " + JSON.stringify(updateValues));
+	console.log("object >> " + id);
+	var today = new Date();
+	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+
+	if (updateValues.def_address) {
+		let sql = `update customer_shipping_address set def_address = 'N' where customer_id = '${updateValues.customer_id}' `;
+
+		pool.query(sql, function (err, data1) {
+			if (err) return callback(err);
+			let query = `
+			update customer_shipping_address set
+			address1 = '${updateValues.address1}',address2 = '${updateValues.address2}',
+			district = '${updateValues.district}', state_id = '${updateValues.state_id}', pin = '${updateValues.pin}', def_address = '${
+				updateValues.def_address === true ? "Y" : "N"
+			}'
+			where
+			id = '${id}'
+			`;
+			console.log("object.." + query);
+
+			pool.query(query, function (err, data) {
+				if (err) return callback(err);
+				return callback(null, data);
+			});
+		});
+	} else {
+		let query = `
+		update customer_shipping_address set
+		address1 = '${updateValues.address1}',address2 = '${updateValues.address2}',
+		district = '${updateValues.district}', state_id = '${updateValues.state_id}', pin = '${updateValues.pin}', def_address = '${
+			updateValues.def_address === true ? "Y" : "N"
+		}'
+		where
+		id = '${id}'
+		`;
+		console.log("object.." + query);
+
+		pool.query(query, function (err, data) {
+			if (err) return callback(err);
+			return callback(null, data);
+		});
+	}
+};
+
 module.exports = {
 	getCustomerDiscount,
 	insertCustomerDiscount,
@@ -431,4 +552,8 @@ module.exports = {
 	getDiscountsByAllCustomerByBrand,
 	updateDefaultCustomerDiscount,
 	insertDiscountsByBrands,
+
+	updateCustomerShippingAddress,
+	insertCustomerShippingAddress,
+	getCustomerShippingAddress,
 };

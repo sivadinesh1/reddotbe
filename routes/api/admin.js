@@ -16,7 +16,11 @@ const {
 	getAllCustomerDefaultDiscounts,
 	updateDefaultCustomerDiscount,
 	getDiscountsByCustomerByBrand,
+	getDiscountsByCustomer,
 	insertDiscountsByBrands,
+	updateCustomerShippingAddress,
+	insertCustomerShippingAddress,
+	getCustomerShippingAddress,
 } = require("../modules/customers/customers.js");
 
 const { insertProduct, updateProduct } = require("../modules/products/products.js");
@@ -329,6 +333,44 @@ adminRoute.get("/prod-exists/:pcode", (req, res) => {
 				result: data,
 			});
 		}
+	});
+});
+
+// ALL CUSTOMER SHIPPING ADDRESS
+
+adminRoute.post("/insert-customer-shipping-address", (req, res) => {
+	let jsonObj = req.body;
+	insertCustomerShippingAddress(jsonObj, (err, data) => {
+		if (err) {
+			return handleError(new ErrorHandler("500", "Error adding customer shipping address."), res);
+		} else {
+			console.log("dinesh");
+			let resdata = JSON.stringify(data);
+			return res.status(200).json({
+				result: "success",
+			});
+		}
+	});
+});
+
+adminRoute.get("/get-shipping-address/:customerid", (req, res) => {
+	console.log("inside get shipping address");
+	// @from Customer file
+	getCustomerShippingAddress(`${req.params.customerid}`, (err, rows) => {
+		if (err) return handleError(new ErrorHandler("500", "Error fetching shipping address"), res);
+		return res.json(rows);
+	});
+});
+
+// get customer discount values BY CUSTOMER
+adminRoute.put("/update-customer-shipping-address/:id", (req, res) => {
+	let jsonObj = req.body;
+
+	console.log("update-default-customer-discount " + JSON.stringify(jsonObj));
+
+	updateCustomerShippingAddress(req.body, req.params.id, (err, rows) => {
+		if (err) return handleError(new ErrorHandler("500", "Error fetching sales master"), res);
+		return res.json(rows);
 	});
 });
 

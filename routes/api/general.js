@@ -7,6 +7,7 @@ const moment = require("moment");
 const { handleError, ErrorHandler } = require("./../helpers/error");
 
 const { getSearchCustomers } = require("../modules/customers/customers.js");
+const { getSearchVendors } = require("../modules/vendors/vendors.js");
 
 const { createInvoice } = require("./createInvoice.js");
 var pool = require("./../helpers/db");
@@ -72,7 +73,7 @@ IFNULL(
 (
 select concat(value,'~',type) 
 from discount 
-where str_to_date('28-07-2020','%d-%m-%Y')  
+where str_to_date('${orderdate}','%d-%m-%Y')  
 between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') and
 customer_id = '${customerid}' and
 gst_slab = a.taxrate and
@@ -81,7 +82,7 @@ discount.brand_id = a.brand_id
 ), 
 (  select concat(value,'~',type) 
 from discount 
-where str_to_date('28-07-2020','%d-%m-%Y')  
+where str_to_date('${orderdate}','%d-%m-%Y')  
 between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') and
 customer_id = '${customerid}' and
 gst_slab = a.taxrate and
@@ -144,6 +145,19 @@ router.post("/search-customer", (req, res) => {
 	console.log("object..>" + centerid, searchstr);
 
 	getSearchCustomers(centerid, searchstr, (err, data) => {
+		if (err) {
+			return handleError(new ErrorHandler("500", "Error fetching customer details."), res);
+		} else {
+			return res.status(200).json(data);
+		}
+	});
+});
+
+router.post("/search-vendor", (req, res) => {
+	const [centerid, searchstr] = Object.values(req.body);
+	console.log("object..> search vendor >" + centerid, searchstr);
+
+	getSearchVendors(centerid, searchstr, (err, data) => {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error fetching customer details."), res);
 		} else {
