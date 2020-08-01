@@ -24,8 +24,6 @@ stockRouter.get("/search-all-draft-purchase/:centerid", (req, res) => {
 	p.status = 'D' and 
 	p.center_id = '${center_id}' `;
 
-	console.log("sq purchase >> " + sql);
-
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error seacrching draft purchase"), res);
@@ -76,8 +74,6 @@ stockRouter.get("/search-purchase/:centerid/:vendorid/:status/:fromdate/:todate"
 	if (status !== "all") {
 		sql = sql + statussql;
 	}
-
-	console.log("search purchase >> " + sql);
 
 	pool.query(sql, function (err, data) {
 		if (err) {
@@ -131,8 +127,6 @@ stockRouter.get("/search-sales/:centerid/:customerid/:status/:fromdate/:todate",
 		sql = sql + statussql;
 	}
 
-	console.log("search sales >> " + sql);
-
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error fetching search purchase"), res);
@@ -152,8 +146,6 @@ purchase p
 where
 p.id = '${purchase_id}' `;
 
-	console.log("sq purchase >> " + sql);
-
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error fetching purchase master"), res);
@@ -164,21 +156,31 @@ p.id = '${purchase_id}' `;
 });
 
 // get sale master records
-stockRouter.get("/sales-master/:id", (req, res) => {
+stockRouter.get("/sales-master/:id", async (req, res) => {
 	// @from Sales file
-	getSalesMaster(`${req.params.id}`, (err, rows) => {
-		if (err) return handleError(new ErrorHandler("500", "Error fetching sales master"), res);
-		return res.json(rows);
-	});
+
+	let rows = await getSalesMaster(`${req.params.id}`);
+	return res.json(rows);
+
+	// getSalesMaster(`${req.params.id}`, (err, rows) => {
+	// 	if (err) return handleError(new ErrorHandler("500", "Error fetching sales master"), res);
+	// 	return res.json(rows);
+	// });
 });
 
 // get sale details records
-stockRouter.get("/sale-details/:id", (req, res) => {
+stockRouter.get("/sale-details/:id", async (req, res) => {
 	// @from Sales file
-	getSalesDetails(`${req.params.id}`, (err, rows) => {
-		if (err) return handleError(new ErrorHandler("500", "Error fetching sales master"), res);
-		return res.json(rows);
-	});
+	// getSalesDetails(`${req.params.id}`, (err, rows) => {
+	// 	if (err) return handleError(new ErrorHandler("500", "Error fetching sales master"), res);
+	// 	return res.json(rows);
+	// });
+
+	let rows = await getSalesDetails(`${req.params.id}`);
+
+	console.log("dinesh test " + rows);
+	console.log("dinesh test ** " + JSON.stringify(rows));
+	return res.json(rows);
 });
 
 stockRouter.post("/delete-sale-details", (req, res) => {
@@ -224,11 +226,8 @@ p.id = pd.product_id and
 pd.purchase_id = '${purchase_id}' 
 	 `;
 
-	console.log("sq purchase >> " + sql);
-
 	pool.query(sql, function (err, data) {
 		if (err) {
-			console.log("object error " + err);
 			return handleError(new ErrorHandler("500", "Error fetching purchase master"), res);
 		} else {
 			return res.json(data);
@@ -242,7 +241,6 @@ stockRouter.post("/delete-purchase-details", (req, res) => {
 
 	let query = `
 	delete from purchase_detail where id = '${id}' `;
-	console.log("delete purchase details id > " + id);
 
 	pool.query(query, function (err, data) {
 		if (err) {
@@ -263,8 +261,6 @@ stockRouter.delete("/delete-purchase/:id", (req, res) => {
 	let sql = `
 	delete from purchase where 
 id = ${purchase_id} `;
-
-	console.log("sq purchase >> " + sql);
 
 	pool.query(sql, function (err, data) {
 		if (err) {

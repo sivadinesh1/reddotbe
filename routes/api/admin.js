@@ -5,7 +5,7 @@ var pool = require("./../helpers/db");
 const moment = require("moment");
 const { handleError, ErrorHandler } = require("./../helpers/error");
 
-const { getSalesMaster, getSalesDetails } = require("../modules/sales/sales.js");
+const { getCenterDetails } = require("../modules/center/center.js");
 
 const {
 	getCustomerDiscount,
@@ -199,14 +199,17 @@ adminRoute.post("/add-brand", (req, res, next) => {
 });
 
 // Customers
-adminRoute.get("/get-customer-details/:centerid/:customerid", (req, res) => {
-	getCustomerDetails(req.params.centerid, req.params.customerid, (err, data) => {
-		if (err) {
-			return handleError(new ErrorHandler("500", "Error fetching customer details."), res);
-		} else {
-			return res.status(200).json(data);
-		}
-	});
+adminRoute.get("/get-customer-details/:centerid/:customerid", async (req, res) => {
+	let rows = await getCustomerDetails(req.params.centerid, req.params.customerid);
+	return res.status(200).json(rows);
+
+	// getCustomerDetails(req.params.centerid, req.params.customerid, (err, data) => {
+	// 	if (err) {
+	// 		return handleError(new ErrorHandler("500", "Error fetching customer details."), res);
+	// 	} else {
+	// 		return res.status(200).json(data);
+	// 	}
+	// });
 });
 
 // customers
@@ -239,21 +242,15 @@ adminRoute.post("/add-customer", (req, res) => {
 	});
 });
 
-// Customers
 adminRoute.get("/get-center-details/:centerid", (req, res) => {
-	let center_id = req.params.centerid;
+	let rows = getCenterDetails(`${req.params.centerid}`);
+	return res.json(rows);
 
-	console.log("inside get vendor details");
-	let sql = `select * from center c where 
-	c.id = '${center_id}'  `;
-
-	pool.query(sql, function (err, data) {
-		if (err) {
-			return handleError(new ErrorHandler("500", "Error fetching center details."), res);
-		} else {
-			res.status(200).json(data);
-		}
-	});
+	// // @ center.js
+	// getCenterDetails(`${req.params.centerid}`, (err, rows) => {
+	// 	if (err) return handleError(new ErrorHandler("500", "Error fetching shipping address"), res);
+	// 	return res.json(rows);
+	// });
 });
 
 adminRoute.post("/update-center", (req, res) => {

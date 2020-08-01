@@ -4,15 +4,23 @@ const fs = require("fs");
 const PDFDocument = require("pdfkit");
 const blobStream = require("blob-stream");
 
-function createInvoice(saleMaster, saleDetails, invoice, path, res) {
-	console.log("create invoice 1 called " + JSON.stringify(saleMaster));
-	console.log("create invoice 2 called " + JSON.stringify(saleDetails));
+function createInvoice(saleMaster, saleDetails, customerDetails, centerDetails, invoice, path, res) {
+	// console.log("salemasterdata " + JSON.stringify(saleMaster));
+	// console.log("saledetailsdata  " + JSON.stringify(saleDetails));
+
+	// console.log("customerdata " + JSON.stringify(customerDetails));
+	// console.log("centerdata " + JSON.stringify(centerDetails));
+
+	let centerdata = centerDetails[0];
+	let customerdata = customerDetails[0];
+	let salemasterdata = saleMaster[0];
+	let saledetailsdata = saleDetails;
 
 	let doc = new PDFDocument({ size: "A4", margin: 50 });
 
-	generateHeader(doc);
+	generateHeader(doc, centerdata);
 	generateCustomerInformation(doc, invoice);
-	generateInvoiceTable(doc, invoice);
+	generateInvoiceTable(doc, invoice, saledetailsdata);
 	generateFooter(doc);
 
 	doc.end();
@@ -37,17 +45,22 @@ function createInvoice(saleMaster, saleDetails, invoice, path, res) {
 	doc.pipe(res);
 }
 
-function generateHeader(doc) {
+function generateHeader(doc, centerdata) {
 	doc
 		.image("logo.png", 20, 45, { width: 50 })
 		.fillColor("#444444")
 
 		.fontSize(14)
-		.text("THE THIRUMURUGAN TRACTOR SPARES", 100, 50)
+		.text(centerdata.name, 100, 50)
 		.fontSize(10)
-		.text("123 Main Street", 200, 65)
-		.text("New York, NY, 10025", 200, 80)
-		.text("PPP", 550, 80)
+		.text(centerdata.address1, 100, 65)
+		.text(centerdata.address2, 100, 80)
+		.text(centerdata.pin, 100, 100)
+		.text(centerdata.gstin, 100, 120)
+		.text(centerdata.email, 100, 140)
+		.text(centerdata.mobile1, 100, 160)
+		.text(centerdata.mobile2, 100, 80)
+
 		.moveDown();
 }
 
@@ -79,41 +92,60 @@ function generateCustomerInformation(doc, invoice) {
 	generateHr(doc, 252);
 }
 
-function generateInvoiceTable(doc, invoice) {
+function generateInvoiceTable(doc, invoice, saledetailsdata) {
 	let i;
-	const invoiceTableTop = 330;
+	let invoiceTableTop = 290;
 
 	doc.font("Helvetica-Bold");
 	generateTableRow(doc, invoiceTableTop, "Item", "Description", "Unit Cost", "Quantity", "Line Total");
 	generateHr(doc, invoiceTableTop + 20);
 	doc.font("Helvetica");
 
-	for (i = 0; i < invoice.items.length; i++) {
-		const item = invoice.items[i];
-		const position = invoiceTableTop + (i + 1) * 30;
-		generateTableRow(
-			doc,
-			position,
-			item.item,
-			item.description,
-			formatCurrency(item.amount / item.quantity),
-			item.quantity,
-			formatCurrency(item.amount),
-		);
+	Array.from(Array(120)).forEach(function (k, idx) {
+		let positionY = invoiceTableTop + (idx + 1) * 30;
 
-		generateHr(doc, position + 20);
-	}
+		// generateTableRow(doc, position, k.description, k.product_code, k.qty, k.qty, k.qty);
 
-	const subtotalPosition = invoiceTableTop + (i + 1) * 30;
-	generateTableRow(doc, subtotalPosition, "", "", "Subtotal", "", formatCurrency(invoice.subtotal));
+		generateTableRow(doc, positionY, "hi..", "hi 11", "hi 33", " hi 444", " hi 55");
 
-	const paidToDatePosition = subtotalPosition + 20;
-	generateTableRow(doc, paidToDatePosition, "", "", "Paid To Date", "", formatCurrency(invoice.paid));
+		//		generateHr(doc, positionY + 20);
 
-	const duePosition = paidToDatePosition + 25;
-	doc.font("Helvetica-Bold");
-	generateTableRow(doc, duePosition, "", "", "Balance Due", "", formatCurrency(invoice.subtotal - invoice.paid));
-	doc.font("Helvetica");
+		// if (positionY > 500) {
+		// 	invoiceTableTop = 60;
+		// 	positionY = 80;
+		// 	doc.addPage();
+		// }
+
+		// console.log("position Y " + positionY);
+		// console.log("invoiceTableTop Y " + invoiceTableTop);
+	});
+
+	// for (i = 0; i < invoice.items.length; i++) {
+	// 	const item = invoice.items[i];
+	// 	const position = invoiceTableTop + (i + 1) * 30;
+	// 	generateTableRow(
+	// 		doc,
+	// 		position,
+	// 		item.item,
+	// 		item.description,
+	// 		formatCurrency(item.amount / item.quantity),
+	// 		item.quantity,
+	// 		formatCurrency(item.amount),
+	// 	);
+
+	// 	generateHr(doc, position + 20);
+	// }
+
+	// const subtotalPosition = invoiceTableTop + (i + 1) * 30;
+	// generateTableRow(doc, subtotalPosition, "", "", "Subtotal", "", formatCurrency(invoice.subtotal));
+
+	// const paidToDatePosition = subtotalPosition + 20;
+	// generateTableRow(doc, paidToDatePosition, "", "", "Paid To Date", "", formatCurrency(invoice.paid));
+
+	// const duePosition = paidToDatePosition + 25;
+	// doc.font("Helvetica-Bold");
+	// generateTableRow(doc, duePosition, "", "", "Balance Due", "", formatCurrency(invoice.subtotal - invoice.paid));
+	// doc.font("Helvetica");
 }
 
 function generateFooter(doc) {
@@ -126,11 +158,11 @@ function generateFooter(doc) {
 function generateTableRow(doc, y, item, description, unitCost, quantity, lineTotal) {
 	doc
 		.fontSize(10)
-		.text(item, 50, y)
-		.text(description, 150, y)
-		.text(unitCost, 280, y, { width: 90, align: "right" })
-		.text(quantity, 370, y, { width: 90, align: "right" })
-		.text(lineTotal, 0, y, { align: "right" });
+		.text(item, { width: 100, align: "left" })
+		.text(description, { width: 200, align: "left" })
+		.text(unitCost, { width: 90, align: "right" })
+		.text(quantity, { width: 90, align: "right" })
+		.text(lineTotal, { width: 90, align: "right" });
 }
 
 function generateHr(doc, y) {

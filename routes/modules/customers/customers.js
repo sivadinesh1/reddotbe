@@ -336,7 +336,7 @@ const updateDefaultCustomerDiscount = (updateValues, callback) => {
 };
 
 // fetch rows from customer tbl & customer shipping addres tbl
-const getCustomerDetails = (centerid, customerid, callback) => {
+const getCustomerDetails = (centerid, customerid) => {
 	let query = `select c.*, s.code,
 	csa.state_id as csa_state,
 	csa.address1 as csa_address1,
@@ -364,9 +364,18 @@ const getCustomerDetails = (centerid, customerid, callback) => {
 
 	let values = [centerid, customerid];
 
-	pool.query(query, values, function (err, data) {
-		if (err) return callback(err);
-		return callback(null, data);
+	// pool.query(query, values, function (err, data) {
+	// 	if (err) return callback(err);
+	// 	return callback(null, data);
+	// });
+
+	return new Promise(function (resolve, reject) {
+		pool.query(query, function (err, data) {
+			if (err) {
+				reject(err);
+			}
+			resolve(data);
+		});
 	});
 };
 
