@@ -97,24 +97,26 @@ function generateInvoiceTable(doc, invoice, saledetailsdata) {
 	let invoiceTableTop = 290;
 
 	doc.font("Helvetica-Bold");
-	generateTableRow(doc, invoiceTableTop, "Item", "Description", "Unit Cost", "Quantity", "Line Total");
+	generateTableRow(doc, invoiceTableTop, "SNo", "Item", "Description", "Unit Cost", "Quantity", "Line Total");
 	generateHr(doc, invoiceTableTop + 20);
 	doc.font("Helvetica");
 
-	Array.from(Array(120)).forEach(function (k, idx) {
-		let positionY = invoiceTableTop + (idx + 1) * 30;
+	// Array.from(Array(120)).forEach(function (k, idx) {
+	saledetailsdata.forEach(function (k, idx) {
+		invoiceTableTop = invoiceTableTop + 44;
 
+		console.log("object >> " + JSON.stringify(k));
 		// generateTableRow(doc, position, k.description, k.product_code, k.qty, k.qty, k.qty);
 
-		generateTableRow(doc, positionY, "hi..", "hi 11", "hi 33", " hi 444", " hi 55");
+		generateTableRow(doc, invoiceTableTop, idx + 1, k.product_code, k.description, k.qty, k.qty, k.qty);
 
 		//		generateHr(doc, positionY + 20);
 
-		// if (positionY > 500) {
-		// 	invoiceTableTop = 60;
-		// 	positionY = 80;
-		// 	doc.addPage();
-		// }
+		if (invoiceTableTop > 700) {
+			invoiceTableTop = 60;
+			//	positionY = 80;
+			doc.addPage();
+		}
 
 		// console.log("position Y " + positionY);
 		// console.log("invoiceTableTop Y " + invoiceTableTop);
@@ -155,18 +157,21 @@ function generateFooter(doc) {
 	});
 }
 
-function generateTableRow(doc, y, item, description, unitCost, quantity, lineTotal) {
+function generateTableRow(doc, y, idx, item, description, unitCost, quantity, lineTotal) {
+	console.log("position Y " + y);
+
 	doc
 		.fontSize(10)
-		.text(item, { width: 100, align: "left" })
-		.text(description, { width: 200, align: "left" })
-		.text(unitCost, { width: 90, align: "right" })
-		.text(quantity, { width: 90, align: "right" })
-		.text(lineTotal, { width: 90, align: "right" });
+		.text(idx, 20, y, { width: 100, align: "left" })
+		.text(item, 50, y, { width: 100, align: "left" })
+		.text(description, 150, y, { width: 200, align: "left" })
+		.text(unitCost, 240, y, { width: 90, align: "right" })
+		.text(quantity, 330, y, { width: 90, align: "right" })
+		.text(lineTotal, 420, y, { width: 90, align: "right" });
 }
 
 function generateHr(doc, y) {
-	doc.strokeColor("#aaaaaa").lineWidth(1).moveTo(50, y).lineTo(550, y).stroke();
+	doc.strokeColor("#aaaaaa").lineWidth(1).moveTo(20, y).lineTo(550, y).stroke();
 }
 
 function formatCurrency(cents) {

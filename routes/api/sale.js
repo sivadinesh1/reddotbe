@@ -20,7 +20,7 @@ saleRouter.get("/get-next-sale-invoice-no/:centerid/:invoicetype", (req, res) =>
 
 	if (invoicetype === "stockissue") {
 		sql = `select concat('SI',"-",'20', "/", "1", "/", lpad(stock_issue_seq + 1, 5, "0")) as NxtInvNo from financialyear  where 
-					center_id = 1 and  
+					center_id = '${center_id}' and  
 					CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
 	} else if (invoicetype === "gstinvoice") {
 		sql = `select concat('${invoiceyear}', "/", "1", "/", lpad(invseq + 1, 5, "0")) as NxtInvNo from financialyear  where 

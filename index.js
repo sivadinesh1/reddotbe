@@ -7,7 +7,7 @@ const moment = require("moment");
 const { handleError, ErrorHandler } = require("./routes/helpers/error");
 
 const logger = require("./middleware/logger.ts");
-console.log(" 1111 ");
+
 // const upload = require('./upload');
 
 const cors = require("cors");
@@ -23,9 +23,9 @@ var corsOptions = {
 	origin: "*",
 	optionsSuccessStatus: 200,
 };
-console.log(" 1112 ");
+
 app.use(logger);
-console.log(" 1113 ");
+
 // app.use(function (req, res, next) {
 //     res.header("Access-Control-Allow-Origin", "*");
 //     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
