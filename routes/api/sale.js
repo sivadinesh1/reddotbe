@@ -7,6 +7,8 @@ const mysql = require("mysql");
 const moment = require("moment");
 const { handleError, ErrorHandler } = require("./../helpers/error");
 
+const { getSalesMaster, getSalesDetails } = require("../modules/sales/sales.js");
+
 var pool = require("../helpers/db");
 
 // Get Possible Next Sale Invoice # (ReadOnly)
@@ -43,11 +45,16 @@ saleRouter.get("/get-next-sale-invoice-no/:centerid/:invoicetype", (req, res) =>
 saleRouter.post("/delete-sales-details", async (req, res) => {
 	let id = req.body.id;
 	let sales_id = req.body.salesid;
+	let qty = req.body.qty;
+	let product_id = req.body.product_id;
+	let stock_id = req.body.stock_id;
 	let autidneeded = req.body.autidneeded;
 
-	console.log("delete sale details id > " + id);
+	console.log("delete sale details id > " + JSON.stringify(req.body));
 	console.log("delete sale details sales_id > " + sales_id);
 	console.log("delete sale details autidneeded > " + autidneeded);
+	console.log("delete sale details product_id > " + product_id);
+	console.log("delete sale details stock_id > " + stock_id);
 
 	if (autidneeded) {
 		var today = new Date();
@@ -79,6 +86,7 @@ saleRouter.post("/delete-sales-details", async (req, res) => {
 			});
 		});
 	}
+
 	// step 2
 	let deletePromise = await new Promise(function (resolve, reject) {
 		let query = `
@@ -92,7 +100,24 @@ saleRouter.post("/delete-sales-details", async (req, res) => {
 		});
 	});
 
-	if (deletePromise.affectedRows === 1) {
+	//
+
+	// step 3
+	let stockUpdatePromise = await new Promise(function (resolve, reject) {
+		let stockUpdateQuery = `update stock set available_stock =  available_stock + '${qty}'
+where product_id = '${product_id}' and id = '${stock_id}'  `;
+
+		pool.query(stockUpdateQuery, function (err, data) {
+			if (err) {
+				return reject(handleError(new ErrorHandler("500", "Error deleting sale details"), res));
+			}
+			resolve(data);
+		});
+	});
+
+	console.log("select promise " + JSON.stringify(stockUpdatePromise));
+
+	if (stockUpdatePromise.affectedRows === 1) {
 		return res.json({
 			result: "success",
 		});
@@ -313,15 +338,23 @@ function processItems(cloneReq, newPK) {
 	});
 }
 
-saleRouter.get("/convert-sale/:center_id/:sales_id", async (req, res) => {
-	let center_id = req.params.center_id;
-	let sales_id = req.params.sales_id;
+// saleRouter.post("/convert-sale/:center_id/:sales_id/:oldinvoiceno", async (req, res) => {
+saleRouter.post("/convert-sale", async (req, res) => {
+	console.log(" sivadinesh " + JSON.stringify(req.body));
+	let center_id = req.body.center_id;
+	let sales_id = req.body.sales_id;
+	let old_invoice_no = req.body.old_invoice_no;
+	let old_stock_issued_date = req.body.old_stock_issued_date;
+
+	var today = new Date();
+	today = moment(today).format("DD-MM-YYYY");
 
 	// (1) Updates invseq in tbl financialyear, then {returns} formated sequence {YY/MM/INVSEQ}
 	await updateSequenceGenerator({ invoicetype: "gstinvoice", center_id: center_id, invoicedate: moment() });
 	let invNo = await getSequenceNo({ invoicetype: "gstinvoice", center_id: center_id, invoicedate: moment() });
 
-	let sql = ` update sale set invoice_no = '${invNo}', sale_type = "gstinvoice" where id = ${sales_id} `;
+	let sql = ` update sale set invoice_no = '${invNo}', sale_type = "gstinvoice", status = "C", stock_issue_ref = '${old_invoice_no}',
+	invoice_date = '${today}', stock_issue_date_ref = '${moment(old_stock_issued_date).format("DD-MM-YYYY")}' where id = ${sales_id} `;
 	console.log("dinesh @@ " + sql);
 	pool.query(sql, function (err, data) {
 		if (err) {
@@ -334,5 +367,110 @@ saleRouter.get("/convert-sale/:center_id/:sales_id", async (req, res) => {
 		}
 	});
 });
+
+saleRouter.get("/delete-sale/:id", async (req, res) => {
+	let sale_id = req.params.id;
+	console.log("sale _id ^^" + sale_id);
+
+	let saleDetails = await getSalesDetails(sale_id);
+
+	let idx = 0;
+
+	let retValue = await deleteSaleDetailsRecs(saleDetails, sale_id);
+
+	if (retValue === "done") {
+		let sql = `
+		delete from sale where 
+	id = '${sale_id}' `;
+		console.log("llllll222222 SQL " + sql);
+		pool.query(sql, function (err, data) {
+			if (err) {
+				console.log("what error " + JSON.stringify(err));
+				return handleError(new ErrorHandler("500", "Error deleting sale detail / master"), res);
+			} else {
+				return res.json({
+					result: "success",
+				});
+			}
+		});
+	}
+});
+
+function deleteSaleDetailsRecs(saleDetails, sale_id) {
+	let idx = 0;
+
+	saleDetails.forEach(async (element, index) => {
+		idx = index + 1;
+
+		console.log("object >>>>>> " + JSON.stringify(element));
+
+		var today = new Date();
+		today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+
+		let auditQuery = `
+		INSERT INTO audit_tbl (module, module_ref_id, module_ref_det_id, actn, old_value, new_value, audit_date)
+		VALUES
+			('Sales', '${sale_id}', '${element.id}', 'delete', 
+			(SELECT CONCAT('[{', result, '}]') as final
+			FROM (
+				SELECT GROUP_CONCAT(CONCAT_WS(',', CONCAT('"saleId": ', sale_id), CONCAT('"productId": "', product_id, '"'), CONCAT('"qty": "', qty, '"')) SEPARATOR '},{') as result
+				FROM (
+					SELECT sale_id, product_id, qty
+					FROM sale_detail where id = '${element.id}'
+				) t1
+			) t2)
+			, '', '${today}'
+			) `;
+
+		// step 1
+		let auditPromise = await new Promise(function (resolve, reject) {
+			pool.query(auditQuery, function (err, data) {
+				if (err) {
+					console.log("error: " + err);
+					return reject(handleError(new ErrorHandler("500", "Error adding sale audit."), res));
+				}
+				resolve(data);
+			});
+		});
+
+		// step 2
+		let deletePromise = await new Promise(function (resolve, reject) {
+			let query = `
+				delete from sale_detail where id = '${element.id}' `;
+
+			pool.query(query, function (err, data) {
+				if (err) {
+					return reject(handleError(new ErrorHandler("500", "Error deleting sale details"), res));
+				}
+				resolve(data);
+			});
+		});
+
+		//
+
+		// step 3
+		let stockUpdatePromise = await new Promise(function (resolve, reject) {
+			let stockUpdateQuery = `update stock set available_stock =  available_stock + '${element.qty}'
+where product_id = '${element.product_id}' and id = '${element.stock_id}'  `;
+
+			pool.query(stockUpdateQuery, function (err, data) {
+				if (err) {
+					return reject(handleError(new ErrorHandler("500", "Error deleting sale details"), res));
+				}
+				resolve(data);
+			});
+		});
+
+		console.log("select promise " + JSON.stringify(stockUpdatePromise));
+	});
+
+	if (saleDetails.length === idx) {
+		return new Promise(function (resolve, reject) {
+			resolve("done");
+		}).catch(() => {
+			/* do whatever you want here */
+		});
+	}
+}
 
 module.exports = saleRouter;

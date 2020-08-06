@@ -84,19 +84,20 @@ stockRouter.get("/search-purchase/:centerid/:vendorid/:status/:fromdate/:todate"
 	});
 });
 
-stockRouter.get("/search-sales/:centerid/:customerid/:status/:fromdate/:todate", (req, res) => {
+stockRouter.get("/search-sales/:centerid/:customerid/:status/:fromdate/:todate/:saletype", (req, res) => {
 	let center_id = req.params.centerid;
 	let status = req.params.status;
 	let customer_id = req.params.customerid;
 	let from_date = req.params.fromdate;
 	let to_date = req.params.todate;
+	let sale_type = req.params.saletype;
 
 	if (from_date !== "") {
-		from_date = moment(req.params.fromdate).format("DD-MM-YYYY") + " 00:00:00";
+		from_date = moment(new Date(req.params.fromdate)).format("DD-MM-YYYY") + " 00:00:00";
 	}
 
 	if (to_date !== "") {
-		to_date = moment(req.params.todate).format("DD-MM-YYYY") + " 23:59:00";
+		to_date = moment(new Date(req.params.todate)).format("DD-MM-YYYY") + " 23:59:00";
 	}
 
 	let custsql = `and s.customer_id = '${customer_id}' `;
@@ -125,6 +126,14 @@ stockRouter.get("/search-sales/:centerid/:customerid/:status/:fromdate/:todate",
 
 	if (status !== "all") {
 		sql = sql + statussql;
+	}
+
+	if (sale_type !== "all") {
+		if (sale_type === "GI") {
+			sql = sql + " and s.sale_type = 'gstinvoice' ";
+		} else if (sale_type === "SI") {
+			sql = sql + " and s.sale_type = 'stockissue' ";
+		}
 	}
 
 	pool.query(sql, function (err, data) {
@@ -257,7 +266,7 @@ module.exports = stockRouter;
 
 stockRouter.delete("/delete-purchase/:id", (req, res) => {
 	let purchase_id = req.params.id;
-
+	console.log("dineh " + purhase_id);
 	let sql = `
 	delete from purchase where 
 id = ${purchase_id} `;

@@ -16,7 +16,7 @@ function createInvoice(saleMaster, saleDetails, customerDetails, centerDetails, 
 	let salemasterdata = saleMaster[0];
 	let saledetailsdata = saleDetails;
 
-	let doc = new PDFDocument({ size: "A4", margin: 50 });
+	let doc = new PDFDocument({ size: "A4", margin: 20 });
 
 	generateHeader(doc, centerdata);
 	generateCustomerInformation(doc, invoice);
@@ -47,19 +47,22 @@ function createInvoice(saleMaster, saleDetails, customerDetails, centerDetails, 
 
 function generateHeader(doc, centerdata) {
 	doc
-		.image("logo.png", 20, 45, { width: 50 })
+		.image("tractor.png", 20, 25, { width: 80 })
 		.fillColor("#444444")
 
 		.fontSize(14)
-		.text(centerdata.name, 100, 50)
+		.text(centerdata.name, { align: "center", lineGap: 1.4 })
 		.fontSize(10)
-		.text(centerdata.address1, 100, 65)
-		.text(centerdata.address2, 100, 80)
-		.text(centerdata.pin, 100, 100)
-		.text(centerdata.gstin, 100, 120)
-		.text(centerdata.email, 100, 140)
-		.text(centerdata.mobile1, 100, 160)
-		.text(centerdata.mobile2, 100, 80)
+		.text(centerdata.tagline, { align: "center", lineGap: 1.4 })
+		.text(centerdata.address1, { align: "center", lineGap: 1.4 })
+		.text(centerdata.address2, { align: "center", lineGap: 1.4 })
+		.text(centerdata.district + "-" + centerdata.pin, { align: "center", lineGap: 1.4 })
+
+		.text(centerdata.gst, { align: "center", lineGap: 1.4 })
+		.text(centerdata.email, { align: "center", lineGap: 1.4 })
+		.text(centerdata.phone, 430, 90)
+		.text(centerdata.mobile, 500, 90)
+		.image("swaraj.png", 480, 35, { width: 80 })
 
 		.moveDown();
 }
