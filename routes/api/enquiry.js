@@ -229,6 +229,25 @@ enquiryRoute.post("/update-giveqty-enquiry-details", (req, res) => {
 	});
 });
 
+enquiryRoute.get("/update-customer/:id/:enqid", (req, res) => {
+	let id = req.params.id;
+	let enqid = req.params.enqid;
+	let query = `update enquiry
+	set
+	customer_id = '${id}'
+	where id = '${enqid}' `;
+
+	pool.query(query, function (err, data) {
+		if (err) {
+			return handleError(new ErrorHandler("500", "Error Updating customer id."), res);
+		} else {
+			res.json({
+				result: "success",
+			});
+		}
+	});
+});
+
 enquiryRoute.post("/update-status-enquiry-details", (req, res) => {
 	let status = req.body.status;
 	let id = req.body.enqdetailid;
@@ -343,7 +362,7 @@ enquiryRoute.post("/add-more-enquiry-details", (req, res) => {
 				from
 				(select ed.*, c.id as customer_id, c.name, c.address1, c.address2, c.district, c.pin, c.gst, c.mobile2, e.remarks, e.estatus,
 					p.id as pid, p.center_id, p.vendor_id, p.product_code as pcode, p.description as pdesc, p.unit, p.packetsize, p.hsncode,
-					p.currentstock, p.unit_price, p.mrp, p.purchaseprice,
+					p.currentstock, p.unit_price, p.mrp, p.purchase_price,
 					p.salesprice, p.rackno, p.location, p.maxdiscount, p.taxrate, 
 					p.minqty, p.itemdiscount, p.reorderqty, p.avgpurprice,
 					p.avgsaleprice, p.margin
@@ -415,7 +434,7 @@ select orig.*, s.available_stock, s.id as stock_pk
 from
 (select ed.*, c.id as customer_id, c.name, c.address1, c.address2, c.district, c.pin, c.gst, c.mobile2, e.remarks, e.estatus,
 	p.id as pid, p.center_id, p.brand_id, p.product_code as pcode, p.description as pdesc, p.unit, p.packetsize, p.hsncode,
-	p.currentstock, p.unit_price, p.mrp, p.purchaseprice,
+	p.currentstock, p.unit_price, p.mrp, p.purchase_price,
 	p.salesprice, p.rackno, p.location, p.maxdiscount, p.taxrate, 
 	p.minqty, p.itemdiscount, p.reorderqty, p.avgpurprice,
 	p.avgsaleprice, p.margin

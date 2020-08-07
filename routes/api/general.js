@@ -114,7 +114,7 @@ router.post("/search-product", (req, res) => {
 	const [centerid, searchstr] = Object.values(req.body);
 
 	let sql = `select a.product_code as product_code, a.description, a.mrp, a.taxrate, b.available_stock,
-	a.packetsize, a.unit_price, a.id as product_id, b.id as stock_pk, a.packetsize as qty, a.rackno, bd.name,
+	a.packetsize, a.unit_price, a.purchase_price as purchase_price, a.id as product_id, b.id as stock_pk, a.packetsize as qty, a.rackno, bd.name,
 	bd.id as brand_id, a.unit as uom, a.hsncode as hsncode, a.minqty as minqty, a.avgpurprice as avgpurprice,
 	a.unit_price as unit_price
 	from 

@@ -45,11 +45,11 @@ stockRouter.get("/search-purchase/:centerid/:vendorid/:status/:fromdate/:todate"
 	let to_date = req.params.todate;
 
 	if (from_date !== "") {
-		from_date = moment(req.params.fromdate).format("DD-MM-YYYY") + " 00:00:00";
+		from_date = moment(new Date(req.params.fromdate)).format("DD-MM-YYYY") + " 00:00:00";
 	}
 
 	if (to_date !== "") {
-		to_date = moment(req.params.todate).format("DD-MM-YYYY") + " 23:59:00";
+		to_date = moment(new Date(req.params.todate)).format("DD-MM-YYYY") + " 23:59:00";
 	}
 
 	let vendsql = `and p.vendor_id = '${vendor_id}' `;
@@ -136,6 +136,10 @@ stockRouter.get("/search-sales/:centerid/:customerid/:status/:fromdate/:todate/:
 		}
 	}
 
+	sql = sql + " order by invoice_no ";
+
+	console.log("sql search sale " + sql);
+
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error fetching search purchase"), res);
@@ -218,7 +222,139 @@ pd.id as id,
 pd.purchase_id as purchase_id,
 pd.product_id as product_id,
 pd.qty as qty,
-pd.unit_price as unit_price,
+pd.purchase_price as purchase_price,
+pd.mrp as mrp,
+pd.batchdate as batchdate,
+pd.tax as tax,
+pd.igst as igst,
+pd.cgst as cgst,
+pd.sgst as sgst,
+pd.taxable_value as tax_value,
+pd.total_value as total_value,
+p.product_code, p.description, p.packetsize, p.taxrate, s.id as stock_pk from  
+purchase_detail pd,
+product p,
+stock s
+where
+s.product_id = p.id and
+p.id = pd.product_id and
+pd.purchase_id = '${purchase_id}' 
+	 `;
+
+	pool.query(sql, function (err, data) {
+		if (err) {
+			return handleError(new ErrorHandler("500", "Error fetching purchase master"), res);
+		} else {
+			return res.json(data);
+		}
+	});
+});
+
+stockRouter.post("/delete-purchase-details", async (req, res) => {
+	let id = req.body.id;
+	let purchase_id = req.body.purchaseid;
+	let qty = req.body.qty;
+	let product_id = req.body.product_id;
+	let stock_id = req.body.stock_id;
+
+	console.log("delete-purchase-details >>>>>> " + id);
+	console.log("delete-purchase-details >>>>>><<<<<< " + purchase_id);
+	console.log("delete-purchase-details >>>>>><<<<<< " + qty);
+	console.log("delete-purchase-details >>>>>><<<<<< " + product_id);
+	console.log("delete-purchase-details >>>>>><<<<<< " + stock_id);
+
+	var today = new Date();
+	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+
+	let auditQuery = `
+	INSERT INTO audit_tbl (module, module_ref_id, module_ref_det_id, actn, old_value, new_value, audit_date)
+	VALUES
+		('Purchase', '${purchase_id}', '${id}', 'delete', 
+		(SELECT CONCAT('[{', result, '}]') as final
+		FROM (
+			SELECT GROUP_CONCAT(CONCAT_WS(',', CONCAT('"purchaseId": ', purchase_id), CONCAT('"productId": "', product_id, '"'), CONCAT('"qty": "', qty, '"')) SEPARATOR '},{') as result
+			FROM (
+				SELECT purchase_id, product_id, qty
+				FROM purchase_detail where id = '${id}'
+			) t1
+		) t2)
+		, '', '${today}'
+		) `;
+
+	// step 1
+	let auditPromise = await new Promise(function (resolve, reject) {
+		pool.query(auditQuery, function (err, data) {
+			if (err) {
+				console.log("error: " + err);
+				return reject(handleError(new ErrorHandler("500", "Error adding sale audit."), res));
+			}
+			resolve(data);
+		});
+	});
+
+	// step 2
+	let deletePromise = await new Promise(function (resolve, reject) {
+		let query = `
+			delete from purchase_detail where id = '${id}' `;
+
+		pool.query(query, function (err, data) {
+			if (err) {
+				return reject(handleError(new ErrorHandler("500", "Error deleting sale details"), res));
+			}
+			resolve(data);
+		});
+	});
+
+	//
+
+	// step 3
+	let stockUpdatePromise = await new Promise(function (resolve, reject) {
+		let stockUpdateQuery = `update stock set available_stock =  available_stock - '${qty}'
+where product_id = '${product_id}' and id = '${stock_id}'  `;
+
+		console.log("stockUpdatePromise > " + stockUpdateQuery);
+
+		pool.query(stockUpdateQuery, function (err, data) {
+			if (err) {
+				return reject(handleError(new ErrorHandler("500", "Error deleting sale details"), res));
+			}
+			resolve(data);
+		});
+	});
+
+	return res.json({
+		result: "success",
+	});
+});
+
+module.exports = stockRouter;
+
+// called from sale details list delete
+stockRouter.delete("/delete-purchase/:id", async (req, res) => {
+	let purchase_id = req.params.id;
+	console.log("purchase _id ^^" + purchase_id);
+
+	let purchaseDetails = await getPurchaseDetails(purchase_id);
+
+	let idx = 0;
+
+	let retValue = await deletePurchaseDetailsRecs(purchaseDetails, purchase_id);
+
+	if (retValue === "done") {
+		return res.json({
+			result: "success",
+		});
+	}
+});
+
+function getPurchaseDetails(purchase_id) {
+	let sql = `
+	select pd.*, 
+pd.id as id, 
+pd.purchase_id as purchase_id,
+pd.product_id as product_id,
+pd.qty as qty,
+pd.purchase_price as purchase_price,
 pd.mrp as mrp,
 pd.batchdate as batchdate,
 pd.tax as tax,
@@ -235,45 +371,106 @@ p.id = pd.product_id and
 pd.purchase_id = '${purchase_id}' 
 	 `;
 
-	pool.query(sql, function (err, data) {
-		if (err) {
-			return handleError(new ErrorHandler("500", "Error fetching purchase master"), res);
-		} else {
-			return res.json(data);
-		}
+	return new Promise(function (resolve, reject) {
+		pool.query(sql, function (err, data) {
+			if (err) {
+				reject(err);
+			}
+			resolve(data);
+		});
 	});
-});
+}
 
-stockRouter.post("/delete-purchase-details", (req, res) => {
-	let id = req.body.id;
-	let purchase_id = req.body.purchaseid;
+function deletePurchaseDetailsRecs(purchaseDetails, purchase_id) {
+	let idx = 0;
 
-	let query = `
-	delete from purchase_detail where id = '${id}' `;
+	purchaseDetails.forEach(async (element, index) => {
+		idx = index + 1;
 
-	pool.query(query, function (err, data) {
-		if (err) {
-			return handleError(new ErrorHandler("500", "Error deleting purchase details"), res);
-		} else {
-			return res.json({
-				result: "success",
+		console.log("object >>>>>> " + JSON.stringify(element));
+		console.log("object >>>>>><<<<<< " + idx);
+
+		var today = new Date();
+		today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+
+		let auditQuery = `
+		INSERT INTO audit_tbl (module, module_ref_id, module_ref_det_id, actn, old_value, new_value, audit_date)
+		VALUES
+			('Purchase', '${purchase_id}', '${element.id}', 'delete', 
+			(SELECT CONCAT('[{', result, '}]') as final
+			FROM (
+				SELECT GROUP_CONCAT(CONCAT_WS(',', CONCAT('"purchaseId": ', purchase_id), CONCAT('"productId": "', product_id, '"'), CONCAT('"qty": "', qty, '"')) SEPARATOR '},{') as result
+				FROM (
+					SELECT purchase_id, product_id, qty
+					FROM purchase_detail where id = '${element.id}'
+				) t1
+			) t2)
+			, '', '${today}'
+			) `;
+
+		// step 1
+		let auditPromise = await new Promise(function (resolve, reject) {
+			pool.query(auditQuery, function (err, data) {
+				if (err) {
+					console.log("error: " + err);
+					return reject(handleError(new ErrorHandler("500", "Error adding sale audit."), res));
+				}
+				resolve(data);
 			});
-		}
+		});
+
+		// step 2
+		let deletePromise = await new Promise(function (resolve, reject) {
+			let query = `
+				delete from purchase_detail where id = '${element.id}' `;
+
+			pool.query(query, function (err, data) {
+				if (err) {
+					return reject(handleError(new ErrorHandler("500", "Error deleting sale details"), res));
+				}
+				resolve(data);
+			});
+		});
+
+		//
+
+		// step 3
+		let stockUpdatePromise = await new Promise(function (resolve, reject) {
+			let stockUpdateQuery = `update stock set available_stock =  available_stock - '${element.qty}'
+where product_id = '${element.product_id}' and id = '${element.id}'  `;
+
+			console.log("stockUpdatePromise > " + stockUpdateQuery);
+
+			pool.query(stockUpdateQuery, function (err, data) {
+				if (err) {
+					return reject(handleError(new ErrorHandler("500", "Error deleting sale details"), res));
+				}
+				resolve(data);
+			});
+		});
 	});
-});
 
-module.exports = stockRouter;
+	if (purchaseDetails.length === idx) {
+		return new Promise(function (resolve, reject) {
+			resolve("done");
+		}).catch(() => {
+			/* do whatever you want here */
+		});
+	}
+}
 
-stockRouter.delete("/delete-purchase/:id", (req, res) => {
+stockRouter.get("/delete-purchase-master/:id", async (req, res) => {
 	let purchase_id = req.params.id;
-	console.log("dineh " + purhase_id);
-	let sql = `
-	delete from purchase where 
-id = ${purchase_id} `;
+	console.log("sale _id ^^" + purchase_id);
 
+	let sql = `
+		delete from purchase where 
+	id = '${purchase_id}' `;
+	console.log("llllll222222 SQL " + sql);
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(new ErrorHandler("500", "Error fetching purchase master"), res);
+			console.log("what error " + JSON.stringify(err));
+			return handleError(new ErrorHandler("500", "Error deleting sale detail / master"), res);
 		} else {
 			return res.json({
 				result: "success",

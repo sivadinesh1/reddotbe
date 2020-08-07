@@ -368,6 +368,7 @@ saleRouter.post("/convert-sale", async (req, res) => {
 	});
 });
 
+// called from sale details list delete
 saleRouter.get("/delete-sale/:id", async (req, res) => {
 	let sale_id = req.params.id;
 	console.log("sale _id ^^" + sale_id);
@@ -379,21 +380,30 @@ saleRouter.get("/delete-sale/:id", async (req, res) => {
 	let retValue = await deleteSaleDetailsRecs(saleDetails, sale_id);
 
 	if (retValue === "done") {
-		let sql = `
-		delete from sale where 
-	id = '${sale_id}' `;
-		console.log("llllll222222 SQL " + sql);
-		pool.query(sql, function (err, data) {
-			if (err) {
-				console.log("what error " + JSON.stringify(err));
-				return handleError(new ErrorHandler("500", "Error deleting sale detail / master"), res);
-			} else {
-				return res.json({
-					result: "success",
-				});
-			}
+		return res.json({
+			result: "success",
 		});
 	}
+});
+
+saleRouter.get("/delete-sale-master/:id", async (req, res) => {
+	let sale_id = req.params.id;
+	console.log("sale _id ^^" + sale_id);
+
+	let sql = `
+		delete from sale where 
+	id = '${sale_id}' `;
+	console.log("llllll222222 SQL " + sql);
+	pool.query(sql, function (err, data) {
+		if (err) {
+			console.log("what error " + JSON.stringify(err));
+			return handleError(new ErrorHandler("500", "Error deleting sale detail / master"), res);
+		} else {
+			return res.json({
+				result: "success",
+			});
+		}
+	});
 });
 
 function deleteSaleDetailsRecs(saleDetails, sale_id) {
@@ -403,6 +413,7 @@ function deleteSaleDetailsRecs(saleDetails, sale_id) {
 		idx = index + 1;
 
 		console.log("object >>>>>> " + JSON.stringify(element));
+		console.log("object >>>>>><<<<<< " + idx);
 
 		var today = new Date();
 		today = moment(today).format("YYYY-MM-DD HH:mm:ss");
@@ -461,7 +472,7 @@ where product_id = '${element.product_id}' and id = '${element.stock_id}'  `;
 			});
 		});
 
-		console.log("select promise " + JSON.stringify(stockUpdatePromise));
+		//	console.log("select promise " + JSON.stringify(stockUpdatePromise));
 	});
 
 	if (saleDetails.length === idx) {

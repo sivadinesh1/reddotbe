@@ -8,7 +8,7 @@ const insertProduct = (insertValues, callback) => {
 	let query = `INSERT INTO 
 		product 
 			(center_id, brand_id, product_code, description, unit, packetsize, hsncode, currentstock, unit_price, mrp, 
-				purchaseprice, salesprice, rackno, location, maxdiscount, alternatecode, taxrate, 
+				purchase_price, salesprice, rackno, location, maxdiscount, alternatecode, taxrate, 
 				minqty, itemdiscount, reorderqty, avgpurprice, avgsaleprice, margin)
 		VALUES
 			( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ) `;
@@ -24,7 +24,7 @@ const insertProduct = (insertValues, callback) => {
 		insertValues.currentstock,
 		insertValues.unit_price,
 		insertValues.mrp,
-		insertValues.purchaseprice,
+		insertValues.purchase_price,
 		insertValues.salesprice,
 		insertValues.rackno,
 		insertValues.location,
@@ -54,7 +54,7 @@ const updateProduct = (updateValues, callback) => {
 			update product set center_id = '${updateValues.center_id}', brand_id = '${updateValues.brand_id}',
 			product_code = '${updateValues.product_code}', description = '${updateValues.description}',unit = '${updateValues.unit}',
 			packetsize = '${updateValues.packetsize}', hsncode = '${updateValues.hsncode}',currentstock = '${updateValues.currentstock}',
-			unit_price = '${updateValues.unit_price}', mrp = '${updateValues.mrp}',purchaseprice = '${updateValues.purchaseprice}',
+			unit_price = '${updateValues.unit_price}', mrp = '${updateValues.mrp}',purchase_price = '${updateValues.purchase_price}',
 			salesprice = '${updateValues.salesprice}', rackno = '${updateValues.rackno}',location = '${updateValues.location}',
 			maxdiscount = '${updateValues.maxdiscount}', alternatecode = '${updateValues.alternatecode}',taxrate = '${updateValues.taxrate}',
 			minqty = '${updateValues.minqty}', itemdiscount = '${updateValues.itemdiscount}',reorderqty = '${updateValues.reorderqty}',
