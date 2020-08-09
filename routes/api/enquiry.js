@@ -527,6 +527,7 @@ discount.brand_id = 0 )
 	a.id = b.product_id and
 	b.id = ed.stock_id and
 	ed.status in ('P', 'F')  and
+	ed.giveqty != 0 and
 	e.id = ${enqid}
 	`;
 	console.log("object # get-enquired-product-data " + sql);
