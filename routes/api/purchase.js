@@ -119,6 +119,9 @@ function processItems(cloneReq, newPK) {
 						updateStock(k);
 						//		}
 					}
+					console.log("delete this " + JSON.stringify(data));
+					insertItemHistory(k, newPK, data.insertId);
+
 					resolve(true);
 				}
 			});
@@ -174,6 +177,38 @@ where id = '${k.product_id}'  `;
 			console.log("object..purchase price update error .");
 		} else {
 			console.log("object..purchase price updated .");
+		}
+	});
+}
+
+function insertItemHistory(k, vPurchase_id, vPurchase_det_id) {
+	var today = new Date();
+	today = moment(today).format("DD-MM-YYYY");
+
+	console.log("delete ME 1 " + vPurchase_id);
+	console.log("delete ME 2 " + vPurchase_det_id);
+
+	// if purchase details id is missing its new else update
+	let purchase_det_id = k.pur_det_id === "" ? vPurchase_det_id : k.pur_det_id;
+	let txn_qty = k.pur_det_id === "" ? k.qty : k.qty - k.old_val;
+	let actn_type = "ADD";
+	let purchase_id = vPurchase_id === "" ? k.purchase_id : vPurchase_id;
+
+	//txn -ve means subtract from qty
+	if (txn_qty < 0) {
+		actn_type = "SUB";
+	}
+
+	let query2 = `
+			insert into item_history (module, product_ref_id, purchase_id, purchase_det_id, actn, actn_type, txn_qty, stock_level, txn_date)
+			values ('Purchase', '${k.product_id}', '${purchase_id}', '${purchase_det_id}', 'PUR', '${actn_type}', '${txn_qty}', 
+							(select (available_stock)  from stock where product_id = '${k.product_id}' ), '${today}' ) `;
+
+	pool.query(query2, function (err, data) {
+		if (err) {
+			console.log("object" + err);
+		} else {
+			console.log("object..stock update .");
 		}
 	});
 }

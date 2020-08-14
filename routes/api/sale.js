@@ -304,34 +304,32 @@ function processItems(cloneReq, newPK) {
 				if (err) {
 					reject(err);
 				}
-				resolve(data);
-			});
-		});
+				// after sale details is updated, then update stock (as this is sale, reduce available stock) tbl & product tbl
+				let qty_to_update = k.qty - k.old_val;
 
-		console.log("object... new qty " + k.qty + " old val " + k.old_val);
-
-		// after sale details is updated, then update stock (as this is sale, reduce available stock) tbl & product tbl
-		let qty_to_update = k.qty - k.old_val;
-
-		let query2 = `update stock set available_stock =  available_stock - '${qty_to_update}'
+				let query2 = `update stock set available_stock =  available_stock - '${qty_to_update}'
 			 where product_id = '${k.product_id}' and id = '${k.stock_pk}'  `;
 
-		let stockTblPromise = new Promise(function (resolve, reject) {
-			pool.query(query2, function (err, data) {
-				if (err) {
-					reject(err);
-				}
-				resolve(data);
-			});
-		});
+				let stockTblPromise = new Promise(function (resolve, reject) {
+					pool.query(query2, function (err, data) {
+						if (err) {
+							reject(err);
+						}
+						resolve(data);
+					});
+				});
 
-		let productTblPromise = new Promise(function (resolve, reject) {
-			// update current stock in product table
-			let query300 = ` update product set currentstock = (select sum(available_stock) from stock where product_id = '${k.product_id}')`;
-			pool.query(query300, function (err, data) {
-				if (err) {
-					reject(err);
-				}
+				let productTblPromise = new Promise(function (resolve, reject) {
+					// update current stock in product table
+					let query300 = ` update product set currentstock = (select sum(available_stock) from stock where product_id = '${k.product_id}')`;
+					pool.query(query300, function (err, data) {
+						if (err) {
+							reject(err);
+						}
+						resolve(data);
+					});
+				});
+				insertItemHistory(k, newPK, data.insertId);
 				resolve(data);
 			});
 		});
@@ -482,6 +480,38 @@ where product_id = '${element.product_id}' and id = '${element.stock_id}'  `;
 			/* do whatever you want here */
 		});
 	}
+}
+
+function insertItemHistory(k, vSale_id, vSale_det_id) {
+	var today = new Date();
+	today = moment(today).format("DD-MM-YYYY");
+
+	// if purchase details id is missing its new else update
+	let sale_det_id = k.sale_det_id === "" ? vSale_det_id : k.sale_det_id;
+	let txn_qty = k.sale_det_id === "" ? k.qty : k.qty - k.old_val;
+	let actn_type = "SUB";
+	let sale_id = vSale_id === "" ? k.sale_id : vSale_id;
+
+	//txn -ve means subtract from qty
+	if (txn_qty < 0) {
+		actn_type = "ADD";
+	}
+
+	//~ bitwise operator. Bitwise does not negate a number exactly. eg:  ~1000 is -1001, not -1000 (a = ~a + 1)
+	txn_qty = ~txn_qty + 1;
+
+	let query2 = `
+			insert into item_history (module, product_ref_id, sale_id, sale_det_id, actn, actn_type, txn_qty, stock_level, txn_date)
+			values ('Sale', '${k.product_id}', '${sale_id}', '${sale_det_id}', 'SAL', '${actn_type}', '${txn_qty}', 
+							(select (available_stock)  from stock where product_id = '${k.product_id}' ), '${today}' ) `;
+
+	pool.query(query2, function (err, data) {
+		if (err) {
+			console.log("object" + err);
+		} else {
+			console.log("object..stock update .");
+		}
+	});
 }
 
 module.exports = saleRouter;
