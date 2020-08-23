@@ -9,6 +9,8 @@ const { handleError, ErrorHandler } = require("./../helpers/error");
 
 const { getSalesMaster, getSalesDetails } = require("../modules/sales/sales.js");
 
+const { addSaleLedgerRecord } = require("../modules/accounts/accounts.js");
+
 var pool = require("../helpers/db");
 
 // Get Possible Next Sale Invoice # (ReadOnly)
@@ -156,7 +158,16 @@ saleRouter.post("/insert-sale-details", async (req, res) => {
 			// (3) - updates sale details
 			let process = processItems(cloneReq, newPK);
 
-			Promise.all([process]).then(res.json({ result: "success", id: newPK, invoiceno: invNo }));
+			Promise.all([process]).then(() => {
+				addSaleLedgerRecord(cloneReq, newPK, (err, data) => {
+					if (err) {
+						let errTxt = err.message;
+						console.log("error inserting ledger records " + errTxt);
+					} else {
+						res.json({ result: "success", id: newPK, invoiceno: invNo });
+					}
+				});
+			});
 		})
 		.catch((err) => {
 			console.log("error: " + err);

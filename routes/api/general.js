@@ -243,7 +243,7 @@ router.get("/all-active-customers/:centerid", (req, res) => {
 	let centerid = req.params.centerid;
 
 	let sql = `select c.id, c.center_id, c.name, c.address1, c.address2, c.district, s.id as state_id, s.code, s.description,
-	c.pin, c.gst, c.phone, c.mobile, c.mobile2, c.whatsapp, c.email, c.isactive  from 
+	c.pin, c.gst, c.phone, c.mobile, c.mobile2, c.whatsapp, c.email, c.isactive, c.credit_amt as credit_amt  from 
 	customer c,
 	state s
 	where 
@@ -367,4 +367,17 @@ router.get("/purchase/:purchaseid/:status", (req, res) => {
 	} catch (error) {
 		return handleError(new ErrorHandler("500", "Error processing request"), res);
 	}
+});
+
+//mgt
+router.get("/all-pymt-modes/:center_id/:status", (req, res) => {
+	let sql = `select * from payment_mode where center_id = '${req.params.center_id}' and is_active = '${req.params.status}'`;
+	console.log("dinesh  " + sql);
+	pool.query(sql, function (err, data) {
+		if (err) {
+			return handleError(new ErrorHandler("500", "Error fetching all all-pymt-modes."), res);
+		} else {
+			return res.json(data);
+		}
+	});
 });

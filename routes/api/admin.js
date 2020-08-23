@@ -202,14 +202,6 @@ adminRoute.post("/add-brand", (req, res, next) => {
 adminRoute.get("/get-customer-details/:centerid/:customerid", async (req, res) => {
 	let rows = await getCustomerDetails(req.params.centerid, req.params.customerid);
 	return res.status(200).json(rows);
-
-	// getCustomerDetails(req.params.centerid, req.params.customerid, (err, data) => {
-	// 	if (err) {
-	// 		return handleError(new ErrorHandler("500", "Error fetching customer details."), res);
-	// 	} else {
-	// 		return res.status(200).json(data);
-	// 	}
-	// });
 });
 
 // customers
@@ -245,12 +237,6 @@ adminRoute.post("/add-customer", (req, res) => {
 adminRoute.get("/get-center-details/:centerid", (req, res) => {
 	let rows = getCenterDetails(`${req.params.centerid}`);
 	return res.json(rows);
-
-	// // @ center.js
-	// getCenterDetails(`${req.params.centerid}`, (err, rows) => {
-	// 	if (err) return handleError(new ErrorHandler("500", "Error fetching shipping address"), res);
-	// 	return res.json(rows);
-	// });
 });
 
 adminRoute.post("/update-center", (req, res) => {
