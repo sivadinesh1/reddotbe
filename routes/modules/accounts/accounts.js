@@ -56,6 +56,7 @@ const addPaymentMaster = async (cloneReq, pymtNo, insertValues, callback) => {
 		cloneReq.customer.id,
 		pymtNo,
 		insertValues.receivedamount,
+		cloneReq.customer.credit_amt,
 		moment(insertValues.receiveddate).format("DD-MM-YYYY"),
 		insertValues.pymtmode,
 		insertValues.bankref,
@@ -63,8 +64,8 @@ const addPaymentMaster = async (cloneReq, pymtNo, insertValues, callback) => {
 	];
 
 	let query = `
-		INSERT INTO PAYMENT ( center_id, customer_id, payment_no, payment_now_amt, pymt_date, pymt_mode_ref_id, bank_ref, pymt_ref, last_updated)
-		VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, '${today}' ) `;
+		INSERT INTO PAYMENT ( center_id, customer_id, payment_no, payment_now_amt, advance_amt_used, pymt_date, pymt_mode_ref_id, bank_ref, pymt_ref, last_updated)
+		VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, '${today}' ) `;
 
 	return new Promise(function (resolve, reject) {
 		pool.query(query, values, function (err, data) {
@@ -254,6 +255,49 @@ const getSaleInvoiceByCenter = (center_id, callback) => {
 	});
 };
 
+const updateCustomerCredit = (balanceamount, center_id, customer_id) => {
+	let qryUpdateSqnc = "";
+
+	//~ bitwise operator. Bitwise does not negate a number exactly. eg:  ~1000 is -1001, not -1000 (a = ~a + 1)
+	balanceamount = ~balanceamount + 1;
+
+	qryUpdateSqnc = `
+		update customer set credit_amt = credit_amt + '${balanceamount}' where 
+		center_id = '${center_id}' and  
+		id = '${customer_id}'
+		 `;
+	console.log("print dinesh " + qryUpdateSqnc);
+	return new Promise(function (resolve, reject) {
+		pool.query(qryUpdateSqnc, function (err, data) {
+			if (err) {
+				reject(err);
+			}
+			resolve(data);
+			//		console.log("dinesh UPdate completed" + JSON.stringify(data));
+		});
+	});
+};
+
+const updateCustomerCreditMinus = (creditusedamount, center_id, customer_id) => {
+	let qryUpdateSqnc = "";
+
+	qryUpdateSqnc = `
+		update customer set credit_amt = credit_amt - '${creditusedamount}' where 
+		center_id = '${center_id}' and  
+		id = '${customer_id}'
+		 `;
+	console.log("print dinesh " + qryUpdateSqnc);
+	return new Promise(function (resolve, reject) {
+		pool.query(qryUpdateSqnc, function (err, data) {
+			if (err) {
+				reject(err);
+			}
+			resolve(data);
+			//		console.log("dinesh UPdate completed" + JSON.stringify(data));
+		});
+	});
+};
+
 module.exports = {
 	addSaleLedgerRecord,
 	addPaymentMaster,
@@ -265,6 +309,8 @@ module.exports = {
 	getPymtSequenceNo,
 	getPaymentsByCenter,
 	getSaleInvoiceByCenter,
+	updateCustomerCredit,
+	updateCustomerCreditMinus,
 };
 
 // select s.id as sale_id, s.center_id as center_id, s.customer_id as customer_id, s.invoice_no as invoice_no, s.invoice_date as invoice_date, s.net_total as invoice_amt, s.sale_type as sale_type, c.name as customer_name, c.address1 as customer_address1,

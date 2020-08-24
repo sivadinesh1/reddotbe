@@ -17,6 +17,8 @@ const {
 	getPymtSequenceNo,
 	getPaymentsByCenter,
 	getSaleInvoiceByCenter,
+	updateCustomerCredit,
+	updateCustomerCreditMinus,
 } = require("../modules/accounts/accounts.js");
 
 accountsRouter.post("/add-payment-received", async (req, res) => {
@@ -82,6 +84,33 @@ function processItems(cloneReq, newPK, sale_ref_id, receivedamount) {
 	});
 }
 
+function processBulkItems(cloneReq, newPK, invoicesplit) {
+	invoicesplit.forEach((e) => {
+		let sql = `INSERT INTO payment_detail(pymt_ref_id, sale_ref_id, applied_amount) VALUES
+		( '${newPK}', '${e.id}', '${e.applied_amount}' )`;
+
+		let pymtdetailsTblPromise = new Promise(function (resolve, reject) {
+			pool.query(sql, function (err, data) {
+				if (err) {
+					reject(err);
+				} else {
+					// check if there is any credit balance for the customer, if yes, first apply that
+
+					addPaymentLedgerRecord(cloneReq, newPK, e.applied_amount, (err, data2) => {
+						if (err) {
+							let errTxt = err.message;
+							console.log("error inserting payment ledger records " + errTxt);
+						} else {
+							// do nothing
+						}
+					});
+					resolve(data);
+				}
+			});
+		});
+	});
+}
+
 accountsRouter.get("/get-ledger-customer/:centerid/:customerid", (req, res) => {
 	getLedgerByCustomers(req.params.centerid, req.params.customerid, (err, data) => {
 		if (err) {
@@ -130,6 +159,67 @@ accountsRouter.get("/get-payments-center/:centerid", (req, res) => {
 			return res.status(200).json(data);
 		}
 	});
+});
+
+accountsRouter.post("/add-bulk-payment-received", async (req, res) => {
+	var today = new Date();
+	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+
+	const cloneReq = { ...req.body };
+
+	console.log("dinesh  " + JSON.stringify(req.body));
+
+	const [customer, center_id, accountarr, invoicesplit, balanceamount] = Object.values(req.body);
+
+	let index = 0;
+
+	for (const k of accountarr) {
+		await updatePymtSequenceGenerator(center_id);
+
+		let pymtNo = await getPymtSequenceNo(cloneReq);
+
+		console.log("calling pymtNo >>>  " + pymtNo);
+
+		// add payment master
+		addPaymentMaster(cloneReq, pymtNo, k, (err, data) => {
+			let newPK = data.insertId;
+
+			// (3) - updates pymt details
+			let process = processBulkItems(cloneReq, newPK, invoicesplit);
+		}).catch((err) => {
+			console.log("error: " + err);
+			return handleError(new ErrorHandler("500", "Error bulk pymtMaster/Details Entry > " + err), res);
+		});
+
+		if (index == accountarr.length - 1) {
+			if (req.body.creditsused === "YES") {
+				updateCustomerCreditMinus(req.body.creditusedamount, cloneReq.centerid, cloneReq.customer.id, (err, data1) => {
+					if (err) {
+						let errTxt = err.message;
+						console.log("error updating updateCustomerCreditMinus " + errTxt);
+					} else {
+						// todo nothing
+					}
+				});
+			}
+
+			// apply the excess amount to custome credit
+			// applicable only if balanceamount < 0
+			if (balanceamount < 0) {
+				updateCustomerCredit(balanceamount, cloneReq.centerid, cloneReq.customer.id, (err, data1) => {
+					if (err) {
+						let errTxt = err.message;
+						console.log("error updating customer credit " + errTxt);
+					} else {
+						// todo nothing
+					}
+				});
+			}
+			return res.status(200).json("success");
+		}
+		index++;
+		// });
+	}
 });
 
 module.exports = accountsRouter;

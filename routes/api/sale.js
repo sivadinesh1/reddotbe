@@ -340,7 +340,7 @@ function processItems(cloneReq, newPK) {
 						resolve(data);
 					});
 				});
-				insertItemHistory(k, newPK, data.insertId);
+				insertItemHistory(k, newPK, data.insertId, cloneReq);
 				resolve(data);
 			});
 		});
@@ -493,7 +493,7 @@ where product_id = '${element.product_id}' and id = '${element.stock_id}'  `;
 	}
 }
 
-function insertItemHistory(k, vSale_id, vSale_det_id) {
+function insertItemHistory(k, vSale_id, vSale_det_id, cloneReq) {
 	var today = new Date();
 	today = moment(today).format("DD-MM-YYYY");
 
@@ -508,12 +508,13 @@ function insertItemHistory(k, vSale_id, vSale_det_id) {
 		actn_type = "ADD";
 	}
 
+	// convert -ve to positive number
 	//~ bitwise operator. Bitwise does not negate a number exactly. eg:  ~1000 is -1001, not -1000 (a = ~a + 1)
 	txn_qty = ~txn_qty + 1;
 
 	let query2 = `
-			insert into item_history (module, product_ref_id, sale_id, sale_det_id, actn, actn_type, txn_qty, stock_level, txn_date)
-			values ('Sale', '${k.product_id}', '${sale_id}', '${sale_det_id}', 'SAL', '${actn_type}', '${txn_qty}', 
+			insert into item_history (center_id, module, product_ref_id, sale_id, sale_det_id, actn, actn_type, txn_qty, stock_level, txn_date)
+			values ('${cloneReq.center_id}', 'Sale', '${k.product_id}', '${sale_id}', '${sale_det_id}', 'SAL', '${actn_type}', '${txn_qty}', 
 							(select (available_stock)  from stock where product_id = '${k.product_id}' ), '${today}' ) `;
 
 	pool.query(query2, function (err, data) {

@@ -120,7 +120,7 @@ function processItems(cloneReq, newPK) {
 						//		}
 					}
 					console.log("delete this " + JSON.stringify(data));
-					insertItemHistory(k, newPK, data.insertId);
+					insertItemHistory(k, newPK, data.insertId, cloneReq);
 
 					resolve(true);
 				}
@@ -181,11 +181,11 @@ where id = '${k.product_id}'  `;
 	});
 }
 
-function insertItemHistory(k, vPurchase_id, vPurchase_det_id) {
+function insertItemHistory(k, vPurchase_id, vPurchase_det_id, cloneReq) {
 	var today = new Date();
 	today = moment(today).format("DD-MM-YYYY");
 
-	console.log("delete ME 1 " + vPurchase_id);
+	console.log("inside insert item history " + JSON.stringify(cloneReq));
 	console.log("delete ME 2 " + vPurchase_det_id);
 
 	// if purchase details id is missing its new else update
@@ -200,8 +200,8 @@ function insertItemHistory(k, vPurchase_id, vPurchase_det_id) {
 	}
 
 	let query2 = `
-			insert into item_history (module, product_ref_id, purchase_id, purchase_det_id, actn, actn_type, txn_qty, stock_level, txn_date)
-			values ('Purchase', '${k.product_id}', '${purchase_id}', '${purchase_det_id}', 'PUR', '${actn_type}', '${txn_qty}', 
+			insert into item_history (center_id, module, product_ref_id, purchase_id, purchase_det_id, actn, actn_type, txn_qty, stock_level, txn_date)
+			values ('${cloneReq.centerid}', 'Purchase', '${k.product_id}', '${purchase_id}', '${purchase_det_id}', 'PUR', '${actn_type}', '${txn_qty}', 
 							(select (available_stock)  from stock where product_id = '${k.product_id}' ), '${today}' ) `;
 
 	pool.query(query2, function (err, data) {
