@@ -1,5 +1,4 @@
 var pool = require("../../helpers/db");
-const moment = require("moment");
 
 // fetch rows from customer tbl & customer shipping addres tbl
 const getCenterDetails = (center_id) => {
@@ -11,9 +10,7 @@ const getCenterDetails = (center_id) => {
   c.state_id = s.id and
   c.id = '${center_id}'  `;
 
-	console.log("get-vendor-details > " + query);
-
-	//	let values = [centerid, searchstr];
+	console.log("getCenterDetails > " + query);
 
 	return new Promise(function (resolve, reject) {
 		pool.query(query, function (err, data) {

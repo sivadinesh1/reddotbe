@@ -20,7 +20,7 @@ const updateBrand = (updateValues, id, callback) => {
 	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
 
 	let query = ` 	update brand set center_id = '${updateValues.center_id}',
-	name = '${updateValues.name}'
+	name = '${updateValues.name}' where 
 	id = '${id}'
 	`;
 

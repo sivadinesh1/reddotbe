@@ -469,7 +469,7 @@ customer_id = ? `;
 };
 
 const insertCustomerShippingAddress = (insertValues, callback) => {
-	if (updateValues.def_address) {
+	if (insertValues.def_address) {
 		let sql = `update customer_shipping_address set def_address = 'N' where customer_id = '${insertValues.customer_id}' `;
 
 		pool.query(sql, function (err, data1) {

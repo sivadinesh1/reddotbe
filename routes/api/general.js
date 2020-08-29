@@ -228,6 +228,93 @@ router.get("/all-active-brands/:centerid/:status", (req, res) => {
 	});
 });
 
+router.get("/vendor-exists/:name", (req, res) => {
+	let name = req.params.name;
+
+	let sql = `select * from vendor v where 
+	v.name = '${name}' `;
+
+	pool.query(sql, function (err, data) {
+		if (err) {
+			console.log("dinesh  " + JSON.stringify(err));
+			return handleError(new ErrorHandler("500", "Error vendor exists."), res);
+		} else {
+			return res.status(200).json({
+				result: data,
+			});
+		}
+	});
+});
+
+router.get("/brand-exists/:name", (req, res) => {
+	let name = req.params.name;
+
+	let sql = `select * from brand b where 
+	b.name = '${name}' `;
+
+	pool.query(sql, function (err, data) {
+		if (err) {
+			console.log("dinesh  " + JSON.stringify(err));
+			return handleError(new ErrorHandler("500", "Error brand exists."), res);
+		} else {
+			return res.status(200).json({
+				result: data,
+			});
+		}
+	});
+});
+
+router.get("/customer-exists/:name", (req, res) => {
+	let name = req.params.name;
+
+	let sql = `select * from customer c where 
+	c.name = '${name}' `;
+
+	pool.query(sql, function (err, data) {
+		if (err) {
+			return handleError(new ErrorHandler("500", "Error Customer exists."), res);
+		} else {
+			return res.status(200).json({
+				result: data,
+			});
+		}
+	});
+});
+
+router.get("/brand-delete/:id", (req, res) => {
+	let id = req.params.id;
+
+	let sql = `update brand set isactive = 'D' where id = '${id}' `;
+
+	pool.query(sql, function (err, data) {
+		if (err) {
+			console.log("dinesh  " + JSON.stringify(err));
+			return handleError(new ErrorHandler("500", "Error delete brand"), res);
+		} else {
+			return res.status(200).json({
+				result: data,
+			});
+		}
+	});
+});
+
+router.get("/vendor-delete/:id", (req, res) => {
+	let id = req.params.id;
+
+	let sql = `update vendor set isactive = 'D' where id = '${id}' `;
+
+	pool.query(sql, function (err, data) {
+		if (err) {
+			console.log("dinesh  " + JSON.stringify(err));
+			return handleError(new ErrorHandler("500", "Error delete vendor"), res);
+		} else {
+			return res.status(200).json({
+				result: data,
+			});
+		}
+	});
+});
+
 // get all active brands
 router.get("/brands-missing-discounts/:centerid/:status/:customerid", (req, res) => {
 	getBrandsMissingDiscountsByCustomer(req.params.centerid, req.params.status, req.params.customerid, (err, rows) => {

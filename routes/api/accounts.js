@@ -84,33 +84,6 @@ function processItems(cloneReq, newPK, sale_ref_id, receivedamount) {
 	});
 }
 
-function processBulkItems(cloneReq, newPK, invoicesplit) {
-	invoicesplit.forEach((e) => {
-		let sql = `INSERT INTO payment_detail(pymt_ref_id, sale_ref_id, applied_amount) VALUES
-		( '${newPK}', '${e.id}', '${e.applied_amount}' )`;
-
-		let pymtdetailsTblPromise = new Promise(function (resolve, reject) {
-			pool.query(sql, function (err, data) {
-				if (err) {
-					reject(err);
-				} else {
-					// check if there is any credit balance for the customer, if yes, first apply that
-
-					addPaymentLedgerRecord(cloneReq, newPK, e.applied_amount, (err, data2) => {
-						if (err) {
-							let errTxt = err.message;
-							console.log("error inserting payment ledger records " + errTxt);
-						} else {
-							// do nothing
-						}
-					});
-					resolve(data);
-				}
-			});
-		});
-	});
-}
-
 accountsRouter.get("/get-ledger-customer/:centerid/:customerid", (req, res) => {
 	getLedgerByCustomers(req.params.centerid, req.params.customerid, (err, data) => {
 		if (err) {
@@ -167,8 +140,6 @@ accountsRouter.post("/add-bulk-payment-received", async (req, res) => {
 
 	const cloneReq = { ...req.body };
 
-	console.log("dinesh  " + JSON.stringify(req.body));
-
 	const [customer, center_id, accountarr, invoicesplit, balanceamount] = Object.values(req.body);
 
 	let index = 0;
@@ -177,8 +148,6 @@ accountsRouter.post("/add-bulk-payment-received", async (req, res) => {
 		await updatePymtSequenceGenerator(center_id);
 
 		let pymtNo = await getPymtSequenceNo(cloneReq);
-
-		console.log("calling pymtNo >>>  " + pymtNo);
 
 		// add payment master
 		addPaymentMaster(cloneReq, pymtNo, k, (err, data) => {
@@ -218,8 +187,34 @@ accountsRouter.post("/add-bulk-payment-received", async (req, res) => {
 			return res.status(200).json("success");
 		}
 		index++;
-		// });
 	}
 });
+
+function processBulkItems(cloneReq, newPK, invoicesplit) {
+	invoicesplit.forEach((e) => {
+		let sql = `INSERT INTO payment_detail(pymt_ref_id, sale_ref_id, applied_amount) VALUES
+		( '${newPK}', '${e.id}', '${e.applied_amount}' )`;
+
+		let pymtdetailsTblPromise = new Promise(function (resolve, reject) {
+			pool.query(sql, function (err, data) {
+				if (err) {
+					reject(err);
+				} else {
+					// check if there is any credit balance for the customer, if yes, first apply that
+
+					addPaymentLedgerRecord(cloneReq, newPK, e.applied_amount, (err, data2) => {
+						if (err) {
+							let errTxt = err.message;
+							console.log("error inserting payment ledger records " + errTxt);
+						} else {
+							// do nothing
+						}
+					});
+					resolve(data);
+				}
+			});
+		});
+	});
+}
 
 module.exports = accountsRouter;

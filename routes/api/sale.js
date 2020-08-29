@@ -237,8 +237,8 @@ function saleMasterEntry(cloneReq, invNo) {
 		revisionCnt = cloneReq.revision + 1;
 	}
 
-	orderdate = cloneReq.orderdate !== "" ? moment(orderdate).format("DD-MM-YYYY") : "";
-	lrdate = cloneReq.lrdate !== "" ? moment(lrdate).format("DD-MM-YYYY") : "";
+	orderdate = cloneReq.orderdate !== "" ? moment(cloneReq.orderdate).format("DD-MM-YYYY") : "";
+	lrdate = cloneReq.lrdate !== "" ? moment(cloneReq.lrdate).format("DD-MM-YYYY") : "";
 
 	// create a invoice number and save in sale master
 	let insQry = `

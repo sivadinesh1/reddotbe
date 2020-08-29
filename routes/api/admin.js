@@ -234,9 +234,9 @@ adminRoute.post("/add-customer", (req, res) => {
 	});
 });
 
-adminRoute.get("/get-center-details/:centerid", (req, res) => {
-	let rows = getCenterDetails(`${req.params.centerid}`);
-	return res.json(rows);
+adminRoute.get("/get-center-details/:centerid", async (req, res) => {
+	let rows = await getCenterDetails(req.params.centerid);
+	return res.status(200).json(rows);
 });
 
 adminRoute.post("/update-center", (req, res) => {
