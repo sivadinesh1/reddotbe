@@ -49,23 +49,8 @@ router.post("/search-product-information", (req, res) => {
 	console.log("object >>>" + JSON.stringify(req.body));
 	const [centerid, customerid, orderdate, searchstr] = Object.values(req.body);
 
-	// 	let sql = `select a.product_code as product_code, a.description, a.mrp, a.taxrate, b.available_stock,
-	// 	a.packetsize as qty, a.unit_price, a.id as product_id, b.id as stock_pk, a.rackno,
-	// 	IFNULL(
-	// (	  select concat(value,'~',type) from discount where   str_to_date('${orderdate}','%d-%m-%Y')  between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') and
-	//   customer_id = '${customerid}' and
-	//   gst_slab = a.taxrate
-	// 	) , '0~NET') as disc_info
-	//   from
-	//   product a,
-	//   stock b
-	//   where
-	//   a.id = b.product_id and
-	//   a.center_id = '${centerid}' and
-	//   ( a.product_code like '%${searchstr}%' or
-	//   a.description like '%${searchstr}%' ) limit 50
-
-	//  `;
+	// initially checks if product has custom discount for the selected customer. if yes, takes that discount
+	// if no custom discount available, it then gets the default discount. brand = 0 for defaults
 
 	let sql = ` select a.product_code as product_code, a.description, a.mrp, a.taxrate, b.available_stock,
 	a.packetsize as qty, a.unit_price, a.id as product_id, b.id as stock_pk, a.rackno,
@@ -290,6 +275,23 @@ router.get("/brand-delete/:id", (req, res) => {
 		if (err) {
 			console.log("dinesh  " + JSON.stringify(err));
 			return handleError(new ErrorHandler("500", "Error delete brand"), res);
+		} else {
+			return res.status(200).json({
+				result: data,
+			});
+		}
+	});
+});
+
+router.get("/enquiry-delete/:id", (req, res) => {
+	let id = req.params.id;
+
+	let sql = `update enquiry set estatus = 'X' where id = '${id}' `;
+
+	pool.query(sql, function (err, data) {
+		if (err) {
+			console.log("dinesh  " + JSON.stringify(err));
+			return handleError(new ErrorHandler("500", "Error delete vendor"), res);
 		} else {
 			return res.status(200).json({
 				result: data,

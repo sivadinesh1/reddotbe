@@ -601,7 +601,8 @@ enquiryRoute.get("/search-enquiries/:centerid/:customerid/:status/:fromdate/:tod
 				when 'D' then 'Draft'
 				when 'E' then 'Executed'
 				when 'P' then 'Invoice Ready'
-        when 'C' then 'Completed'
+				when 'C' then 'Completed'
+				when 'X' then 'Cancelled'
     end as status_txt,
 	(select count(*) from enquiry_detail where enquiry_id = e.id)
 	as noofitems
