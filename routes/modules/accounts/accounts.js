@@ -64,7 +64,7 @@ const addPaymentMaster = async (cloneReq, pymtNo, insertValues, callback) => {
 	];
 
 	let query = `
-		INSERT INTO PAYMENT ( center_id, customer_id, payment_no, payment_now_amt, advance_amt_used, pymt_date, pymt_mode_ref_id, bank_ref, pymt_ref, last_updated)
+		INSERT INTO payment ( center_id, customer_id, payment_no, payment_now_amt, advance_amt_used, pymt_date, pymt_mode_ref_id, bank_ref, pymt_ref, last_updated)
 		VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, '${today}' ) `;
 
 	return new Promise(function (resolve, reject) {
