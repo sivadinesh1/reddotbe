@@ -119,7 +119,7 @@ const getPymtSequenceNo = (cloneReq) => {
 };
 
 const getPaymentsByCustomers = (center_id, customer_id, callback) => {
-	let query = ` select p.*, s.invoice_no as invoice_no, s.invoice_date as invoice_date from 
+	let query = ` select p.*, pd.applied_amount as applied_amount, s.invoice_no as invoice_no, s.invoice_date as invoice_date from 
         payment p,
         payment_detail pd,
         sale s
@@ -146,7 +146,8 @@ const getPaymentsByCenter = (center_id, callback) => {
 	pymt_ref as pymt_ref,
 	last_updated as last_updated,
 	s.invoice_no as invoice_no, 
-	DATE_FORMAT(STR_TO_DATE(s.invoice_date,'%d-%m-%Y'), '%d-%b-%Y') as invoice_date
+	DATE_FORMAT(STR_TO_DATE(s.invoice_date,'%d-%m-%Y'), '%d-%b-%Y') as invoice_date,
+	pd.applied_amount as applied_amount
 	from 
 				 payment p,
 				 payment_detail pd,
