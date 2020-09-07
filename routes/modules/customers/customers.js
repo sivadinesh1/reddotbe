@@ -356,7 +356,7 @@ const getCustomerDetails = (centerid, customerid) => {
 	s.id = c.state_id and
 	csa.customer_id = c.id and
 	csa.def_address= 'Y' and
-	csa.state_id = s.id and
+	
 	c.id = '${customerid}' and
 	c.center_id = '${centerid}' `;
 
@@ -458,7 +458,7 @@ customer_shipping_address csa,
 state s 
 where 
 csa.state_id = s.id and
-customer_id = ? `;
+customer_id = ? order by id desc `;
 
 	let values = [customerid];
 
@@ -469,7 +469,11 @@ customer_id = ? `;
 };
 
 const insertCustomerShippingAddress = (insertValues, callback) => {
-	if (insertValues.def_address) {
+	console.log("dinesh " + JSON.stringify(insertValues));
+
+	let def_address = insertValues.def_address === true ? "Y" : "N";
+
+	if (def_address === "Y") {
 		let sql = `update customer_shipping_address set def_address = 'N' where customer_id = '${insertValues.customer_id}' `;
 
 		pool.query(sql, function (err, data1) {
@@ -489,8 +493,10 @@ const insertCustomerShippingAddress = (insertValues, callback) => {
 		insertValues.district,
 		insertValues.state_id,
 		insertValues.pin,
-		insertValues.def_address === true ? "Y" : "N",
+		def_address,
 	];
+
+	console.log("dinesh insertCustomerShippingAddress " + JSON.stringify(values1));
 
 	pool.query(query1, values1, function (err, data) {
 		if (err) {

@@ -336,6 +336,70 @@ enquiryRoute.post("/insert-enquiry-details", (req, res) => {
 	});
 });
 
+// enquiryRoute.post("/add-more-enquiry-details", (req, res) => {
+// 	let jsonObj = req.body;
+
+// 	var today = new Date();
+// 	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+
+// 	const prodArr = jsonObj["productarr"];
+// 	console.log("TCL: prodArr", prodArr.length);
+
+// 	let newProdArr = [];
+
+// 	prodArr.forEach(function (k) {
+// 		console.log(".........xx..." + k.notes);
+// 		let query1 = `INSERT INTO enquiry_detail ( enquiry_id, product_id, askqty, product_code, notes, status)
+// 							values ( '${req.body.enquiry_id}', (select id from product where product_code='${k.product_code}'), '${k.quantity}', '${k.product_code}', '${k.notes}', 'O')`;
+// 		pool.query(query1, function (err, data) {
+// 			if (err) {
+// 				return handleError(new ErrorHandler("500", "Error add-more-enquiry-details."), res);
+// 			} else {
+// 				let tmpid = data.insertId;
+
+// 				let sql = `
+// 				select orig.*, s.available_stock, s.id as stock_pk
+// 				from
+// 				(select ed.*, c.id as customer_id, c.name, c.address1, c.address2, c.district, c.pin, c.gst, c.mobile2, e.remarks, e.estatus,
+// 					p.id as pid, p.center_id, p.vendor_id, p.product_code as pcode, p.description as pdesc, p.unit, p.packetsize, p.hsncode,
+// 					p.currentstock, p.unit_price, p.mrp, p.purchase_price,
+// 					p.salesprice, p.rackno, p.location, p.maxdiscount, p.taxrate,
+// 					p.minqty, p.itemdiscount, p.reorderqty, p.avgpurprice,
+// 					p.avgsaleprice, p.margin
+// 					from
+// 					enquiry e,
+// 					customer c,
+// 					enquiry_detail ed
+// 					LEFT outer JOIN product p
+// 					ON p.id = ed.product_id where
+// 					e.id = ed.enquiry_id and
+// 					e.customer_id = c.id and ed.id =  ${tmpid}) as orig
+// 					LEFT outer JOIN stock s
+// 					ON orig.product_id = s.product_id and
+// 					s.mrp = orig.mrp `;
+
+// 				//		console.log("get enq details1 " + sql);
+
+// 				pool.query(sql, function (err, data) {
+// 					if (err) {
+// 						return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
+// 					} else {
+// 						console.log("dinesh >> " + JSON.stringify(data));
+// 						newProdArr.push(data[0]);
+// 						console.log("pring the new prod arr " + JSON.stringify(newProdArr));
+
+// 						if (newProdArr.length === prodArr.length) {
+// 							res.json({
+// 								result: newProdArr,
+// 							});
+// 						}
+// 					}
+// 				});
+// 			}
+// 		});
+// 	});
+// });
+
 enquiryRoute.post("/add-more-enquiry-details", (req, res) => {
 	let jsonObj = req.body;
 
@@ -356,17 +420,21 @@ enquiryRoute.post("/add-more-enquiry-details", (req, res) => {
 				return handleError(new ErrorHandler("500", "Error add-more-enquiry-details."), res);
 			} else {
 				let tmpid = data.insertId;
+				newProdArr.push(tmpid);
 
-				let sql = `
+				if (newProdArr.length === prodArr.length) {
+					newProdArr = [];
+
+					let sql = `
 				select orig.*, s.available_stock, s.id as stock_pk
 				from
 				(select ed.*, c.id as customer_id, c.name, c.address1, c.address2, c.district, c.pin, c.gst, c.mobile2, e.remarks, e.estatus,
 					p.id as pid, p.center_id, p.vendor_id, p.product_code as pcode, p.description as pdesc, p.unit, p.packetsize, p.hsncode,
 					p.currentstock, p.unit_price, p.mrp, p.purchase_price,
-					p.salesprice, p.rackno, p.location, p.maxdiscount, p.taxrate, 
+					p.salesprice, p.rackno, p.location, p.maxdiscount, p.taxrate,
 					p.minqty, p.itemdiscount, p.reorderqty, p.avgpurprice,
 					p.avgsaleprice, p.margin
-					from 
+					from
 					enquiry e,
 					customer c,
 					enquiry_detail ed
@@ -378,22 +446,22 @@ enquiryRoute.post("/add-more-enquiry-details", (req, res) => {
 					ON orig.product_id = s.product_id and
 					s.mrp = orig.mrp `;
 
-				console.log("get enq details1 " + sql);
+					pool.query(sql, function (err, data) {
+						if (err) {
+							return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
+						} else {
+							console.log("dinesh >> " + JSON.stringify(data));
+							newProdArr.push(data[0]);
+							console.log("pring the new prod arr " + JSON.stringify(newProdArr));
 
-				pool.query(sql, function (err, data) {
-					if (err) {
-						return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
-					} else {
-						newProdArr.push(data[0]);
-						console.log("pring the new prod arr " + JSON.stringify(newProdArr));
-
-						if (newProdArr.length === prodArr.length) {
-							res.json({
-								result: newProdArr,
-							});
+							if (newProdArr.length === prodArr.length) {
+								res.json({
+									result: newProdArr,
+								});
+							}
 						}
-					}
-				});
+					});
+				}
 			}
 		});
 	});

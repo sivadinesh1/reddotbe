@@ -2,7 +2,8 @@ var pool = require("../../helpers/db");
 const moment = require("moment");
 
 const getProductInventoryReport = (center_id, product_id, callback) => {
-	let query = ` select ih.id, module, p.id as product_id, p.description as product_description, ih.module,
+	let query = ` select ih.id, module, p.id as product_id, p.product_code as product_code, p.description as product_description,
+  b.name as brand_name,  ih.module,
 
   IFNULL((select invoice_no from purchase where id = ih.purchase_id), (select invoice_no from sale where id = ih.sale_id)) as invoice_no,
   
@@ -10,8 +11,10 @@ const getProductInventoryReport = (center_id, product_id, callback) => {
   txn_date as txn_date
   from 
   item_history ih,
-  product p
+  product p,
+  brand b
   where 
+  b.id = p.brand_id and
   p.id = ih.product_ref_id and
   ih.center_id = '${center_id}'
   

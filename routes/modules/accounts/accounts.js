@@ -4,7 +4,7 @@ const moment = require("moment");
 const addSaleLedgerRecord = (insertValues, invoice_ref_id, callback) => {
 	var today = new Date();
 	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
-
+	// balance amount is taken from querying ledger table, with Limit 1, check the subquery.
 	let query = `
 INSERT INTO ledger ( center_id, customer_id, invoice_ref_id, ledger_detail, credit_amt, balance_amt, ledger_date)
 VALUES
@@ -23,19 +23,100 @@ VALUES
 	});
 };
 
-const addPaymentLedgerRecord = (insertValues, payment_ref_id, receivedamount, callback) => {
+// reverse sale ledger entry if it is update of completed sale
+
+const addReverseSaleLedgerRecord = (insertValues, invoice_ref_id, callback) => {
+	var today = new Date();
+	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+
+	// balance amount is taken from querying ledger table, with Limit 1, check the subquery.
+	let query = `
+INSERT INTO ledger ( center_id, customer_id, invoice_ref_id, ledger_detail, debit_amt, balance_amt, ledger_date)
+VALUES
+	( ? , ?, ?, 'Invoice Reversal', 
+	
+	IFNULL((select credit_amt from (select (credit_amt) as credit_amt
+    FROM ledger
+		where center_id = '${insertValues.center_id}'  and customer_id = '${insertValues.customerctrl.id}'
+		and ledger_detail = 'invoice' and invoice_ref_id = '${invoice_ref_id}'
+    ORDER BY  id DESC
+		LIMIT 1) a), 0),
+		
+		(
+			
+	
+	 IFNULL((select balance_amt from (select (balance_amt ) as balance_amt
+    FROM ledger
+		where center_id = '${insertValues.center_id}'  and customer_id = '${insertValues.customerctrl.id}'
+		and invoice_ref_id = '${invoice_ref_id}'
+    ORDER BY  id DESC
+		LIMIT 1) a), 0)
+		-
+		IFNULL((select credit_amt from (select (credit_amt) as credit_amt
+			FROM ledger
+			where center_id = '${insertValues.center_id}'  and customer_id = '${insertValues.customerctrl.id}'
+			and ledger_detail = 'Invoice' and invoice_ref_id = '${invoice_ref_id}'
+			ORDER BY  id DESC
+			LIMIT 1) a), 0)
+		
+		), '${today}'
+  ) `;
+
+	console.log("dinesh .." + query);
+
+	let values = [insertValues.center_id, insertValues.customerctrl.id, invoice_ref_id];
+
+	pool.query(query, values, function (err, data) {
+		if (err) return callback(err);
+		return callback(null, data);
+	});
+};
+
+const addSaleLedgerAfterReversalRecord = (insertValues, invoice_ref_id, callback) => {
+	var today = new Date();
+	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+	// balance amount is taken from querying ledger table, with Limit 1, check the subquery.
+	let query = `
+INSERT INTO ledger ( center_id, customer_id, invoice_ref_id, ledger_detail, credit_amt, balance_amt, ledger_date)
+VALUES
+  ( ? , ?, ?, 'Invoice', ?, (credit_amt + IFNULL((select balance_amt from (select (balance_amt) as balance_amt
+    FROM ledger
+    where center_id = '${insertValues.center_id}'  and customer_id = '${insertValues.customerctrl.id}'
+    ORDER BY  id DESC
+    LIMIT 1) a), 0)), '${today}'
+  ) `;
+
+	let values = [insertValues.center_id, insertValues.customerctrl.id, invoice_ref_id, insertValues.net_total];
+
+	pool.query(query, values, function (err, data) {
+		if (err) return callback(err);
+		return callback(null, data);
+	});
+};
+
+const addPaymentLedgerRecord = (insertValues, payment_ref_id, receivedamount, sale_ref_id, callback) => {
 	var today = new Date();
 	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
 
 	let query = `
-INSERT INTO ledger ( center_id, customer_id, payment_ref_id, ledger_detail, debit_amt, balance_amt, ledger_date)
-VALUES
-  ( ? , ?, ?, 'payment', ?, IFNULL((select balance_amt from (select (balance_amt) as balance_amt
-    FROM ledger
-    where center_id = '${insertValues.customer.center_id}'  and customer_id = '${insertValues.customer.id}'
-    ORDER BY  id DESC
-    LIMIT 1) a), 0) - '${receivedamount}', '${today}'
-  ) `;
+	INSERT INTO ledger ( center_id, customer_id, invoice_ref_id, payment_ref_id, ledger_detail, debit_amt, balance_amt, ledger_date)
+	VALUES
+		( ? , ?, '${sale_ref_id}', ?, 'Payment', ?, IFNULL((select balance_amt from (select (balance_amt) as balance_amt
+			FROM ledger
+			where center_id = '${insertValues.customer.center_id}'  and customer_id = '${insertValues.customer.id}'
+			ORDER BY  id DESC
+			LIMIT 1) a), 0) - '${receivedamount}', '${today}'
+		) `;
+
+	// 	let query = `
+	// INSERT INTO ledger ( center_id, customer_id, invoice_ref_id, payment_ref_id, ledger_detail, debit_amt, balance_amt, ledger_date)
+	// VALUES
+	//   ( ? , ?, '${sale_ref_id}' ?, 'Payment', ?, IFNULL((select balance_amt from (select (balance_amt) as balance_amt
+	//     FROM ledger
+	//     where center_id = '${insertValues.customer.center_id}'  and customer_id = '${insertValues.customer.id}'
+	//     ORDER BY  id DESC
+	//     LIMIT 1) a), 0) - '${receivedamount}', '${today}'
+	//   ) `;
 
 	let values = [insertValues.customer.center_id, insertValues.customer.id, payment_ref_id, receivedamount];
 
@@ -312,6 +393,8 @@ module.exports = {
 	getSaleInvoiceByCenter,
 	updateCustomerCredit,
 	updateCustomerCreditMinus,
+	addReverseSaleLedgerRecord,
+	addSaleLedgerAfterReversalRecord,
 };
 
 // select s.id as sale_id, s.center_id as center_id, s.customer_id as customer_id, s.invoice_no as invoice_no, s.invoice_date as invoice_date, s.net_total as invoice_amt, s.sale_type as sale_type, c.name as customer_name, c.address1 as customer_address1,

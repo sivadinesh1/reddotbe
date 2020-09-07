@@ -9,7 +9,7 @@ const { handleError, ErrorHandler } = require("./../helpers/error");
 
 const { getSalesMaster, getSalesDetails } = require("../modules/sales/sales.js");
 
-const { addSaleLedgerRecord } = require("../modules/accounts/accounts.js");
+const { addSaleLedgerRecord, addReverseSaleLedgerRecord, addSaleLedgerAfterReversalRecord } = require("../modules/accounts/accounts.js");
 
 var pool = require("../helpers/db");
 
@@ -159,14 +159,37 @@ saleRouter.post("/insert-sale-details", async (req, res) => {
 			let process = processItems(cloneReq, newPK);
 
 			Promise.all([process]).then(() => {
-				addSaleLedgerRecord(cloneReq, newPK, (err, data) => {
-					if (err) {
-						let errTxt = err.message;
-						console.log("error inserting ledger records " + errTxt);
-					} else {
-						res.json({ result: "success", id: newPK, invoiceno: invNo });
-					}
-				});
+				// ledger entry should NOT be done if status is draft ("D")
+				if (cloneReq.status === "C" && cloneReq.salesid === "") {
+					addSaleLedgerRecord(cloneReq, newPK, (err, data) => {
+						if (err) {
+							let errTxt = err.message;
+							console.log("error inserting ledger records " + errTxt);
+						} else {
+							res.json({ result: "success", id: newPK, invoiceno: invNo });
+						}
+					});
+				} else if (cloneReq.status === "C" && cloneReq.salesid !== "") {
+					// reverse the old ledger entry and then add a new sale entry
+
+					addReverseSaleLedgerRecord(cloneReq, newPK, (err, data) => {
+						if (err) {
+							let errTxt = err.message;
+							console.log("error inserting reversal ledger records " + errTxt);
+						} else {
+							addSaleLedgerAfterReversalRecord(cloneReq, newPK, (err, data) => {
+								if (err) {
+									let errTxt = err.message;
+									console.log("error inserting ledger records " + errTxt);
+								} else {
+									res.json({ result: "success", id: newPK, invoiceno: invNo });
+								}
+							});
+						}
+					});
+				} else {
+					res.json({ result: "success", id: newPK, invoiceno: invNo });
+				}
 			});
 		})
 		.catch((err) => {
