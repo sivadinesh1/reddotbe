@@ -202,7 +202,7 @@ function processBulkItems(cloneReq, newPK, invoicesplit) {
 				} else {
 					// check if there is any credit balance for the customer, if yes, first apply that
 
-					addPaymentLedgerRecord(cloneReq, newPK, e.applied_amount, sale_ref_id, (err, data2) => {
+					addPaymentLedgerRecord(cloneReq, newPK, e.applied_amount, e.id, (err, data2) => {
 						if (err) {
 							let errTxt = err.message;
 							console.log("error inserting payment ledger records " + errTxt);
