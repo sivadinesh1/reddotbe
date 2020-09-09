@@ -52,7 +52,7 @@ router.post("/search-product-information", (req, res) => {
 	// initially checks if product has custom discount for the selected customer. if yes, takes that discount
 	// if no custom discount available, it then gets the default discount. brand = 0 for defaults
 
-	let sql = ` select a.product_code as product_code, a.description, a.mrp, a.taxrate, b.available_stock,
+	let sql = ` select a.product_code as product_code, a.description, b.mrp, a.taxrate, b.available_stock,
 	a.packetsize as qty, a.unit_price, a.id as product_id, b.id as stock_pk, a.rackno,
 IFNULL(
 (
@@ -98,7 +98,7 @@ a.description like '%${searchstr}%' ) limit 50
 router.post("/search-product", (req, res) => {
 	const [centerid, searchstr] = Object.values(req.body);
 
-	let sql = `select a.product_code as product_code, a.description, a.mrp, a.taxrate, b.available_stock,
+	let sql = `select a.product_code as product_code, a.description, b.mrp, a.taxrate, b.available_stock,
 	a.packetsize, a.unit_price, a.purchase_price as purchase_price, a.id as product_id, b.id as stock_pk, a.packetsize as qty, a.rackno, bd.name,
 	bd.id as brand_id, a.unit as uom, a.hsncode as hsncode, a.minqty as minqty, a.avgpurprice as avgpurprice,
 	a.unit_price as unit_price

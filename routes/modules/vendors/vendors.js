@@ -60,7 +60,7 @@ const updateVendor = (updateValues, id, callback) => {
 const getSearchVendors = (centerid, searchstr, callback) => {
 	let query = `
 	select v.id, v.center_id, v.name, v.address1, v.address2, v.district, 
-	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp,  v.email, v.isactive
+	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp,  v.email, v.isactive, s.code as code
 	from
 	vendor v,
 	state s
