@@ -354,7 +354,7 @@ function processItems(cloneReq, newPK) {
 				});
 
 				let productTblPromise = new Promise(function (resolve, reject) {
-					// update current stock in product table
+					// update current stock in product tables
 					let query300 = ` update product set currentstock = (select sum(available_stock) from stock where product_id = '${k.product_id}')`;
 					pool.query(query300, function (err, data) {
 						if (err) {
