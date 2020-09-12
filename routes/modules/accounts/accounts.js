@@ -201,11 +201,14 @@ const getPymtSequenceNo = (cloneReq) => {
 };
 
 const getPaymentsByCustomers = (center_id, customer_id, callback) => {
-	let query = ` select p.*, pd.applied_amount as applied_amount, s.invoice_no as invoice_no, s.invoice_date as invoice_date from 
+	let query = ` select p.*, pd.applied_amount as applied_amount, s.invoice_no as invoice_no, 
+	s.invoice_date as invoice_date,  pm.pymt_mode_name as pymt_mode from 
         payment p,
         payment_detail pd,
-        sale s
-        where 
+				sale s,
+				payment_mode pm
+				where 
+				pm.id = p.pymt_mode_ref_id and
         p.id = pd.pymt_ref_id and
         pd.sale_ref_id = s.id and
         p.center_id =   '${center_id}' and p.customer_id = '${customer_id}' order by id desc  `;
@@ -321,7 +324,10 @@ const getSaleInvoiceByCenter = (center_id, callback) => {
 	where pd.sale_ref_id = s.id and pd.pymt_ref_id = p2.id and p2.is_cancelled = 'NO'), 0) as paid_amount,
 	(s.net_total - IFNULL((select sum(pd.applied_amount) from payment_detail pd, payment p2
 	where pd.sale_ref_id = s.id and pd.pymt_ref_id = p2.id and p2.is_cancelled = 'NO'), 0)) as 
-	bal_amount
+	bal_amount,
+	( select pm.pymt_mode_name from payment_mode pm, payment_detail pd, payment p3 where pm.id = p3.pymt_mode_ref_id and
+	pd.sale_ref_id = s.id and pd.pymt_ref_id = p3.id and p3.is_cancelled = 'NO'
+	) as pymt_mode
 	from sale s, customer c
 	where
 	

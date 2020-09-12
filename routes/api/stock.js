@@ -238,6 +238,7 @@ stock s
 where
 s.product_id = p.id and
 p.id = pd.product_id and
+s.id = pd.stock_id and
 pd.purchase_id = '${purchase_id}' 
 	 `;
 

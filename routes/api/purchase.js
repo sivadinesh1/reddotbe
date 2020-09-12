@@ -91,14 +91,14 @@ function purchaseMasterEntry(cloneReq) {
 function processItems(cloneReq, newPK) {
 	cloneReq.productarr.forEach(function (k) {
 		let insQuery1 = ` INSERT INTO purchase_detail(purchase_id, product_id, qty, purchase_price, mrp, batchdate, tax,
-			igst, cgst, sgst, taxable_value, total_value) VALUES
+			igst, cgst, sgst, taxable_value, total_value, stock_id) VALUES
 			( '${newPK}', '${k.product_id}', '${k.qty}', '${k.purchase_price}', '${k.mrp}', '${moment().format("DD-MM-YYYY")}', '${k.taxrate}', '${k.igst}', 
-			'${k.cgst}', '${k.sgst}', '${k.taxable_value}', '${k.total_value}') `;
+			'${k.cgst}', '${k.sgst}', '${k.taxable_value}', '${k.total_value}', '${k.stock_pk}') `;
 
 		let updQuery1 = ` update purchase_detail set purchase_id = '${k.purchase_id}', product_id = '${k.product_id}', 
 			qty = '${k.qty}', purchase_price = '${k.purchase_price}', mrp = '${k.mrp}', batchdate = '${moment().format("DD-MM-YYYY")}', 
 			tax = '${k.taxrate}', igst = '${k.igst}', cgst = '${k.cgst}', sgst = '${k.sgst}', 
-			taxable_value =  '${k.taxable_value}', total_value = '${k.total_value}' where
+			taxable_value =  '${k.taxable_value}', total_value = '${k.total_value}', stock_id = '${k.stock_pk}' where
 			id = '${k.pur_det_id}' `;
 
 		new Promise(function (resolve, reject) {
@@ -109,8 +109,15 @@ function processItems(cloneReq, newPK) {
 					updateLatestPurchasePrice(k);
 
 					if (`${k.mrp_change_flag}` === "Y") {
+						// get pur_det_id for both insert and update - check
+						// if insert its: data.insertId
+						// for update its k.k.pur_det_id
+
+						let pdetailid = k.pur_det_id === "" ? data.insertId : k.pur_det_id;
+
+						console.log("print the purchase detail id for both insert and upadte  " + JSON.stringify(data));
 						// if mrp flag is true the insert new record to stocks
-						insertStock(k);
+						insertStock(k, pdetailid);
 					} else {
 						// else update the stock tbl, only of the status is "C - completed", draft should be ignored
 
@@ -129,7 +136,7 @@ function processItems(cloneReq, newPK) {
 	});
 }
 
-function insertStock(k) {
+function insertStock(k, pdetailid) {
 	let upDate = new Date();
 	todayYYMMDD = moment(upDate).format("YYYY-MM-DD");
 	let query2 = `
@@ -141,6 +148,19 @@ function insertStock(k) {
 			console.log("object" + err);
 		} else {
 			console.log("object..stock update .");
+
+			let query3 = `
+
+			update purchase_detail set stock_id =  '${data.insertId}'
+			where id  = '${pdetailid}' `;
+			console.log("dinesh *** " + query3);
+			pool.query(query3, function (err, data) {
+				if (err) {
+					console.log("object" + err);
+				} else {
+					console.log("New Stock id due to MRP change is updated back in  purchase details table.");
+				}
+			});
 		}
 	});
 }
@@ -154,7 +174,7 @@ function updateStock(k) {
 	let query2 = `
 
 update stock set available_stock =  available_stock + '${qty_to_update}'
-where product_id = '${k.product_id}' and mrp = '${k.mrp}' `;
+where product_id = '${k.product_id}' and id = '${k.stock_pk}' `;
 
 	pool.query(query2, function (err, data) {
 		if (err) {
