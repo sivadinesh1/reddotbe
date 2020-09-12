@@ -17,6 +17,7 @@ const {
 	getPymtSequenceNo,
 	getPaymentsByCenter,
 	getSaleInvoiceByCenter,
+	getPymtTransactionsByCenter,
 	updateCustomerCredit,
 	updateCustomerCreditMinus,
 } = require("../modules/accounts/accounts.js");
@@ -128,6 +129,16 @@ accountsRouter.get("/get-payments-center/:centerid", (req, res) => {
 	getPaymentsByCenter(req.params.centerid, (err, data) => {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error fetching get getPaymentsByCenter ."), res);
+		} else {
+			return res.status(200).json(data);
+		}
+	});
+});
+
+accountsRouter.get("/get-pymt-transactions-center/:centerid", (req, res) => {
+	getPymtTransactionsByCenter(req.params.centerid, (err, data) => {
+		if (err) {
+			return handleError(new ErrorHandler("500", "Error fetching get getPymtTransactionsByCenter ."), res);
 		} else {
 			return res.status(200).json(data);
 		}

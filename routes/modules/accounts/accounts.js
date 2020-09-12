@@ -244,9 +244,41 @@ const getPaymentsByCenter = (center_id, callback) => {
 				 c.id = p.customer_id and
 				 p.id = pd.pymt_ref_id and
 				 pd.sale_ref_id = s.id and
-				 p.center_id = '${center_id}' order by p.id desc 
+				 p.center_id = '${center_id}' order by pymt_date desc 
 				 
 				 
+	`;
+
+	pool.query(query, function (err, data) {
+		if (err) {
+			console.log("object......" + JSON.stringify(err));
+			return callback(err);
+		}
+		return callback(null, data);
+	});
+};
+
+const getPymtTransactionsByCenter = (center_id, callback) => {
+	let query = `
+	select 
+	c.name as customer_name,
+	pymt_mode_name as pymt_mode_name,
+	p.payment_no as payment_no,
+	 DATE_FORMAT(STR_TO_DATE(p.pymt_date,'%d-%m-%Y'), '%d-%b-%Y') as pymt_date,
+	 p.payment_now_amt as paid_amount,
+	p.advance_amt_used as advance_amt_used,
+	pymt_mode_ref_id as pymt_mode_ref_id,
+	pymt_ref as pymt_ref,
+	last_updated as last_updated
+from 
+	payment p,
+	customer c,
+	payment_mode pm
+where 
+	pm.id = p.pymt_mode_ref_id and
+	c.id = p.customer_id and
+	p.center_id = '${center_id}' order by pymt_date desc 
+	
 	`;
 
 	pool.query(query, function (err, data) {
@@ -324,10 +356,7 @@ const getSaleInvoiceByCenter = (center_id, callback) => {
 	where pd.sale_ref_id = s.id and pd.pymt_ref_id = p2.id and p2.is_cancelled = 'NO'), 0) as paid_amount,
 	(s.net_total - IFNULL((select sum(pd.applied_amount) from payment_detail pd, payment p2
 	where pd.sale_ref_id = s.id and pd.pymt_ref_id = p2.id and p2.is_cancelled = 'NO'), 0)) as 
-	bal_amount,
-	( select pm.pymt_mode_name from payment_mode pm, payment_detail pd, payment p3 where pm.id = p3.pymt_mode_ref_id and
-	pd.sale_ref_id = s.id and pd.pymt_ref_id = p3.id and p3.is_cancelled = 'NO'
-	) as pymt_mode
+	bal_amount
 	from sale s, customer c
 	where
 	
@@ -339,7 +368,10 @@ const getSaleInvoiceByCenter = (center_id, callback) => {
 	console.log("getSaleInvoiceByCenter >> " + query);
 
 	pool.query(query, function (err, data) {
-		if (err) return callback(err);
+		if (err) {
+			console.log("object...." + JSON.stringify(err));
+			return callback(err);
+		}
 		return callback(null, data);
 	});
 };
@@ -397,6 +429,7 @@ module.exports = {
 	updatePymtSequenceGenerator,
 	getPymtSequenceNo,
 	getPaymentsByCenter,
+	getPymtTransactionsByCenter,
 	getSaleInvoiceByCenter,
 	updateCustomerCredit,
 	updateCustomerCreditMinus,
