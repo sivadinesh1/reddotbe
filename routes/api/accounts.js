@@ -20,6 +20,7 @@ const {
 	getPymtTransactionsByCenter,
 	updateCustomerCredit,
 	updateCustomerCreditMinus,
+	getPymtTransactionByCustomers,
 } = require("../modules/accounts/accounts.js");
 
 accountsRouter.post("/add-payment-received", async (req, res) => {
@@ -117,6 +118,16 @@ accountsRouter.get("/get-sale-invoice-center/:centerid", (req, res) => {
 
 accountsRouter.get("/get-payments-customer/:centerid/:customerid", (req, res) => {
 	getPaymentsByCustomers(req.params.centerid, req.params.customerid, (err, data) => {
+		if (err) {
+			return handleError(new ErrorHandler("500", "Error fetching get ledger customer."), res);
+		} else {
+			return res.status(200).json(data);
+		}
+	});
+});
+
+accountsRouter.get("/get-pymt-transactions-customer/:centerid/:customerid", (req, res) => {
+	getPymtTransactionByCustomers(req.params.centerid, req.params.customerid, (err, data) => {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error fetching get ledger customer."), res);
 		} else {

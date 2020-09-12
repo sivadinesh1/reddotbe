@@ -219,6 +219,25 @@ const getPaymentsByCustomers = (center_id, customer_id, callback) => {
 	});
 };
 
+const getPymtTransactionByCustomers = (center_id, customer_id, callback) => {
+	let query = ` 
+	select 
+		p.*,
+		pm.pymt_mode_name as pymt_mode 
+ 	from
+  	payment p,
+		payment_mode pm
+	where 
+		pm.id = p.pymt_mode_ref_id and
+		p.center_id = '${center_id}' and p.customer_id = '${customer_id}'
+	order by pymt_date desc `;
+
+	pool.query(query, function (err, data) {
+		if (err) return callback(err);
+		return callback(null, data);
+	});
+};
+
 const getPaymentsByCenter = (center_id, callback) => {
 	let query = `
 	select 
@@ -435,6 +454,7 @@ module.exports = {
 	updateCustomerCreditMinus,
 	addReverseSaleLedgerRecord,
 	addSaleLedgerAfterReversalRecord,
+	getPymtTransactionByCustomers,
 };
 
 // select s.id as sale_id, s.center_id as center_id, s.customer_id as customer_id, s.invoice_no as invoice_no, s.invoice_date as invoice_date, s.net_total as invoice_amt, s.sale_type as sale_type, c.name as customer_name, c.address1 as customer_address1,
