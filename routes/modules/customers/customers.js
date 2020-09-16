@@ -345,7 +345,8 @@ const getCustomerDetails = (centerid, customerid) => {
 	csa.district as csa_district,
 	csa.pin as csa_pin,
 	csa.def_address as def_address,
-	s1.code as csa_code
+	s1.code as csa_code,
+	c.credit_amt
 	from 
 	customer c,
 	state s,

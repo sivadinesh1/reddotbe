@@ -5,12 +5,6 @@ const PDFDocument = require("pdfkit");
 const blobStream = require("blob-stream");
 
 function createInvoice(saleMaster, saleDetails, customerDetails, centerDetails, invoice, path, res) {
-	// console.log("salemasterdata " + JSON.stringify(saleMaster));
-	// console.log("saledetailsdata  " + JSON.stringify(saleDetails));
-
-	// console.log("customerdata " + JSON.stringify(customerDetails));
-	// console.log("centerdata " + JSON.stringify(centerDetails));
-
 	let centerdata = centerDetails[0];
 	let customerdata = customerDetails[0];
 	let salemasterdata = saleMaster[0];

@@ -202,7 +202,7 @@ const getPymtSequenceNo = (cloneReq) => {
 
 const getPaymentsByCustomers = (center_id, customer_id, callback) => {
 	let query = ` select p.*, pd.applied_amount as applied_amount, s.invoice_no as invoice_no, 
-	s.invoice_date as invoice_date,  pm.pymt_mode_name as pymt_mode from 
+	s.invoice_date as invoice_date, s.net_total as invoice_amount,  pm.pymt_mode_name as pymt_mode from 
         payment p,
         payment_detail pd,
 				sale s,
@@ -222,15 +222,27 @@ const getPaymentsByCustomers = (center_id, customer_id, callback) => {
 const getPymtTransactionByCustomers = (center_id, customer_id, callback) => {
 	let query = ` 
 	select 
-		p.*,
-		pm.pymt_mode_name as pymt_mode 
+	p.id as id, p.center_id as center_id, p.customer_id as customer_id,
+	p.payment_no as payment_no,
+		p.payment_now_amt as payment_now_amt,
+		p.advance_amt_used as advance_amt_used,
+		str_to_date(p.pymt_date, '%d-%m-%YYYY') as pymt_date,
+		p.pymt_mode_ref_id as pymt_mode_ref_id,
+		p.bank_ref as bank_ref,
+		p.pymt_ref as pymt_ref,
+		p.is_cancelled as is_cancelled,
+		p.cancelled_date as cancelled_date,
+		p.createdby as createdby,
+		p.last_updated as last_updated,
+	
+	pm.pymt_mode_name as pymt_mode
  	from
   	payment p,
 		payment_mode pm
 	where 
 		pm.id = p.pymt_mode_ref_id and
 		p.center_id = '${center_id}' and p.customer_id = '${customer_id}'
-	order by pymt_date desc `;
+	order by last_updated desc `;
 
 	pool.query(query, function (err, data) {
 		if (err) return callback(err);

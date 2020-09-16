@@ -438,7 +438,7 @@ function deletePurchaseDetailsRecs(purchaseDetails, purchase_id) {
 		// step 3
 		let stockUpdatePromise = await new Promise(function (resolve, reject) {
 			let stockUpdateQuery = `update stock set available_stock =  available_stock - '${element.qty}'
-where product_id = '${element.product_id}' and id = '${element.id}'  `;
+where product_id = '${element.product_id}' and id = '${element.stock_id}'  `;
 
 			console.log("stockUpdatePromise > " + stockUpdateQuery);
 

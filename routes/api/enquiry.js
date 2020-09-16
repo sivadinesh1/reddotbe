@@ -47,7 +47,7 @@ enquiryRoute.post("/draft-enquiry", (req, res) => {
 	var objectKeysArray = Object.keys(jsonObj);
 	objectKeysArray.forEach(function (objKey) {
 		var objValue = jsonObj[objKey];
-		console.log("object..MAIN VAL." + JSON.stringify(objValue));
+		console.log("object..MAIN VAL draft enquiry.." + JSON.stringify(objValue));
 
 		// first update enquiry table with STATUS = 'D'
 		let upQry1 = `update enquiry set estatus = 'D' where id = '${objValue.enquiry_id}' `;
@@ -62,7 +62,7 @@ enquiryRoute.post("/draft-enquiry", (req, res) => {
 		let upQuery1 = `update enquiry_detail
 		set
 		product_id = '${objValue.product_id}',
-		stock_id = '${objValue.stockid}',
+		stock_id = ${objValue.stockid},
 		giveqty = '${objValue.giveqty}',
 		processed = '${objValue.processed}',
 		status = 'D'
@@ -82,6 +82,7 @@ enquiryRoute.post("/draft-enquiry", (req, res) => {
 		console.log("object upQuery1 a> g " + uQrys);
 		pool.query(uQrys, function (err, data) {
 			if (err) {
+				console.log("dinesh " + JSON.stringify(err));
 				return handleError(new ErrorHandler("500", "Error Updating draft-enquiry."), res);
 			}
 		});
