@@ -417,14 +417,13 @@ const updateCustomerCredit = (balanceamount, center_id, customer_id) => {
 	balanceamount = ~balanceamount + 1;
 
 	qryUpdateSqnc = `
-		update customer set credit_amt = credit_amt + '${balanceamount}' where 
+		update customer set credit_amt = credit_amt + ${balanceamount} where 
 		center_id = '${center_id}' and  
 		id = '${customer_id}'
 		 `;
 	console.log("print dinesh " + qryUpdateSqnc);
 
-	logger.access.info("hello dinesh sir info");
-	logger.debug.debug("hello dinesh sir debug");
+	logger.debug.debug("hello dinesh sir debug" + qryUpdateSqnc);
 
 	return new Promise(function (resolve, reject) {
 		pool.query(qryUpdateSqnc, function (err, data) {
@@ -441,11 +440,13 @@ const updateCustomerCreditMinus = (creditusedamount, center_id, customer_id) => 
 	let qryUpdateSqnc = "";
 
 	qryUpdateSqnc = `
-		update customer set credit_amt = credit_amt - '${creditusedamount}' where 
+		update customer set credit_amt = credit_amt - ${creditusedamount} where 
 		center_id = '${center_id}' and  
 		id = '${customer_id}'
 		 `;
-	console.log("print dinesh " + qryUpdateSqnc);
+	//console.log("print dinesh " + qryUpdateSqnc);
+	logger.debug.debug("updateCustomerCreditMinus >> " + qryUpdateSqnc);
+
 	return new Promise(function (resolve, reject) {
 		pool.query(qryUpdateSqnc, function (err, data) {
 			if (err) {

@@ -31,7 +31,7 @@ app.use(logger1);
 // logger is actual logging
 app.use(logger.express);
 
-logger.access.info("hello dinesh sir info ** ");
+// logger.access.info("hello dinesh sir info ** ");
 
 // app.use(function (req, res, next) {
 //     res.header("Access-Control-Allow-Origin", "*");
