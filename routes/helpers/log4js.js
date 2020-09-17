@@ -8,12 +8,12 @@ const LOG_PATH = "./logs";
 
 log4js.configure({
 	appenders: {
-		// access: {
-		// 	type: "dateFile",
-		// 	filename: `${LOG_PATH}/access.log`,
-		// 	pattern: "-yyyy-MM-dd",
-		// 	backups: 3,
-		// },
+		access: {
+			type: "dateFile",
+			filename: `${LOG_PATH}/access.log`,
+			pattern: "-yyyy-MM-dd",
+			backups: 3,
+		},
 		debug: {
 			type: "dateFile",
 			filename: `${LOG_PATH}/debug.log`,
@@ -29,7 +29,7 @@ log4js.configure({
 });
 
 module.exports = {
-	//	access: log4js.getLogger("access"),
+	access: log4js.getLogger("access"),
 
 	debug: log4js.getLogger("debug"),
 	express: log4js.connectLogger(log4js.getLogger("access"), { level: log4js.levels.INFO }),
