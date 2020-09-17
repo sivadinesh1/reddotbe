@@ -7,35 +7,10 @@ const { handleError, ErrorHandler } = require("./../helpers/error");
 var pool = require("./../helpers/db");
 const moment = require("moment");
 
-// body = body.append("productid", productid);
-// body = body.append("status", status);
-// body = body.append("enqdetailid", enqdetailid);
-
-// enquiryRoute.post("/update-productinfo-enquiry-details", (req, res) => {
-// 	let product_id = req.body.productid;
-// 	let stock_id = req.body.stockid;
-// 	let status = req.body.status;
-// 	let id = req.body.enqdetailid;
-
-// 	let query = `update enquiry_detail
-// 	set
-// 	product_id = '${product_id}',
-// 	stock_id = '${stock_id}',
-// 	status = '${status}'
-// 	where id = '${id}' `;
-
-// 	pool.query(query, function(err, data) {
-// 		if (err) {
-// 			return handleError(new ErrorHandler("500", "Error Updating product info enquiry details."), res);
-// 		} else {
-// 		}
-// 	});
-// });
-
 enquiryRoute.post("/draft-enquiry", (req, res) => {
 	let jsonObj = req.body;
 
-	console.log("object>>> move-to-sale");
+	console.log("object>>> draft enquiry...");
 	let today = new Date();
 
 	let now = new Date();
@@ -213,6 +188,7 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 	});
 });
 
+// todo this end point not used, check and delete
 enquiryRoute.post("/update-giveqty-enquiry-details", (req, res) => {
 	let giveqty = req.body.giveqty;
 	let id = req.body.enqdetailid;
@@ -249,6 +225,7 @@ enquiryRoute.get("/update-customer/:id/:enqid", (req, res) => {
 	});
 });
 
+// todo, can be deleted, check and delete
 enquiryRoute.post("/update-status-enquiry-details", (req, res) => {
 	let status = req.body.status;
 	let id = req.body.enqdetailid;
@@ -278,26 +255,6 @@ enquiryRoute.post("/update-enquiry-details", (req, res) => {
 	objectKeysArray.forEach(function (objKey) {
 		var objValue = jsonObj[objKey];
 	});
-
-	// var today = new Date();
-	// today = moment(today).format("YYYY-MM-DD HH:mm:ss");
-	// let query = `update enquiry_detail
-	// set
-	// product_id = '1',
-	// giveqty = 99,
-	// status = 'P'
-	// where id = '7'`;
-
-	// pool.query(query, function (err, data) {
-	// 	if (err) {
-	// 		console.log("object..." + err);
-	// 		res.status(500).json({
-	// 			result: "NOTOK",
-	// 			message: `ERROR While updating.`
-	// 		});
-	// 	} else {
-	// 	}
-	// });
 });
 
 enquiryRoute.post("/insert-enquiry-details", (req, res) => {

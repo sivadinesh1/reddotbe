@@ -6,7 +6,9 @@ const mysql = require("mysql");
 const moment = require("moment");
 const { handleError, ErrorHandler } = require("./routes/helpers/error");
 
-const logger = require("./middleware/logger.ts");
+const logger = require("./routes/helpers/log4js");
+
+const logger1 = require("./middleware/logger.ts");
 
 // const upload = require('./upload');
 
@@ -24,7 +26,12 @@ var corsOptions = {
 	optionsSuccessStatus: 200,
 };
 
-app.use(logger);
+// logger1 is middleware, not sure of middleware logger
+app.use(logger1);
+// logger is actual logging
+app.use(logger.express);
+
+logger.access.info("hello dinesh sir info ** ");
 
 // app.use(function (req, res, next) {
 //     res.header("Access-Control-Allow-Origin", "*");

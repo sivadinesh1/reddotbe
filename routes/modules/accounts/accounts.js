@@ -1,4 +1,7 @@
 var pool = require("../../helpers/db");
+// const logger = require("../../helpers/log4js");
+const logger = require("./../../helpers/log4js");
+
 const moment = require("moment");
 
 const addSaleLedgerRecord = (insertValues, invoice_ref_id, callback) => {
@@ -419,6 +422,10 @@ const updateCustomerCredit = (balanceamount, center_id, customer_id) => {
 		id = '${customer_id}'
 		 `;
 	console.log("print dinesh " + qryUpdateSqnc);
+
+	logger.access.info("hello dinesh sir info");
+	logger.debug.debug("hello dinesh sir debug");
+
 	return new Promise(function (resolve, reject) {
 		pool.query(qryUpdateSqnc, function (err, data) {
 			if (err) {

@@ -10,7 +10,22 @@ function createInvoice(saleMaster, saleDetails, customerDetails, centerDetails, 
 	let salemasterdata = saleMaster[0];
 	let saledetailsdata = saleDetails;
 
-	let doc = new PDFDocument({ size: "A4", margin: 20 });
+	//	let doc = new PDFDocument({ size: "A4", margin: 20 });
+
+	let doc = new PDFDocument({
+		size: "A4",
+		margin: 36,
+		// margins: {
+		// 	// by default, all are 72
+		// 	top: 72,
+		// 	bottom: 72,
+		// 	left: 72,
+		// 	right: 72,
+		// },
+		layout: "portrait", // can be 'landscape'
+	});
+
+	drawPageMarginLine(doc);
 
 	generateHeader(doc, centerdata);
 	generateCustomerInformation(doc, invoice);
@@ -39,24 +54,49 @@ function createInvoice(saleMaster, saleDetails, customerDetails, centerDetails, 
 	doc.pipe(res);
 }
 
+// draw margin {moveTo (X, Y) - positions to exact point & lineTo (X, Y) draws a line}
+// add this after every addpage
+function drawPageMarginLine(doc) {
+	doc
+		.strokeColor("#aaaaaa")
+		.moveTo(36, 36)
+		.lineWidth(1)
+		.lineTo(36, 806) // this is the end point the line
+
+		.moveTo(36, 36)
+		.lineWidth(1)
+		.lineTo(559, 36) // this is the end point the line
+
+		.moveTo(559, 36)
+		.lineWidth(1)
+		.lineTo(559, 806) // this is the end point the line
+
+		.moveTo(36, 806)
+		.lineWidth(1)
+		.lineTo(559, 806) // this is the end point the line
+
+		.stroke();
+}
+
 function generateHeader(doc, centerdata) {
 	doc
-		.image("tractor.png", 20, 25, { width: 80 })
-		.fillColor("#444444")
+		.image("tractor.png", 42, 42, { width: 80 })
+		.fillColor("blue")
 
 		.fontSize(14)
-		.text(centerdata.name, { align: "center", lineGap: 1.4 })
+		.text(centerdata.name, 50, 42, { align: "center", lineGap: 1.4 })
 		.fontSize(10)
-		.text(centerdata.tagline, { align: "center", lineGap: 1.4 })
-		.text(centerdata.address1, { align: "center", lineGap: 1.4 })
-		.text(centerdata.address2, { align: "center", lineGap: 1.4 })
+		// .text(centerdata.tagline, 52, 60, { align: "center", lineGap: 1.4 })
+		.text(centerdata.tagline, 52, 60, { align: "center", lineGap: 1.8 })
+		.text(centerdata.address1 + "," + centerdata.address2, { align: "center", lineGap: 1.8 })
+		//	.text(centerdata.address2, { align: "center", lineGap: 1.4 })
 		.text(centerdata.district + "-" + centerdata.pin, { align: "center", lineGap: 1.4 })
 
 		.text(centerdata.gst, { align: "center", lineGap: 1.4 })
 		.text(centerdata.email, { align: "center", lineGap: 1.4 })
 		.text(centerdata.phone, 430, 90)
 		.text(centerdata.mobile, 500, 90)
-		.image("swaraj.png", 480, 35, { width: 80 })
+		.image("swaraj.png", 472, 42, { width: 80 })
 
 		.moveDown();
 }
@@ -64,7 +104,7 @@ function generateHeader(doc, centerdata) {
 function generateCustomerInformation(doc, invoice) {
 	doc.fillColor("#444444").fontSize(20).text("Invoice", 50, 160);
 
-	generateHr(doc, 185);
+	generateHr(doc, 130);
 
 	const customerInformationTop = 200;
 
@@ -112,8 +152,20 @@ function generateInvoiceTable(doc, invoice, saledetailsdata) {
 		if (invoiceTableTop > 700) {
 			invoiceTableTop = 60;
 			//	positionY = 80;
-			doc.addPage();
+			doc.addPage({
+				margin: 36,
+			});
 		}
+
+		// Add different margins on each side
+		// doc.addPage({
+		//   margins: {
+		//     top: 50,
+		//     bottom: 50,
+		//     left: 72,
+		//     right: 72
+		//   }
+		// });
 
 		// console.log("position Y " + positionY);
 		// console.log("invoiceTableTop Y " + invoiceTableTop);
@@ -158,6 +210,7 @@ function generateTableRow(doc, y, idx, item, description, unitCost, quantity, li
 	console.log("position Y " + y);
 
 	doc
+		.moveTo(42, 250)
 		.fontSize(10)
 		.text(idx, 20, y, { width: 100, align: "left" })
 		.text(item, 50, y, { width: 100, align: "left" })
