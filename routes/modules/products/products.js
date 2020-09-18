@@ -5,7 +5,7 @@ const insertProduct = (insertValues, callback) => {
 	var today = new Date();
 	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
 
-	let query = `INSERT INTO 
+	let query = `insert into 
 		product 
 			(center_id, brand_id, product_code, description, unit, packetsize, hsncode, currentstock, unit_price, mrp, 
 				purchase_price, salesprice, rackno, location, maxdiscount, alternatecode, taxrate, 

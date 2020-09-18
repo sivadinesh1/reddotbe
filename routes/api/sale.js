@@ -320,12 +320,14 @@ function processItems(cloneReq, newPK) {
 	cloneReq.productarr.forEach(function (k) {
 		let insQuery100 = `INSERT INTO sale_detail(sale_id, product_id, qty, disc_percent, disc_value, disc_type, unit_price, mrp, batchdate, tax,
 												igst, cgst, sgst, taxable_value, total_value, stock_id) VALUES
-												( '${newPK}', '${k.product_id}', '${k.qty}', '${k.disc_percent}', '${k.disc_value}', '${k.disc_type}', '${k.unit_price}', '${k.mrp}', 
+												( '${newPK}', '${k.product_id}', '${k.qty}', '${k.disc_percent}', '${k.disc_value}', '${k.disc_type}', '${
+			(k.total_value - k.disc_value) / k.qty
+		}', '${k.mrp}', 
 												'${moment().format("DD-MM-YYYY")}', '${k.taxrate}', '${k.igst}', 
 												'${k.cgst}', '${k.sgst}', '${k.taxable_value}', '${k.total_value}', '${k.stock_pk}')`;
 
 		let upQuery100 = `update sale_detail set product_id = '${k.product_id}', qty = '${k.qty}', disc_percent = '${k.disc_percent}', 
-		disc_value = '${k.disc_value}',	disc_type= '${k.disc_type}', unit_price = '${k.unit_price}', mrp = '${k.mrp}', 
+		disc_value = '${k.disc_value}',	disc_type= '${k.disc_type}', unit_price = '${(k.total_value - k.disc_value) / k.qty}', mrp = '${k.mrp}', 
 												batchdate = '${moment().format("DD-MM-YYYY")}', tax = '${k.taxrate}',
 												igst = '${k.igst}', cgst = '${k.cgst}', sgst = '${k.sgst}', 
 												taxable_value = '${k.taxable_value}', total_value = '${k.total_value}', stock_id = '${k.stock_pk}'

@@ -73,11 +73,14 @@ customer_id = '${customerid}' and
 gst_slab = a.taxrate and
 discount.brand_id = 0 )
 	
-	) as disc_info
+	) as disc_info,
+	brand.name as name
 from 
 product a, 
-stock b
+stock b,
+brand
 where 
+brand.id = a.brand_id and 
 a.id = b.product_id and
 a.center_id = '${centerid}' and
 ( a.product_code like '%${searchstr}%' or

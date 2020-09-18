@@ -15,17 +15,10 @@ function createInvoice(saleMaster, saleDetails, customerDetails, centerDetails, 
 	let doc = new PDFDocument({
 		size: "A4",
 		margin: 36,
-		// margins: {
-		// 	// by default, all are 72
-		// 	top: 72,
-		// 	bottom: 72,
-		// 	left: 72,
-		// 	right: 72,
-		// },
 		layout: "portrait", // can be 'landscape'
 	});
 
-	drawPageMarginLine(doc);
+	// drawPageMarginLine(doc);
 
 	generateHeader(doc, centerdata);
 	generateCustomerInformation(doc, invoice);
@@ -54,30 +47,6 @@ function createInvoice(saleMaster, saleDetails, customerDetails, centerDetails, 
 	doc.pipe(res);
 }
 
-// draw margin {moveTo (X, Y) - positions to exact point & lineTo (X, Y) draws a line}
-// add this after every addpage
-function drawPageMarginLine(doc) {
-	doc
-		.strokeColor("#aaaaaa")
-		.moveTo(36, 36)
-		.lineWidth(1)
-		.lineTo(36, 806) // this is the end point the line
-
-		.moveTo(36, 36)
-		.lineWidth(1)
-		.lineTo(559, 36) // this is the end point the line
-
-		.moveTo(559, 36)
-		.lineWidth(1)
-		.lineTo(559, 806) // this is the end point the line
-
-		.moveTo(36, 806)
-		.lineWidth(1)
-		.lineTo(559, 806) // this is the end point the line
-
-		.stroke();
-}
-
 function generateHeader(doc, centerdata) {
 	doc
 		.image("tractor.png", 42, 42, { width: 80 })
@@ -85,7 +54,7 @@ function generateHeader(doc, centerdata) {
 
 		.fontSize(14)
 		.text(centerdata.name, 50, 42, { align: "center", lineGap: 1.4 })
-		.fontSize(10)
+		.fontSize(9)
 		// .text(centerdata.tagline, 52, 60, { align: "center", lineGap: 1.4 })
 		.text(centerdata.tagline, 52, 60, { align: "center", lineGap: 1.8 })
 		.text(centerdata.address1 + "," + centerdata.address2, { align: "center", lineGap: 1.8 })
@@ -133,19 +102,54 @@ function generateInvoiceTable(doc, invoice, saledetailsdata) {
 	let i;
 	let invoiceTableTop = 290;
 
-	doc.font("Helvetica-Bold");
-	generateTableRow(doc, invoiceTableTop, "SNo", "Item", "Description", "Unit Cost", "Quantity", "Line Total");
-	generateHr(doc, invoiceTableTop + 20);
-	doc.font("Helvetica");
+	//doc.font("Helvetica-Bold");
+	generateTableRow(
+		doc,
+		invoiceTableTop,
+		"SNo",
+		"PRODUCT NAME",
+		"PCODE",
+		"HSN",
+		"QTY",
+		"UOM",
+		"UNIT RATE",
+		"DIS %",
+		"AMOUNT",
+		"SGST",
+		"CGST",
+		"NET AMOUNT",
+	);
 
-	// Array.from(Array(120)).forEach(function (k, idx) {
+	generateHr(doc, invoiceTableTop + 20);
+
+	doc
+		.strokeColor("#aaaaaa")
+		.moveTo(33, 280)
+		.lineWidth(1)
+		.lineTo(33, 620) // this is the end point the line
+
+		.stroke();
+
 	saledetailsdata.forEach(function (k, idx) {
 		invoiceTableTop = invoiceTableTop + 44;
 
 		console.log("object >> " + JSON.stringify(k));
-		// generateTableRow(doc, position, k.description, k.product_code, k.qty, k.qty, k.qty);
 
-		generateTableRow(doc, invoiceTableTop, idx + 1, k.product_code, k.description, k.qty, k.qty, k.qty);
+		generateTableRow(
+			doc,
+			invoiceTableTop,
+			idx + 1,
+			k.description,
+			k.product_code,
+			k.hsncode,
+			k.qty,
+			k.mrp,
+			k.disc_percent,
+			k.total_value,
+			k.sgst,
+			k.cgst,
+			k.total_value,
+		);
 
 		//		generateHr(doc, positionY + 20);
 
@@ -156,47 +160,80 @@ function generateInvoiceTable(doc, invoice, saledetailsdata) {
 				margin: 36,
 			});
 		}
-
-		// Add different margins on each side
-		// doc.addPage({
-		//   margins: {
-		//     top: 50,
-		//     bottom: 50,
-		//     left: 72,
-		//     right: 72
-		//   }
-		// });
-
-		// console.log("position Y " + positionY);
-		// console.log("invoiceTableTop Y " + invoiceTableTop);
 	});
 
-	// for (i = 0; i < invoice.items.length; i++) {
-	// 	const item = invoice.items[i];
-	// 	const position = invoiceTableTop + (i + 1) * 30;
-	// 	generateTableRow(
-	// 		doc,
-	// 		position,
-	// 		item.item,
-	// 		item.description,
-	// 		formatCurrency(item.amount / item.quantity),
-	// 		item.quantity,
-	// 		formatCurrency(item.amount),
-	// 	);
+	generateSummaryLeft(doc, saledetailsdata);
+}
 
-	// 	generateHr(doc, position + 20);
-	// }
+function generateSummaryLeft(doc, saledetailsdata) {
+	let sum_SGST_0 = getSumByTaxtypeAndTaxPercent(saledetailsdata, "SGST", 0);
+	let sum_CGST_0 = getSumByTaxtypeAndTaxPercent(saledetailsdata, "CGST", 0);
+	let sum_IGST_0 = getSumByTaxtypeAndTaxPercent(saledetailsdata, "IGST", 0);
 
-	// const subtotalPosition = invoiceTableTop + (i + 1) * 30;
-	// generateTableRow(doc, subtotalPosition, "", "", "Subtotal", "", formatCurrency(invoice.subtotal));
+	let sum_SGST_5 = getSumByTaxtypeAndTaxPercent(saledetailsdata, "SGST", 5);
+	let sum_CGST_5 = getSumByTaxtypeAndTaxPercent(saledetailsdata, "CGST", 5);
+	let sum_IGST_5 = getSumByTaxtypeAndTaxPercent(saledetailsdata, "IGST", 5);
 
-	// const paidToDatePosition = subtotalPosition + 20;
-	// generateTableRow(doc, paidToDatePosition, "", "", "Paid To Date", "", formatCurrency(invoice.paid));
+	let sum_SGST_12 = getSumByTaxtypeAndTaxPercent(saledetailsdata, "SGST", 12);
+	let sum_CGST_12 = getSumByTaxtypeAndTaxPercent(saledetailsdata, "CGST", 12);
+	let sum_IGST_12 = getSumByTaxtypeAndTaxPercent(saledetailsdata, "IGST", 12);
 
-	// const duePosition = paidToDatePosition + 25;
-	// doc.font("Helvetica-Bold");
-	// generateTableRow(doc, duePosition, "", "", "Balance Due", "", formatCurrency(invoice.subtotal - invoice.paid));
-	// doc.font("Helvetica");
+	let sum_SGST_18 = getSumByTaxtypeAndTaxPercent(saledetailsdata, "SGST", 18);
+	let sum_CGST_18 = getSumByTaxtypeAndTaxPercent(saledetailsdata, "CGST", 18);
+	let sum_IGST_18 = getSumByTaxtypeAndTaxPercent(saledetailsdata, "IGST", 18);
+
+	let sum_SGST_28 = getSumByTaxtypeAndTaxPercent(saledetailsdata, "SGST", 28);
+	let sum_CGST_28 = getSumByTaxtypeAndTaxPercent(saledetailsdata, "CGST", 28);
+	let sum_IGST_28 = getSumByTaxtypeAndTaxPercent(saledetailsdata, "IGST", 28);
+
+	let GST_0 = sum_SGST_0 + sum_SGST_0 + sum_SGST_0;
+	let GST_5 = sum_SGST_5 + sum_SGST_5 + sum_SGST_5;
+	let GST_12 = sum_SGST_12 + sum_SGST_12 + sum_SGST_12;
+	let GST_18 = sum_SGST_18 + sum_SGST_18 + sum_SGST_18;
+	let GST_28 = sum_SGST_28 + sum_SGST_28 + sum_SGST_28;
+
+	let sumDiscountPercent_0 = getSumByDiscountPercent(saledetailsdata, 0);
+	let sumDiscountPercent_5 = getSumByDiscountPercent(saledetailsdata, 5);
+	let sumDiscountPercent_12 = getSumByDiscountPercent(saledetailsdata, 12);
+	let sumDiscountPercent_18 = getSumByDiscountPercent(saledetailsdata, 18);
+	let sumDiscountPercent_28 = getSumByDiscountPercent(saledetailsdata, 28);
+
+	let sumTaxablePercent_0 = getSumByTaxableByPercent(saledetailsdata, 0);
+	let sumTaxablePercent_5 = getSumByTaxableByPercent(saledetailsdata, 5);
+	let sumTaxablePercent_12 = getSumByTaxableByPercent(saledetailsdata, 12);
+	let sumTaxablePercent_18 = getSumByTaxableByPercent(saledetailsdata, 18);
+	let sumTaxablePercent_28 = getSumByTaxableByPercent(saledetailsdata, 28);
+
+	let sumTotalPercent_0 = getSumByTotalByPercent(saledetailsdata, 0);
+	let sumTotalPercent_5 = getSumByTotalByPercent(saledetailsdata, 5);
+	let sumTotalPercent_12 = getSumByTotalByPercent(saledetailsdata, 12);
+	let sumTotalPercent_18 = getSumByTotalByPercent(saledetailsdata, 18);
+	let sumTotalPercent_28 = getSumByTotalByPercent(saledetailsdata, 28);
+
+	console.log("will it print " + sumTotalPercent_12);
+	console.log("will it sumTotalPercent_18 >> " + sumTotalPercent_18);
+	console.log("will it print " + sumTotalPercent_28);
+
+	console.log("will it print " + sumTaxablePercent_12);
+	console.log("will it sumTaxablePercent_18 >> " + sumTaxablePercent_18);
+	console.log("will it print " + sumTaxablePercent_28);
+
+	let total_0 = GST_0 + sumDiscountPercent_0 + sumTaxablePercent_0 + sumTotalPercent_0;
+	let total_5 = GST_5 + sumDiscountPercent_5 + sumTaxablePercent_5 + sumTotalPercent_5;
+	let total_12 = GST_12 + sumDiscountPercent_12 + sumTaxablePercent_12 + sumTotalPercent_12;
+	let total_18 = GST_18 + sumDiscountPercent_18 + sumTaxablePercent_18 + sumTotalPercent_18;
+	let total_28 = GST_28 + sumDiscountPercent_28 + sumTaxablePercent_28 + sumTotalPercent_28;
+
+	let subtotalAllTax = sumTaxablePercent_0 + sumTaxablePercent_5 + sumTaxablePercent_12 + sumTaxablePercent_18 + sumTaxablePercent_28;
+	let discountAllTax = sumDiscountPercent_0 + sumDiscountPercent_5 + sumDiscountPercent_12 + sumDiscountPercent_18 + sumDiscountPercent_28;
+	let totalAllTax = sumTotalPercent_0 + sumTotalPercent_5 + sumTotalPercent_12 + sumTotalPercent_18 + sumTotalPercent_28;
+	let SGSTAllTax = sum_SGST_0 + sum_SGST_5 + sum_SGST_12 + sum_SGST_18 + sum_SGST_28;
+	let CGSTAllTax = sum_CGST_0 + sum_CGST_5 + sum_CGST_12 + sum_CGST_18 + sum_CGST_28;
+	let IGSTAllTax = sum_IGST_0 + sum_IGST_5 + sum_IGST_12 + sum_IGST_18 + sum_IGST_28;
+
+	let finalTotalAllTax = total_0 + total_5 + total_12 + total_18 + total_28;
+
+	generateSummaryLeftTableRow(doc, 300, "class", "subtotal", "disc", "amount", "sgst", "cgst", "gst", "total");
 }
 
 function generateFooter(doc) {
@@ -206,22 +243,42 @@ function generateFooter(doc) {
 	});
 }
 
-function generateTableRow(doc, y, idx, item, description, unitCost, quantity, lineTotal) {
+function generateTableRow(doc, y, idx, product_description, product_code, hsn, qty, uom, mrp, disc_percent, amount, sgst, cgst, net_amount) {
 	console.log("position Y " + y);
 
 	doc
 		.moveTo(42, 250)
 		.fontSize(10)
-		.text(idx, 20, y, { width: 100, align: "left" })
-		.text(item, 50, y, { width: 100, align: "left" })
-		.text(description, 150, y, { width: 200, align: "left" })
-		.text(unitCost, 240, y, { width: 90, align: "right" })
-		.text(quantity, 330, y, { width: 90, align: "right" })
-		.text(lineTotal, 420, y, { width: 90, align: "right" });
+		.text(idx, 0, y, { width: 36, align: "center" })
+		.text(product_description, 36, y, { width: 144, align: "left" })
+		.text(product_code, 180, y, { width: 50, align: "center" })
+		.text(hsn, 230, y, { width: 36, align: "center" })
+		.text(qty, 266, y, { width: 36, align: "center" })
+		.text(uom, 296, y, { width: 30, align: "center" })
+		.text(mrp, 326, y, { width: 30, align: "center" })
+		.text(disc_percent, 360, y, { width: 20, align: "center" })
+		.text(amount, 380, y, { width: 50, align: "center" })
+		.text(sgst, 430, y, { width: 30, align: "center" })
+		.text(cgst, 460, y, { width: 30, align: "center" })
+		.text(net_amount, 490, y, { width: 60, align: "center" });
+}
+
+function generateSummaryLeftTableRow(doc, y, classhead, subtotal, disc, amount, sgst, cgst, gst, total) {
+	doc
+		.moveTo(42, 300)
+		.fontSize(10)
+		.text(classhead, 0, y, { width: 36, align: "center" })
+		.text(subtotal, 36, y, { width: 144, align: "left" })
+		.text(disc, 180, y, { width: 50, align: "center" })
+		.text(amount, 230, y, { width: 36, align: "center" })
+		.text(sgst, 266, y, { width: 36, align: "center" })
+		.text(cgst, 296, y, { width: 30, align: "center" })
+		.text(gst, 326, y, { width: 30, align: "center" })
+		.text(total, 360, y, { width: 20, align: "center" });
 }
 
 function generateHr(doc, y) {
-	doc.strokeColor("#aaaaaa").lineWidth(1).moveTo(20, y).lineTo(550, y).stroke();
+	doc.strokeColor("#aaaaaa").lineWidth(1).moveTo(42, y).lineTo(550, y).stroke();
 }
 
 function formatCurrency(cents) {
@@ -236,6 +293,48 @@ function formatDate(date) {
 	return year + "/" + month + "/" + day;
 }
 
+function getSumByTaxtypeAndTaxPercent(dataArr, tax_type, tax_percent) {
+	return dataArr
+		.filter((arr) => {
+			if (tax_type === "IGST") {
+				return arr.igst === tax_percent;
+			} else if (tax_type === "CGST") {
+				return arr.cgst === tax_percent / 2;
+			} else if (tax_type === "SGST") {
+				return arr.sgst === tax_percent / 2;
+			}
+		})
+		.reduce((a, c) => {
+			return a + c.taxable_value * (tax_percent / 100);
+		}, 0);
+}
+
+function getSumByDiscountPercent(dataArr, tax_percent) {
+	return dataArr
+		.filter((arr) => arr.tax === tax_percent)
+		.reduce((a, c) => {
+			return (a + c.disc_value).toFixed(2);
+		}, 0);
+}
+
+function getSumByTaxableByPercent(dataArr, tax_percent) {
+	return dataArr
+		.filter((arr) => arr.tax === tax_percent)
+		.reduce((a, c) => {
+			return (a + c.taxable_value).toFixed(2);
+		}, 0);
+}
+
+function getSumByTotalByPercent(dataArr, tax_percent) {
+	return dataArr
+		.filter((arr) => arr.tax === tax_percent)
+		.reduce((a, c) => {
+			return (a + c.total_value).toFixed(2);
+		}, 0);
+}
+
 module.exports = {
 	createInvoice,
 };
+
+// Array.from(Array(120)).forEach(function (k, idx) {

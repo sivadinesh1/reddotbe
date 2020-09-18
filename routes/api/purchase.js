@@ -185,10 +185,11 @@ where product_id = '${k.product_id}' and id = '${k.stock_pk}' `;
 	});
 }
 
+// when purchasing, for company both unit_price (use in sales screen reports) & purchase_price are same
 function updateLatestPurchasePrice(k) {
 	let query2 = `
 
-update product set purchase_price = '${k.purchase_price}'
+update product set purchase_price = '${k.purchase_price}', unit_price = '${k.purchase_price}'
 where id = '${k.product_id}'  `;
 	console.log("object.. di.." + query2);
 
