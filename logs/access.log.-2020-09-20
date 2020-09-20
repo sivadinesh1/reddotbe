@@ -1,0 +1,561 @@
+[2020-09-20T00:00:40.787] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T00:00:45.263] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T00:01:24.052] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T00:01:27.715] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T00:03:14.196] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T00:03:22.436] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T00:07:17.408] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T00:07:19.615] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T00:10:22.717] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T00:10:27.707] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T00:10:56.347] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T00:10:59.608] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T00:22:10.303] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T00:22:10.311] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2000:22:10%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2000:22:10%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 3946 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T00:27:09.346] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T00:27:09.358] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2000:27:09%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2000:27:09%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 3946 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T01:40:32.723] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T01:40:32.727] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2001:40:32%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2001:40:32%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 3946 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T06:04:31.840] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T06:04:31.848] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2006:04:31%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2006:04:31%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 3946 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T07:40:26.150] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2007:40:25%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2007:40:25%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 3946 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T07:40:26.155] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T08:39:20.059] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T08:39:20.068] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2008:39:19%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2008:39:19%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 3946 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:07:07.444] [INFO] access - ::1 - - "GET /api/stock/sales-master/0 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:07:07.579] [INFO] access - ::1 - - "GET /api/sale/get-next-sale-invoice-no/1/gstinvoice HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:07:11.069] [INFO] access - ::1 - - "OPTIONS /api/search-customer HTTP/1.1" 200 0 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:07:11.113] [INFO] access - ::1 - - "POST /api/search-customer HTTP/1.1" 200 1592 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:07:16.727] [INFO] access - ::1 - - "OPTIONS /api/search-product-information HTTP/1.1" 200 0 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:07:16.940] [INFO] access - ::1 - - "POST /api/search-product-information HTTP/1.1" 200 11685 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:10:19.273] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:12:57.871] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:12:59.814] [INFO] access - ::1 - - "GET /api/stock/sales-master/0 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:12:59.916] [INFO] access - ::1 - - "GET /api/sale/get-next-sale-invoice-no/1/gstinvoice HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:13:01.405] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:13:01.412] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2010:12:48%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2010:12:48%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 3946 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:13:06.006] [INFO] access - ::1 - - "GET /api/stock/sales-master/93 HTTP/1.1" 200 536 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:13:06.115] [INFO] access - ::1 - - "GET /api/stock/sale-details/93 HTTP/1.1" 200 929 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:13:06.117] [INFO] access - ::1 - - "GET /api/admin/get-customer-details/1/4 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:13:11.081] [INFO] access - ::1 - - "OPTIONS /api/sale/insert-sale-details/ HTTP/1.1" 200 0 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:13:11.149] [INFO] access - ::1 - - "POST /api/sale/insert-sale-details/ HTTP/1.1" 200 54 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:13:11.230] [INFO] access - ::1 - - "GET /api/sale/get-next-sale-invoice-no/1/gstinvoice HTTP/1.1" 200 27 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:13:11.301] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:13:11.321] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2010:12:48%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2010:12:48%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 3946 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:13:13.080] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:14:02.320] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:14:05.448] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:14:32.720] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:14:36.427] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:15:22.857] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:15:36.831] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:15:41.320] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:16:23.615] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:16:26.985] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:16:45.636] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:16:48.737] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:24:37.853] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:24:47.963] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:32:19.500] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:32:22.802] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:34:10.719] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:36:02.787] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:36:09.544] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:40:40.613] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:40:45.940] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:41:36.775] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:41:41.782] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:42:50.619] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:42:54.535] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:43:13.495] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:43:16.680] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:43:28.549] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:43:32.923] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:44:06.438] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:44:09.936] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:44:54.193] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:44:57.781] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:45:09.384] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:45:13.700] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:45:33.266] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:45:36.384] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:45:48.125] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:45:50.587] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:46:02.804] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:46:05.685] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:46:18.892] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:46:21.873] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:46:35.643] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:46:38.648] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:47:36.345] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:47:39.042] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:48:52.871] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:48:56.913] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:53:11.088] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:53:16.692] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:55:00.832] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:55:03.970] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:55:31.745] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:55:38.333] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:56:12.983] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:56:16.530] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:56:54.138] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:56:57.488] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:57:52.644] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:57:55.894] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:58:27.963] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:58:31.286] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T10:59:50.035] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T10:59:52.837] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T11:00:41.152] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T11:00:44.545] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T11:02:55.535] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T11:02:59.368] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T11:33:21.290] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T11:33:24.078] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T11:33:36.344] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T11:33:39.799] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T11:34:13.051] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T11:34:15.984] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T11:34:27.916] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T11:34:31.206] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T11:34:38.258] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T11:34:41.948] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T11:37:45.122] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T11:37:48.386] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T11:39:02.694] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T11:39:07.598] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T11:39:23.693] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T11:39:31.640] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T11:39:56.157] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T11:39:59.728] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T11:43:36.918] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T11:43:40.043] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T11:44:00.312] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T11:44:05.738] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T11:45:14.302] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T11:45:18.410] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T11:46:47.267] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T11:46:51.265] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T11:47:05.345] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T11:47:08.392] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T11:47:22.388] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T11:47:25.672] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T11:47:31.910] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T11:47:35.264] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T11:47:43.725] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T11:47:47.634] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T11:49:58.236] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T11:50:06.044] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T11:50:19.105] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T11:50:21.159] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T11:54:15.384] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T11:54:19.851] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T11:55:05.006] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T11:55:11.306] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:02:17.717] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T12:02:21.867] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:04:46.179] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T12:04:50.275] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:05:51.795] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T12:05:55.415] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:07:13.106] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T12:07:16.557] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/93 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:24:02.984] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:24:03.022] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2012:24:01%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2012:24:01%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 3946 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:39:18.854] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:39:18.866] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2012:39:18%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2012:39:18%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 3946 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:41:47.465] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T12:42:35.613] [INFO] access - ::1 - - "GET /api/stock/sales-master/90 HTTP/1.1" 200 537 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:42:35.831] [INFO] access - ::1 - - "GET /api/admin/get-customer-details/1/105 HTTP/1.1" 200 582 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:42:35.852] [INFO] access - ::1 - - "GET /api/stock/sale-details/90 HTTP/1.1" 200 486 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:42:39.383] [INFO] access - ::1 - - "OPTIONS /api/sale/insert-sale-details/ HTTP/1.1" 200 0 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:42:39.524] [INFO] access - ::1 - - "POST /api/sale/insert-sale-details/ HTTP/1.1" 200 54 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:42:39.570] [INFO] access - ::1 - - "GET /api/sale/get-next-sale-invoice-no/1/gstinvoice HTTP/1.1" 200 27 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:42:39.718] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:42:39.720] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2012:39:18%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2012:39:18%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 3953 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:42:41.740] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:52:41.633] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2020%202020%2012:52:41%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2012:52:41%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 1150 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:52:41.699] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:52:41.717] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2012:52:41%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2012:52:41%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 3953 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:52:41.879] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:55:27.556] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T12:55:36.188] [INFO] access - ::1 - - "GET /api/stock/sales-master/90 HTTP/1.1" 200 544 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:55:36.340] [INFO] access - ::1 - - "GET /api/admin/get-customer-details/1/105 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:55:36.351] [INFO] access - ::1 - - "GET /api/stock/sale-details/90 HTTP/1.1" 200 486 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:55:39.825] [INFO] access - ::1 - - "OPTIONS /api/sale/insert-sale-details/ HTTP/1.1" 200 0 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:55:39.894] [INFO] access - ::1 - - "POST /api/sale/insert-sale-details/ HTTP/1.1" 200 54 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:55:39.947] [INFO] access - ::1 - - "GET /api/sale/get-next-sale-invoice-no/1/gstinvoice HTTP/1.1" 200 27 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:55:40.057] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:55:40.066] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2012:52:41%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2012:52:41%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 3953 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:55:42.134] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:56:46.169] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T12:56:49.350] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T12:59:28.346] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T12:59:32.967] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:00:31.745] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:00:58.601] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:01:02.351] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:01:40.036] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:01:43.473] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:01:55.373] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:01:58.612] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:03:12.361] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:03:16.770] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:04:36.288] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:04:39.873] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:06:02.218] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:06:05.128] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:06:35.698] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:06:38.582] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:08:43.118] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:08:47.210] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:09:39.626] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:09:42.545] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:10:17.268] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:10:21.086] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:10:49.002] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:10:52.242] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:11:28.447] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:11:31.707] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:14:02.122] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:14:07.397] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:14:49.930] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:14:54.458] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:15:26.011] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:15:29.699] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:15:48.683] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:15:52.203] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:16:12.005] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:16:16.693] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:16:31.510] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:16:34.571] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:16:46.549] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:16:50.269] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:18:19.141] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:18:22.425] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:18:40.958] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:18:43.923] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:19:32.126] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:19:35.413] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:20:29.788] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:20:43.470] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:21:55.497] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:21:58.250] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:22:33.225] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:22:36.243] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:22:43.716] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:22:46.483] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:22:57.815] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:23:05.906] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:23:35.110] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:23:39.827] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:23:53.364] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:23:56.636] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:24:55.891] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:25:00.402] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:25:12.315] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:25:14.930] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:27:41.672] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:27:44.525] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:27:58.128] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:28:01.125] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:28:14.412] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:28:17.249] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:28:34.628] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:28:37.912] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:28:51.763] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:28:55.496] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:29:44.560] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:29:49.007] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:31:30.004] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T13:31:34.545] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:41:25.845] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T13:41:25.853] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2013:41:25%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2013:41:25%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 3953 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:05:30.754] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:05:37.138] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:05:47.204] [INFO] access - ::1 - - "GET /api/stock/sales-master/90 HTTP/1.1" 200 544 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:05:47.336] [INFO] access - ::1 - - "GET /api/admin/get-customer-details/1/105 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:05:47.342] [INFO] access - ::1 - - "GET /api/stock/sale-details/90 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:05:51.336] [INFO] access - ::1 - - "OPTIONS /api/sale/insert-sale-details/ HTTP/1.1" 200 0 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:05:51.409] [INFO] access - ::1 - - "POST /api/sale/insert-sale-details/ HTTP/1.1" 200 54 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:05:51.524] [INFO] access - ::1 - - "GET /api/sale/get-next-sale-invoice-no/1/gstinvoice HTTP/1.1" 200 27 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:05:51.614] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:05:51.618] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2013:41:25%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2013:41:25%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 3953 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:05:53.354] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:06:56.844] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:07:01.867] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:07:51.907] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:07:58.630] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:08:33.425] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:08:36.820] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:09:41.630] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:09:44.939] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:11:15.317] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:11:37.592] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:14:39.285] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:14:42.215] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:15:12.579] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:15:16.572] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:15:23.954] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:15:26.814] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:15:46.551] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:15:51.006] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:15:59.038] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:16:02.521] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:17:01.481] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:17:04.901] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:17:55.321] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:17:59.106] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:20:53.181] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:20:59.720] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:21:39.687] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:21:42.756] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:22:04.109] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:22:06.356] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:22:19.061] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:22:21.908] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:23:26.847] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:23:29.734] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:24:07.738] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:24:11.509] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:25:28.796] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:25:31.793] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:25:53.695] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:25:56.332] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:26:13.017] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:26:17.835] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:27:12.167] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:27:16.361] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:27:32.108] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:27:35.308] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:27:44.269] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:27:46.958] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:27:56.508] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:28:07.092] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:28:10.725] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:32:40.614] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:32:40.625] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2016:32:40%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2016:32:40%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 3953 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:35:37.647] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:35:47.674] [INFO] access - ::1 - - "GET /api/stock/sales-master/90 HTTP/1.1" 200 544 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:35:47.844] [INFO] access - ::1 - - "GET /api/admin/get-customer-details/1/105 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:35:47.850] [INFO] access - ::1 - - "GET /api/stock/sale-details/90 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:35:51.048] [INFO] access - ::1 - - "OPTIONS /api/sale/insert-sale-details/ HTTP/1.1" 200 0 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:35:51.109] [INFO] access - ::1 - - "POST /api/sale/insert-sale-details/ HTTP/1.1" 200 54 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:35:51.138] [INFO] access - ::1 - - "GET /api/sale/get-next-sale-invoice-no/1/gstinvoice HTTP/1.1" 200 27 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:35:51.286] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:35:51.290] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2016:32:40%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2016:32:40%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 3953 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:35:53.246] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:36:29.513] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:36:44.777] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:36:50.096] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:38:12.790] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:38:15.911] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:38:23.130] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:38:26.543] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:39:01.441] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:39:04.859] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:39:21.922] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:39:26.940] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:39:55.614] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:39:58.577] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:40:09.744] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:40:12.570] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:40:30.979] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:40:33.769] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:40:43.488] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:40:47.219] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:41:00.459] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:41:03.619] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:42:33.832] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:42:37.102] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:43:23.934] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T16:43:27.665] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:49:16.883] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T16:49:16.893] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2016:49:16%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2016:49:16%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 3953 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:32:32.947] [INFO] access - ::1 - - "GET /api/stock/sales-master/90 HTTP/1.1" 200 544 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:32:33.091] [INFO] access - ::1 - - "GET /api/admin/get-customer-details/1/105 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:32:33.097] [INFO] access - ::1 - - "GET /api/stock/sale-details/90 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:32:41.677] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:32:41.687] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2016:49:16%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2016:49:16%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:32:52.216] [INFO] access - ::1 - - "GET /api/stock/sales-master/90 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:32:52.327] [INFO] access - ::1 - - "GET /api/stock/sale-details/90 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:32:52.329] [INFO] access - ::1 - - "GET /api/admin/get-customer-details/1/105 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:32:56.041] [INFO] access - ::1 - - "OPTIONS /api/sale/insert-sale-details/ HTTP/1.1" 200 0 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:32:56.119] [INFO] access - ::1 - - "POST /api/sale/insert-sale-details/ HTTP/1.1" 200 54 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:32:56.236] [INFO] access - ::1 - - "GET /api/sale/get-next-sale-invoice-no/1/gstinvoice HTTP/1.1" 200 27 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:32:56.263] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:32:56.267] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2016:49:16%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2016:49:16%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 3953 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:32:57.841] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:35:11.389] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T17:35:15.088] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:38:09.000] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T17:38:13.374] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:39:34.599] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T17:39:39.057] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:40:51.101] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T17:40:56.623] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:42:45.760] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T17:42:50.114] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:43:46.552] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T17:43:50.337] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:44:23.318] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T17:44:27.198] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:45:14.976] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T17:45:17.649] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:45:34.736] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T17:45:38.567] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:45:56.027] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T17:45:59.061] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:47:36.336] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T17:47:43.732] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:50:42.728] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T17:50:49.699] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:50:49.710] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2017:50:48%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2017:50:48%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 3953 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:56:45.489] [INFO] access - ::1 - - "GET /api/stock/sales-master/90 HTTP/1.1" 200 544 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:56:45.661] [INFO] access - ::1 - - "GET /api/stock/sale-details/90 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:56:45.662] [INFO] access - ::1 - - "GET /api/admin/get-customer-details/1/105 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:56:49.135] [INFO] access - ::1 - - "OPTIONS /api/sale/insert-sale-details/ HTTP/1.1" 200 0 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:56:49.232] [INFO] access - ::1 - - "POST /api/sale/insert-sale-details/ HTTP/1.1" 200 54 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:56:49.341] [INFO] access - ::1 - - "GET /api/sale/get-next-sale-invoice-no/1/gstinvoice HTTP/1.1" 200 27 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:56:49.423] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:56:49.425] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2017:50:48%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2017:50:48%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 3953 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:56:50.834] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T17:57:26.227] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T17:57:30.851] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:02:53.421] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T18:02:59.891] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:06:21.177] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T18:06:25.953] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:14:34.370] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:14:34.386] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2018:14:34%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2018:14:34%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 3953 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:21:31.864] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T18:21:40.061] [INFO] access - ::1 - - "GET /api/stock/sales-master/90 HTTP/1.1" 200 544 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:21:40.189] [INFO] access - ::1 - - "GET /api/stock/sale-details/90 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:21:40.193] [INFO] access - ::1 - - "GET /api/admin/get-customer-details/1/105 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:21:44.149] [INFO] access - ::1 - - "OPTIONS /api/sale/insert-sale-details/ HTTP/1.1" 200 0 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:21:44.228] [INFO] access - ::1 - - "POST /api/sale/insert-sale-details/ HTTP/1.1" 200 54 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:21:44.304] [INFO] access - ::1 - - "GET /api/sale/get-next-sale-invoice-no/1/gstinvoice HTTP/1.1" 200 27 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:21:44.408] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:21:44.418] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2018:14:34%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2018:14:34%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 3953 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:21:46.736] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:22:28.180] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T18:22:33.175] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:23:05.331] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T18:23:09.349] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:25:33.716] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T18:25:38.013] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:26:17.334] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2018:26:16%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2018:26:16%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 3953 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:26:17.399] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:32:29.908] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T18:32:38.043] [INFO] access - ::1 - - "GET /api/stock/sales-master/90 HTTP/1.1" 200 544 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:32:38.214] [INFO] access - ::1 - - "GET /api/admin/get-customer-details/1/105 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:32:38.227] [INFO] access - ::1 - - "GET /api/stock/sale-details/90 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:32:41.710] [INFO] access - ::1 - - "OPTIONS /api/sale/insert-sale-details/ HTTP/1.1" 200 0 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:32:41.776] [INFO] access - ::1 - - "POST /api/sale/insert-sale-details/ HTTP/1.1" 200 54 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:32:41.919] [INFO] access - ::1 - - "GET /api/sale/get-next-sale-invoice-no/1/gstinvoice HTTP/1.1" 200 27 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:32:41.983] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:32:41.985] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2018:26:16%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2018:26:16%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 3953 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:32:43.795] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:34:40.373] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T18:34:45.259] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:38:10.533] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T18:38:44.166] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T18:39:46.627] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T18:40:04.627] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T18:40:50.000] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T18:40:51.574] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:41:35.758] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T18:41:40.308] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:41:59.209] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T18:42:01.804] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:42:13.614] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T18:42:17.598] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:42:48.365] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T18:42:51.445] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:44:10.967] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T18:44:17.361] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:44:48.201] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:45:59.789] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T18:46:03.716] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:47:17.567] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T18:47:21.744] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:53:15.300] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T18:53:19.811] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:54:20.854] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T18:54:25.648] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:57:11.212] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T18:57:15.639] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T18:59:10.546] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T18:59:16.476] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T19:07:27.724] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T19:07:33.454] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T19:09:28.938] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T19:09:47.765] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T19:11:17.152] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T19:11:22.723] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T19:12:24.933] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T19:12:46.165] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T19:12:47.501] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T19:13:12.440] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T19:13:51.672] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T19:13:53.444] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T19:14:18.530] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T19:14:25.810] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T19:15:34.145] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T19:16:51.971] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T19:16:53.370] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T19:17:25.417] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T19:17:29.414] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T19:18:47.249] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T19:18:57.447] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T19:21:41.971] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T19:21:41.992] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2019:21:40%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2019:21:40%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 3953 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T19:23:54.510] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T19:23:54.521] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2019:23:54%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2019:23:54%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 3953 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T19:50:23.754] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2019:50:23%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2019:50:23%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 3953 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T19:50:23.772] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T19:59:59.798] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T19:59:59.804] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2019:59:59%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2019:59:59%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 3953 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T21:06:12.222] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T21:06:24.951] [INFO] access - ::1 - - "GET /api/stock/sales-master/90 HTTP/1.1" 200 544 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T21:06:25.103] [INFO] access - ::1 - - "GET /api/admin/get-customer-details/1/105 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T21:06:25.110] [INFO] access - ::1 - - "GET /api/stock/sale-details/90 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T21:06:28.942] [INFO] access - ::1 - - "OPTIONS /api/sale/insert-sale-details/ HTTP/1.1" 200 0 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T21:06:29.008] [INFO] access - ::1 - - "POST /api/sale/insert-sale-details/ HTTP/1.1" 200 54 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T21:06:29.033] [INFO] access - ::1 - - "GET /api/sale/get-next-sale-invoice-no/1/gstinvoice HTTP/1.1" 200 27 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T21:06:29.138] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2019:59:59%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2019:59:59%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 3954 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T21:06:29.161] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T21:06:31.558] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T21:09:27.000] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T21:09:31.811] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T21:11:27.261] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T21:11:32.133] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T21:12:59.078] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T21:13:07.275] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T21:15:29.910] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T21:15:34.220] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T21:16:44.479] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T21:16:50.054] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T21:18:19.591] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T21:18:24.400] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T21:19:08.977] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T21:19:31.315] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T21:19:35.158] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T21:20:54.913] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T21:21:00.636] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T21:21:56.234] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T21:23:38.040] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T21:23:43.507] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T21:24:42.776] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T21:24:45.728] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T21:25:18.999] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T21:25:23.558] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T21:26:04.138] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T21:26:08.516] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T21:35:28.326] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T21:35:35.058] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T21:53:33.351] [INFO] access - hello dinesh sir info ** 
+[2020-09-20T21:53:38.478] [INFO] access - ::1 - - "GET /api/print/invoice-pdf/90 HTTP/1.1" 200 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T23:37:44.765] [INFO] access - ::1 - - "GET /api/all-active-customers/1 HTTP/1.1" 304 - "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"
+[2020-09-20T23:37:44.788] [INFO] access - ::1 - - "GET /api/stock/search-sales/1/all/all/Sun%20Sep%2013%202020%2023:37:44%20GMT+0530%20(India%20Standard%20Time)/Sun%20Sep%2020%202020%2023:37:44%20GMT+0530%20(India%20Standard%20Time)/all HTTP/1.1" 200 3954 "http://localhost:8100/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36"

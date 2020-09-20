@@ -19,6 +19,7 @@ function getSalesDetails(sales_id) {
 							sd.mrp as mrp, sd.batchdate as batchdate, sd.tax as tax, sd.igst as igst,
 							sd.cgst as cgst, sd.sgst as sgst, sd.taxable_value as tax_value,
 							sd.total_value as total_value, p.product_code, p.description, p.packetsize, p.taxrate,
+							p.hsncode, p.unit,
 							s.id as stock_pk, s.mrp as stock_mrp, s.available_stock as stock_available_stock
 							from 
 							sale_detail sd, product p, stock s

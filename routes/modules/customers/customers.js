@@ -337,7 +337,7 @@ const updateDefaultCustomerDiscount = (updateValues, callback) => {
 
 // fetch rows from customer tbl & customer shipping addres tbl
 const getCustomerDetails = (centerid, customerid) => {
-	let query = `select c.*, s.code,
+	let query = `select c.*, s.code,  s.description,
 	csa.state_id as csa_state,
 	csa.address1 as csa_address1,
 	csa.address2 as csa_address2, 
