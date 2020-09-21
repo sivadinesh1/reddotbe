@@ -711,16 +711,16 @@ function generateSummaryLeftTableRow(doc, y, classhead, subtotal, disc, amount, 
 	doc
 		.fontSize(9)
 		.text(classhead, 24, y, { width: 40, align: "left" })
-		.text(subtotal, 64, y, { width: 50, align: "right" })
-		.text(disc, 113, y, { width: 49, align: "right" })
-		.text(amount, 169, y, { width: 49, align: "right" });
+		.text((+subtotal).toFixed(2), 64, y, { width: 50, align: "right" })
+		.text((+disc).toFixed(2), 113, y, { width: 49, align: "right" })
+		.text((+amount).toFixed(2), 169, y, { width: 49, align: "right" });
 
 	if (!isIGST) {
-		doc.text(sgst, 225, y, { width: 49, align: "right" }).text(cgst, 281, y, { width: 49, align: "right" });
-		doc.text(gst, 337, y, { width: 49, align: "right" }).text(total, 393, y, { width: 49, align: "right" });
+		doc.text((+sgst).toFixed(2), 225, y, { width: 49, align: "right" }).text((+cgst).toFixed(2), 281, y, { width: 49, align: "right" });
+		doc.text((+gst).toFixed(2), 337, y, { width: 49, align: "right" }).text((+total).toFixed(2), 393, y, { width: 49, align: "right" });
 	} else if (isIGST) {
-		doc.text(igst, 225, y, { width: 39, align: "right" });
-		doc.text(gst, 281, y, { width: 49, align: "right" }).text(total, 337, y, { width: 49, align: "right" });
+		doc.text((+igst).toFixed(2), 225, y, { width: 39, align: "right" });
+		doc.text((+gst).toFixed(2), 281, y, { width: 49, align: "right" }).text((+total).toFixed(2), 337, y, { width: 49, align: "right" });
 	}
 }
 
@@ -731,11 +731,11 @@ function generateSummaryRightTableRow(doc, y, subtotal, discount, sgst, cgst, fi
 		.font("Helvetica-Bold")
 		.text("SUB TOTAL", 460, y, { width: 70, align: "left" })
 		.font("Helvetica")
-		.text(subtotal, 510, y, { width: 70, align: "right" })
+		.text((+subtotal).toFixed(2), 510, y, { width: 70, align: "right" })
 
 		.text("DISCOUNT", 460, y + 15, { width: 70, align: "left" })
 
-		.text(discount, 510, y + 15, { width: 70, align: "right" });
+		.text((+discount).toFixed(2), 510, y + 15, { width: 70, align: "right" });
 
 	if (!isIGST) {
 		doc
@@ -750,7 +750,7 @@ function generateSummaryRightTableRow(doc, y, subtotal, discount, sgst, cgst, fi
 		doc
 			.text("IGST", 460, y + 30, { width: 70, align: "left" })
 
-			.text(igst, 510, y + 30, { width: 70, align: "right" });
+			.text((+igst).toFixed(2), 510, y + 30, { width: 70, align: "right" });
 	}
 
 	doc
@@ -760,17 +760,22 @@ function generateSummaryRightTableRow(doc, y, subtotal, discount, sgst, cgst, fi
 
 		.text("Misc.", 460, y + 75, { width: 70, align: "left" })
 
-		.text(salemasterdata.transport_charges + salemasterdata.unloading_charges + salemasterdata.misc_charges, 510, y + 75, {
+		.text((+(+salemasterdata.transport_charges + +salemasterdata.unloading_charges + +salemasterdata.misc_charges)).toFixed(2), 510, y + 75, {
 			width: 70,
 			align: "right",
 		})
 		.font("Helvetica-Bold")
 		.text("TOTAL", 460, y + 95, { width: 70, align: "left" })
 
-		.text(finalTotalAllTax + salemasterdata.transport_charges + salemasterdata.unloading_charges + salemasterdata.misc_charges, 510, y + 95, {
-			width: 70,
-			align: "right",
-		})
+		.text(
+			(+(+finalTotalAllTax + +salemasterdata.transport_charges + +salemasterdata.unloading_charges + +salemasterdata.misc_charges)).toFixed(2),
+			510,
+			y + 95,
+			{
+				width: 70,
+				align: "right",
+			},
+		)
 		.font("Helvetica");
 }
 
