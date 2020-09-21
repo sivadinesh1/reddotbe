@@ -259,7 +259,7 @@ function generateInvoiceTable(doc, salemasterdata, saledetailsdata) {
 
 		generateTableRow(
 			doc,
-			515,
+			invoiceTableTop,
 			idx + 1,
 			k.description,
 			k.product_code,
@@ -293,7 +293,7 @@ function generateInvoiceTable(doc, salemasterdata, saledetailsdata) {
 			.strokeColor("#aaaaaa")
 			.moveTo(x_start + 29, invoiceTableTop - 6)
 			.lineWidth(1)
-			.lineTo(x_start + 29, invoiceTableTop + 20) // this is the end point the line
+			.lineTo(x_start + 29, 515) // this is the end point the line
 
 			.stroke();
 		// Product Desc
