@@ -21,7 +21,10 @@ VALUES
 	let values = [insertValues.center_id, insertValues.customerctrl.id, invoice_ref_id, insertValues.net_total];
 
 	pool.query(query, values, function (err, data) {
-		if (err) return callback(err);
+		if (err) {
+			console.log("Error inside addSaleLedgerRecord" + JSON.stringify(err));
+			return callback(err);
+		}
 		return callback(null, data);
 	});
 };
@@ -71,7 +74,10 @@ VALUES
 	let values = [insertValues.center_id, insertValues.customerctrl.id, invoice_ref_id];
 
 	pool.query(query, values, function (err, data) {
-		if (err) return callback(err);
+		if (err) {
+			console.log("Error inside addReverseSaleLedgerRecord " + JSON.stringify(err));
+			return callback(err);
+		}
 		return callback(null, data);
 	});
 };
@@ -93,7 +99,10 @@ VALUES
 	let values = [insertValues.center_id, insertValues.customerctrl.id, invoice_ref_id, insertValues.net_total];
 
 	pool.query(query, values, function (err, data) {
-		if (err) return callback(err);
+		if (err) {
+			console.log("error inside addSaleLedgerAfterReversalRecord " + JSON.stringify(err));
+			return callback(err);
+		}
 		return callback(null, data);
 	});
 };
@@ -112,20 +121,13 @@ const addPaymentLedgerRecord = (insertValues, payment_ref_id, receivedamount, sa
 			LIMIT 1) a), 0) - '${receivedamount}', '${today}'
 		) `;
 
-	// 	let query = `
-	// INSERT INTO ledger ( center_id, customer_id, invoice_ref_id, payment_ref_id, ledger_detail, debit_amt, balance_amt, ledger_date)
-	// VALUES
-	//   ( ? , ?, '${sale_ref_id}' ?, 'Payment', ?, IFNULL((select balance_amt from (select (balance_amt) as balance_amt
-	//     FROM ledger
-	//     where center_id = '${insertValues.customer.center_id}'  and customer_id = '${insertValues.customer.id}'
-	//     ORDER BY  id DESC
-	//     LIMIT 1) a), 0) - '${receivedamount}', '${today}'
-	//   ) `;
-
 	let values = [insertValues.customer.center_id, insertValues.customer.id, payment_ref_id, receivedamount];
 
 	pool.query(query, values, function (err, data) {
-		if (err) return callback(err);
+		if (err) {
+			console.log("error inside addPaymentLedgerRecord " + JSON.stringify(err));
+			return callback(err);
+		}
 		return callback(null, data);
 	});
 };
@@ -195,6 +197,7 @@ const getPymtSequenceNo = (cloneReq) => {
 	return new Promise(function (resolve, reject) {
 		pool.query(pymtNoQry, function (err, data) {
 			if (err) {
+				console.log("error in getPymtSequenceNo " + JSON.stringify(err));
 				reject(err);
 			}
 			resolve(data[0].pymtNo);
@@ -217,7 +220,10 @@ const getPaymentsByCustomers = (center_id, customer_id, callback) => {
         p.center_id =   '${center_id}' and p.customer_id = '${customer_id}' order by id desc  `;
 
 	pool.query(query, function (err, data) {
-		if (err) return callback(err);
+		if (err) {
+			console.log("error in getPaymentsByCustomers " + JSON.stringify(err));
+			return callback(err);
+		}
 		return callback(null, data);
 	});
 };
@@ -248,7 +254,10 @@ const getPymtTransactionByCustomers = (center_id, customer_id, callback) => {
 	order by last_updated desc `;
 
 	pool.query(query, function (err, data) {
-		if (err) return callback(err);
+		if (err) {
+			console.log("error in getPymtTransactionByCustomers " + JSON.stringify(err));
+			return callback(err);
+		}
 		return callback(null, data);
 	});
 };
@@ -316,7 +325,10 @@ where
 	`;
 
 	pool.query(query, function (err, data) {
-		if (err) return callback(err);
+		if (err) {
+			console.log("error in getPymtTransactionsByCenter" + JSON.stringify(err));
+			return callback(err);
+		}
 		return callback(null, data);
 	});
 };
@@ -330,7 +342,10 @@ const getLedgerByCustomers = (center_id, customer_id, callback) => {
 	 l.center_id =  '${center_id}' and l.customer_id = '${customer_id}' order by l.id desc  `;
 
 	pool.query(query, function (err, data) {
-		if (err) return callback(err);
+		if (err) {
+			console.log("error in getLegerByCustomers " + JSON.stringify(err));
+			return callback(err);
+		}
 		return callback(null, data);
 	});
 };
@@ -367,7 +382,10 @@ const getSaleInvoiceByCustomers = (center_id, customer_id, callback) => {
 	console.log("object" + query);
 
 	pool.query(query, function (err, data) {
-		if (err) return callback(err);
+		if (err) {
+			console.log("error in getSaleInvoiceByCustomers " + JSON.stringify(err));
+			return callback(err);
+		}
 		return callback(null, data);
 	});
 };
@@ -403,7 +421,7 @@ const getSaleInvoiceByCenter = (center_id, callback) => {
 
 	pool.query(query, function (err, data) {
 		if (err) {
-			console.log("object...." + JSON.stringify(err));
+			console.log("error in getSaleInvoiceByCenter ...." + JSON.stringify(err));
 			return callback(err);
 		}
 		return callback(null, data);
@@ -428,6 +446,7 @@ const updateCustomerCredit = (balanceamount, center_id, customer_id) => {
 	return new Promise(function (resolve, reject) {
 		pool.query(qryUpdateSqnc, function (err, data) {
 			if (err) {
+				console.log("error in updateCustomerCredit " + JSON.stringify(err));
 				reject(err);
 			}
 			resolve(data);
@@ -450,6 +469,7 @@ const updateCustomerCreditMinus = (creditusedamount, center_id, customer_id) => 
 	return new Promise(function (resolve, reject) {
 		pool.query(qryUpdateSqnc, function (err, data) {
 			if (err) {
+				console.log("error in updateCustomerCreditMinus " + JSON.stringify(err));
 				reject(err);
 			}
 			resolve(data);

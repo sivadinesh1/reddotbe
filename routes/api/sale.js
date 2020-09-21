@@ -540,11 +540,12 @@ function insertItemHistory(k, vSale_id, vSale_det_id, cloneReq) {
 	let query2 = `
 			insert into item_history (center_id, module, product_ref_id, sale_id, sale_det_id, actn, actn_type, txn_qty, stock_level, txn_date)
 			values ('${cloneReq.center_id}', 'Sale', '${k.product_id}', '${sale_id}', '${sale_det_id}', 'SAL', '${actn_type}', '${txn_qty}', 
-							(select (available_stock)  from stock where product_id = '${k.product_id}' ), '${today}' ) `;
+							(select (available_stock)  from stock where product_id = '${k.product_id}' and mrp = '${k.product_id}' ), '${today}' ) `;
+	console.log("sql for insertItemHistory" + query2);
 
 	pool.query(query2, function (err, data) {
 		if (err) {
-			console.log("object" + err);
+			console.log("object insertItemHistory >>" + err);
 		} else {
 			console.log("object..stock update .");
 		}
