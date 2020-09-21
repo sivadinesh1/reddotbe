@@ -293,7 +293,7 @@ function generateInvoiceTable(doc, salemasterdata, saledetailsdata) {
 			.strokeColor("#aaaaaa")
 			.moveTo(x_start + 29, invoiceTableTop - 6)
 			.lineWidth(1)
-			.lineTo(x_start + 29, 515) // this is the end point the line
+			.lineTo(x_start + 29, 525) // this is the end point the line
 
 			.stroke();
 		// Product Desc
@@ -301,7 +301,7 @@ function generateInvoiceTable(doc, salemasterdata, saledetailsdata) {
 			.strokeColor("#aaaaaa")
 			.moveTo(x_start + 29 + 149, invoiceTableTop - 8)
 			.lineWidth(1)
-			.lineTo(x_start + 29 + 149, invoiceTableTop + 20)
+			.lineTo(x_start + 29 + 149, 525)
 
 			.stroke();
 		// hsncode
@@ -309,7 +309,7 @@ function generateInvoiceTable(doc, salemasterdata, saledetailsdata) {
 			.strokeColor("#aaaaaa")
 			.moveTo(x_start + 29 + 150 + 42, invoiceTableTop - 8)
 			.lineWidth(1)
-			.lineTo(x_start + 29 + 150 + 42, invoiceTableTop + 20)
+			.lineTo(x_start + 29 + 150 + 42, 525)
 
 			.stroke();
 
@@ -318,7 +318,7 @@ function generateInvoiceTable(doc, salemasterdata, saledetailsdata) {
 			.strokeColor("#aaaaaa")
 			.moveTo(x_start + 29 + 150 + 42 + 29, invoiceTableTop - 8)
 			.lineWidth(1)
-			.lineTo(x_start + 29 + 150 + 42 + 29, invoiceTableTop + 20)
+			.lineTo(x_start + 29 + 150 + 42 + 29, 525)
 
 			.stroke();
 
@@ -327,7 +327,7 @@ function generateInvoiceTable(doc, salemasterdata, saledetailsdata) {
 			.strokeColor("#aaaaaa")
 			.moveTo(x_start + 29 + 150 + 42 + 29 + 29, invoiceTableTop - 6)
 			.lineWidth(1)
-			.lineTo(x_start + 29 + 150 + 42 + 29 + 29, invoiceTableTop + 20)
+			.lineTo(x_start + 29 + 150 + 42 + 29 + 29, 525)
 
 			.stroke();
 		// disc
@@ -335,7 +335,7 @@ function generateInvoiceTable(doc, salemasterdata, saledetailsdata) {
 			.strokeColor("#aaaaaa")
 			.moveTo(x_start + 29 + 150 + 42 + 29 + 29 + 50, invoiceTableTop - 6)
 			.lineWidth(1)
-			.lineTo(x_start + 29 + 150 + 42 + 29 + 29 + 50, invoiceTableTop + 20)
+			.lineTo(x_start + 29 + 150 + 42 + 29 + 29 + 50, 525)
 
 			.stroke();
 		// taxable amount
@@ -343,7 +343,7 @@ function generateInvoiceTable(doc, salemasterdata, saledetailsdata) {
 			.strokeColor("#aaaaaa")
 			.moveTo(x_start + 29 + 150 + 42 + 29 + 29 + 50 + 29, invoiceTableTop - 6)
 			.lineWidth(1)
-			.lineTo(x_start + 29 + 150 + 42 + 29 + 29 + 50 + 29, invoiceTableTop + 20)
+			.lineTo(x_start + 29 + 150 + 42 + 29 + 29 + 50 + 29, 525)
 
 			.stroke();
 		if (!isIGST) {
@@ -352,7 +352,7 @@ function generateInvoiceTable(doc, salemasterdata, saledetailsdata) {
 				.strokeColor("#aaaaaa")
 				.moveTo(x_start + 29 + 150 + 42 + 29 + 29 + 50 + 29 + 50, invoiceTableTop - 6)
 				.lineWidth(1)
-				.lineTo(x_start + 29 + 150 + 42 + 29 + 29 + 50 + 29 + 50, invoiceTableTop + 20)
+				.lineTo(x_start + 29 + 150 + 42 + 29 + 29 + 50 + 29 + 50, 525)
 
 				.stroke();
 			//CGST
@@ -360,7 +360,7 @@ function generateInvoiceTable(doc, salemasterdata, saledetailsdata) {
 				.strokeColor("#aaaaaa")
 				.moveTo(x_start + 29 + 150 + 42 + 29 + 29 + 50 + 29 + 50 + 29, invoiceTableTop - 6)
 				.lineWidth(1)
-				.lineTo(x_start + 29 + 150 + 42 + 29 + 29 + 50 + 29 + 50 + 29, invoiceTableTop + 20)
+				.lineTo(x_start + 29 + 150 + 42 + 29 + 29 + 50 + 29 + 50 + 29, 525)
 
 				.stroke();
 		} else {
@@ -369,7 +369,7 @@ function generateInvoiceTable(doc, salemasterdata, saledetailsdata) {
 				.strokeColor("#aaaaaa")
 				.moveTo(x_start + 29 + 150 + 42 + 29 + 29 + 50 + 29 + 50, invoiceTableTop - 6)
 				.lineWidth(1)
-				.lineTo(x_start + 29 + 150 + 42 + 29 + 29 + 50 + 29 + 50, invoiceTableTop + 20)
+				.lineTo(x_start + 29 + 150 + 42 + 29 + 29 + 50 + 29 + 50, 525)
 
 				.stroke();
 		}
@@ -379,7 +379,7 @@ function generateInvoiceTable(doc, salemasterdata, saledetailsdata) {
 			.strokeColor("#aaaaaa")
 			.moveTo(x_start + 29 + 150 + 42 + 29 + 29 + 50 + 29 + 50 + 29 + 29, invoiceTableTop - 6)
 			.lineWidth(1)
-			.lineTo(x_start + 29 + 150 + 42 + 29 + 29 + 50 + 29 + 50 + 29 + 29, invoiceTableTop + 20)
+			.lineTo(x_start + 29 + 150 + 42 + 29 + 29 + 50 + 29 + 50 + 29 + 29, 525)
 
 			.stroke();
 	});
