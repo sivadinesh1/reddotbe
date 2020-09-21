@@ -707,8 +707,6 @@ function generateTableRow(
 	doc.text(net_amount, x_start + 29 + 150 + 42 + 29 + 29 + 50 + 29 + 50 + 29 + 29, y, { width: 60, align: "right" });
 }
 
-generateSummaryLeftTableRow(doc, start + 10, "CLASS", "SUB TOTAL", "DISC", "AMOUNT", "SGST", "CGST", "GST", "TOTAL", isIGST, "IGST");
-
 function generateSummaryLeftTableRow(doc, y, classhead, subtotal, disc, amount, sgst, cgst, gst, total, isIGST, igst) {
 	doc.fontSize(9).text(classhead, 24, y, { width: 40, align: "left" });
 	if (subtotal === "SUB TOTAL") {
