@@ -259,7 +259,7 @@ function generateInvoiceTable(doc, salemasterdata, saledetailsdata) {
 
 		generateTableRow(
 			doc,
-			invoiceTableTop,
+			515,
 			idx + 1,
 			k.description,
 			k.product_code,
@@ -707,20 +707,68 @@ function generateTableRow(
 	doc.text(net_amount, x_start + 29 + 150 + 42 + 29 + 29 + 50 + 29 + 50 + 29 + 29, y, { width: 60, align: "right" });
 }
 
+generateSummaryLeftTableRow(doc, start + 10, "CLASS", "SUB TOTAL", "DISC", "AMOUNT", "SGST", "CGST", "GST", "TOTAL", isIGST, "IGST");
+
 function generateSummaryLeftTableRow(doc, y, classhead, subtotal, disc, amount, sgst, cgst, gst, total, isIGST, igst) {
-	doc
-		.fontSize(9)
-		.text(classhead, 24, y, { width: 40, align: "left" })
-		.text((+subtotal).toFixed(2), 64, y, { width: 50, align: "right" })
-		.text((+disc).toFixed(2), 113, y, { width: 49, align: "right" })
-		.text((+amount).toFixed(2), 169, y, { width: 49, align: "right" });
+	doc.fontSize(9).text(classhead, 24, y, { width: 40, align: "left" });
+	if (subtotal === "SUB TOTAL") {
+		doc.text(subtotal, 64, y, { width: 50, align: "right" });
+	} else {
+		doc.text((+subtotal).toFixed(2), 64, y, { width: 50, align: "right" });
+	}
+
+	if (disc === "DISC") {
+		doc.text(disc, 113, y, { width: 49, align: "right" });
+	} else {
+		doc.text((+disc).toFixed(2), 113, y, { width: 49, align: "right" });
+	}
+	if (amount === "AMOUNT") {
+		doc.text(amount, 169, y, { width: 49, align: "right" });
+	} else {
+		doc.text((+amount).toFixed(2), 169, y, { width: 49, align: "right" });
+	}
 
 	if (!isIGST) {
-		doc.text((+sgst).toFixed(2), 225, y, { width: 49, align: "right" }).text((+cgst).toFixed(2), 281, y, { width: 49, align: "right" });
-		doc.text((+gst).toFixed(2), 337, y, { width: 49, align: "right" }).text((+total).toFixed(2), 393, y, { width: 49, align: "right" });
+		if (sgst === "SGST") {
+			doc.text(sgst, 225, y, { width: 49, align: "right" });
+		} else {
+			doc.text((+sgst).toFixed(2), 225, y, { width: 49, align: "right" });
+		}
+
+		if (cgst === "CGST") {
+			doc.text(cgst, 281, y, { width: 49, align: "right" });
+		} else {
+			doc.text((+cgst).toFixed(2), 281, y, { width: 49, align: "right" });
+		}
+
+		if (gst === "GST") {
+			doc.text(gst, 337, y, { width: 49, align: "right" });
+		} else {
+			doc.text((+gst).toFixed(2), 337, y, { width: 49, align: "right" });
+		}
+		if (total === "TOTAL") {
+			doc.text(total, 393, y, { width: 49, align: "right" });
+		} else {
+			doc.text((+total).toFixed(2), 393, y, { width: 49, align: "right" });
+		}
 	} else if (isIGST) {
-		doc.text((+igst).toFixed(2), 225, y, { width: 39, align: "right" });
-		doc.text((+gst).toFixed(2), 281, y, { width: 49, align: "right" }).text((+total).toFixed(2), 337, y, { width: 49, align: "right" });
+		if (igst === "IGST") {
+			doc.text(igst, 225, y, { width: 39, align: "right" });
+		} else {
+			doc.text((+igst).toFixed(2), 225, y, { width: 39, align: "right" });
+		}
+
+		if (gst === "GST") {
+			doc.text(gst, 281, y, { width: 49, align: "right" });
+		} else {
+			doc.text((+gst).toFixed(2), 281, y, { width: 49, align: "right" });
+		}
+
+		if (total === "TOTAL") {
+			doc.text(total, 337, y, { width: 49, align: "right" });
+		} else {
+			doc.text((+total).toFixed(2), 337, y, { width: 49, align: "right" });
+		}
 	}
 }
 
