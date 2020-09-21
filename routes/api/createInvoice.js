@@ -741,11 +741,11 @@ function generateSummaryRightTableRow(doc, y, subtotal, discount, sgst, cgst, fi
 		doc
 			.text("SGST", 460, y + 30, { width: 70, align: "left" })
 
-			.text(sgst, 510, y + 30, { width: 70, align: "right" })
+			.text((+sgst).toFixed(2), 510, y + 30, { width: 70, align: "right" })
 
 			.text("CGST", 460, y + 45, { width: 70, align: "left" })
 
-			.text(cgst, 510, y + 45, { width: 70, align: "right" });
+			.text((+cgst).toFixed(2), 510, y + 45, { width: 70, align: "right" });
 	} else if (isIGST) {
 		doc
 			.text("IGST", 460, y + 30, { width: 70, align: "left" })
