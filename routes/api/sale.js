@@ -138,7 +138,7 @@ where product_id = '${product_id}' and id = '${stock_id}'  `;
 saleRouter.post("/insert-sale-details", async (req, res) => {
 	const cloneReq = { ...req.body };
 
-	console.log("object.." + JSON.stringify(cloneReq));
+	console.log("object..insert-sale-details >> " + JSON.stringify(cloneReq));
 
 	// (1) Updates invseq in tbl financialyear, then {returns} formated sequence {YY/MM/INVSEQ}
 	await updateSequenceGenerator(cloneReq);

@@ -101,6 +101,7 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 
 			pool.query(upQuery, function (err, data) {
 				if (err) {
+					console.log("error update enquiry detai" + JSON.stringify(err));
 					return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
 				}
 			});
@@ -110,6 +111,7 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 
 			pool.query(insQry, function (err, data) {
 				if (err) {
+					console.log("error insert into backorder " + JSON.stringify(err));
 					return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
 				}
 			});
@@ -135,6 +137,7 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 
 			pool.query(upQuery1, function (err, data) {
 				if (err) {
+					console.log("error update enquiry detai.... partial fullfilment..." + JSON.stringify(err));
 					return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
 				}
 			});
@@ -146,6 +149,7 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 
 			pool.query(insQry2, function (err, data) {
 				if (err) {
+					console.log("object insQry2 a>g >>>>>>>> " + +JSON.stringify(err));
 					return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
 				}
 			});
@@ -154,6 +158,8 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 		if (objValue.giveqty >= objValue.askqty && objValue.product_id !== "" && objValue.product_id !== null) {
 			// F- fullfilled
 			// updt enq_det_tbl status as F, give qty = actual given
+
+			console.log("objValue >>>> " + JSON.stringify(objValue));
 
 			let upQuery3 = `update enquiry_detail
 			set
@@ -164,8 +170,11 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 			status = 'F'
 			where id = '${objValue.id}' `;
 
+			console.log("SQL upQuery3 >> " + upQuery3);
+
 			pool.query(upQuery3, function (err, data) {
 				if (err) {
+					console.log("query >> enquiry details >> " + JSON.stringify(err));
 					return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
 				}
 			});
