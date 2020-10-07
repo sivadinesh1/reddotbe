@@ -3,6 +3,7 @@ const reportsRouter = express.Router();
 
 const mysql = require("mysql");
 const moment = require("moment");
+const logger = require("../../routes/helpers/log4js");
 
 const { handleError, ErrorHandler } = require("./../helpers/error");
 
@@ -12,7 +13,7 @@ var pool = require("./../helpers/db");
 
 reportsRouter.post("/inventory-report", (req, res) => {
 	const [center_id, product_id] = Object.values(req.body);
-	console.log("object..> inventory-report >" + center_id, product_id);
+	logger.debug.debug("object..> inventory-report >" + center_id, product_id);
 
 	getProductInventoryReport(center_id, product_id, (err, data) => {
 		if (err) {

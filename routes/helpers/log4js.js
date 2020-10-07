@@ -29,7 +29,7 @@ log4js.configure({
 });
 
 module.exports = {
-	access: log4js.getLogger("access"),
+	//	access: log4js.getLogger("access"),
 
 	debug: log4js.getLogger("debug"),
 	express: log4js.connectLogger(log4js.getLogger("access"), { level: log4js.levels.INFO }),

@@ -3,6 +3,7 @@
 const fs = require("fs");
 // const PDFDocument = require("./pdfkit-tables");
 const blobStream = require("blob-stream");
+const logger = require("./../../helpers/log4js");
 
 const PDFDocument = require("./../../helpers/pdfkit-tables");
 
@@ -82,7 +83,7 @@ function printSaleInvoice(path, res) {
 	doc.moveDown().table(table1, 100, 350, { width: 300 });
 
 	doc.end();
-	console.log("inside print sale invoice ..");
+	logger.debug.debug("inside print sale invoice ..");
 	doc.pipe(fs.createWriteStream(path));
 
 	var stream = doc.pipe(blobStream());

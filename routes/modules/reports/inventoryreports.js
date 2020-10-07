@@ -1,5 +1,6 @@
 var pool = require("../../helpers/db");
 const moment = require("moment");
+const logger = require("./../../helpers/log4js");
 
 const getProductInventoryReport = (center_id, product_id, callback) => {
 	let query = ` select ih.id, module, p.id as product_id, p.product_code as product_code, p.description as product_description,

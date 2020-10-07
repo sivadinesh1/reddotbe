@@ -1,5 +1,6 @@
 const express = require("express");
 const stockRouter = express.Router();
+const logger = require("../../routes/helpers/log4js");
 
 const mysql = require("mysql");
 const moment = require("moment");
@@ -138,7 +139,7 @@ stockRouter.get("/search-sales/:centerid/:customerid/:status/:fromdate/:todate/:
 
 	sql = sql + " order by invoice_no ";
 
-	console.log("sql search sale " + sql);
+	logger.debug.debug("sql search sale " + sql);
 
 	pool.query(sql, function (err, data) {
 		if (err) {
@@ -191,8 +192,8 @@ stockRouter.get("/sale-details/:id", async (req, res) => {
 
 	let rows = await getSalesDetails(`${req.params.id}`);
 
-	console.log("dinesh test " + rows);
-	console.log("dinesh test ** " + JSON.stringify(rows));
+	logger.debug.debug("dinesh test " + rows);
+	logger.debug.debug("dinesh test ** " + JSON.stringify(rows));
 	return res.json(rows);
 });
 
@@ -258,11 +259,11 @@ stockRouter.post("/delete-purchase-details", async (req, res) => {
 	let product_id = req.body.product_id;
 	let stock_id = req.body.stock_id;
 
-	console.log("delete-purchase-details >>>>>> " + id);
-	console.log("delete-purchase-details >>>>>><<<<<< " + purchase_id);
-	console.log("delete-purchase-details >>>>>><<<<<< " + qty);
-	console.log("delete-purchase-details >>>>>><<<<<< " + product_id);
-	console.log("delete-purchase-details >>>>>><<<<<< " + stock_id);
+	logger.debug.debug("delete-purchase-details >>>>>> " + id);
+	logger.debug.debug("delete-purchase-details >>>>>><<<<<< " + purchase_id);
+	logger.debug.debug("delete-purchase-details >>>>>><<<<<< " + qty);
+	logger.debug.debug("delete-purchase-details >>>>>><<<<<< " + product_id);
+	logger.debug.debug("delete-purchase-details >>>>>><<<<<< " + stock_id);
 
 	var today = new Date();
 	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
@@ -286,7 +287,7 @@ stockRouter.post("/delete-purchase-details", async (req, res) => {
 	let auditPromise = await new Promise(function (resolve, reject) {
 		pool.query(auditQuery, function (err, data) {
 			if (err) {
-				console.log("error: " + err);
+				logger.debug.debug("error: " + err);
 				return reject(handleError(new ErrorHandler("500", "Error adding sale audit."), res));
 			}
 			resolve(data);
@@ -313,7 +314,7 @@ stockRouter.post("/delete-purchase-details", async (req, res) => {
 		let stockUpdateQuery = `update stock set available_stock =  available_stock - '${qty}'
 where product_id = '${product_id}' and id = '${stock_id}'  `;
 
-		console.log("stockUpdatePromise > " + stockUpdateQuery);
+		logger.debug.debug("stockUpdatePromise > " + stockUpdateQuery);
 
 		pool.query(stockUpdateQuery, function (err, data) {
 			if (err) {
@@ -333,7 +334,7 @@ module.exports = stockRouter;
 // called from sale details list delete
 stockRouter.delete("/delete-purchase/:id", async (req, res) => {
 	let purchase_id = req.params.id;
-	console.log("purchase _id ^^" + purchase_id);
+	logger.debug.debug("purchase _id ^^" + purchase_id);
 
 	let purchaseDetails = await getPurchaseDetails(purchase_id);
 
@@ -388,8 +389,8 @@ function deletePurchaseDetailsRecs(purchaseDetails, purchase_id) {
 	purchaseDetails.forEach(async (element, index) => {
 		idx = index + 1;
 
-		console.log("object >>>>>> " + JSON.stringify(element));
-		console.log("object >>>>>><<<<<< " + idx);
+		logger.debug.debug("object >>>>>> " + JSON.stringify(element));
+		logger.debug.debug("object >>>>>><<<<<< " + idx);
 
 		var today = new Date();
 		today = moment(today).format("YYYY-MM-DD HH:mm:ss");
@@ -413,7 +414,7 @@ function deletePurchaseDetailsRecs(purchaseDetails, purchase_id) {
 		let auditPromise = await new Promise(function (resolve, reject) {
 			pool.query(auditQuery, function (err, data) {
 				if (err) {
-					console.log("error: " + err);
+					logger.debug.debug("error: " + err);
 					return reject(handleError(new ErrorHandler("500", "Error adding sale audit."), res));
 				}
 				resolve(data);
@@ -440,7 +441,7 @@ function deletePurchaseDetailsRecs(purchaseDetails, purchase_id) {
 			let stockUpdateQuery = `update stock set available_stock =  available_stock - '${element.qty}'
 where product_id = '${element.product_id}' and id = '${element.stock_id}'  `;
 
-			console.log("stockUpdatePromise > " + stockUpdateQuery);
+			logger.debug.debug("stockUpdatePromise > " + stockUpdateQuery);
 
 			pool.query(stockUpdateQuery, function (err, data) {
 				if (err) {
@@ -462,15 +463,15 @@ where product_id = '${element.product_id}' and id = '${element.stock_id}'  `;
 
 stockRouter.get("/delete-purchase-master/:id", async (req, res) => {
 	let purchase_id = req.params.id;
-	console.log("sale _id ^^" + purchase_id);
+	logger.debug.debug("sale _id ^^" + purchase_id);
 
 	let sql = `
 		delete from purchase where 
 	id = '${purchase_id}' `;
-	console.log("llllll222222 SQL " + sql);
+	logger.debug.debug("llllll222222 SQL " + sql);
 	pool.query(sql, function (err, data) {
 		if (err) {
-			console.log("what error " + JSON.stringify(err));
+			logger.debug.debug("what error " + JSON.stringify(err));
 			return handleError(new ErrorHandler("500", "Error deleting sale detail / master"), res);
 		} else {
 			return res.json({

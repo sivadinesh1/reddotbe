@@ -6,6 +6,7 @@ const moment = require("moment");
 const { handleError, ErrorHandler } = require("./../helpers/error");
 
 const { getCenterDetails } = require("../modules/center/center.js");
+const logger = require("../../routes/helpers/log4js");
 
 const {
 	getCustomerDiscount,
@@ -55,7 +56,7 @@ adminRoute.get("/view-product-info/:centerid/:productid", (req, res) => {
 	p.id = '${product_id}' and
 	p.center_id = '${center_id}' `;
 
-	console.log("object view-product-info " + sql);
+	logger.debug.debug("object view-product-info " + sql);
 
 	pool.query(sql, function (err, data) {
 		if (err) {
@@ -92,7 +93,7 @@ adminRoute.post("/update-product", (req, res) => {
 
 	updateProduct(jsonObj, (err, data) => {
 		if (err) {
-			console.log("dinesh " + JSON.stringify(err));
+			logger.debug.debug("dinesh " + JSON.stringify(err));
 			return handleError(new ErrorHandler("500", "Error Updating product" + err.message), res);
 		} else {
 			res.status(200).json({
@@ -115,7 +116,7 @@ adminRoute.get("/get-vendor-details/:centerid/:vendorid", (req, res) => {
 	v.id = '${vendor_id}' and
 	v.center_id = '${center_id}' order by v.name`;
 
-	console.log("get-vendor-details >> " + sql);
+	logger.debug.debug("get-vendor-details >> " + sql);
 
 	pool.query(sql, function (err, data) {
 		if (err) {
@@ -127,7 +128,7 @@ adminRoute.get("/get-vendor-details/:centerid/:vendorid", (req, res) => {
 });
 
 adminRoute.get("/get-states", (req, res) => {
-	console.log("inside get vendor details");
+	logger.debug.debug("inside get vendor details");
 	let sql = `select * from state `;
 
 	pool.query(sql, function (err, data) {
@@ -224,7 +225,7 @@ adminRoute.post("/add-customer", (req, res) => {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error adding customer."), res);
 		} else {
-			console.log("dinesh");
+			logger.debug.debug("dinesh");
 			let resdata = JSON.stringify(data);
 			return res.status(200).json({
 				result: "success",
@@ -242,14 +243,14 @@ adminRoute.get("/get-center-details/:centerid", async (req, res) => {
 adminRoute.post("/update-center", (req, res) => {
 	let jsonObj = req.body;
 
-	console.log(" inside add purchase ..." + JSON.stringify(jsonObj));
+	logger.debug.debug(" inside add purchase ..." + JSON.stringify(jsonObj));
 
 	var objValue = jsonObj["formArray"];
 
 	const basic_info = objValue[0];
 	const general_info = objValue[1];
 	const addl_info = objValue[2];
-	console.log("object>>" + basic_info);
+	logger.debug.debug("object>>" + basic_info);
 
 	const center_id = basic_info["center_id"];
 	const company_id = basic_info["company_id"];
@@ -287,7 +288,7 @@ adminRoute.post("/update-center", (req, res) => {
 	id = '${center_id}'
 	`;
 
-	console.log("print the val " + query);
+	logger.debug.debug("print the val " + query);
 
 	pool.query(query, function (err, data) {
 		if (err) {
@@ -327,7 +328,7 @@ adminRoute.post("/insert-customer-shipping-address", (req, res) => {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error adding customer shipping address."), res);
 		} else {
-			console.log("dinesh");
+			logger.debug.debug("dinesh");
 			let resdata = JSON.stringify(data);
 			return res.status(200).json({
 				result: "success",
@@ -337,7 +338,7 @@ adminRoute.post("/insert-customer-shipping-address", (req, res) => {
 });
 
 adminRoute.get("/get-shipping-address/:customerid", (req, res) => {
-	console.log("inside get shipping address");
+	logger.debug.debug("inside get shipping address");
 	// @from Customer file
 	getCustomerShippingAddress(`${req.params.customerid}`, (err, rows) => {
 		if (err) return handleError(new ErrorHandler("500", "Error fetching shipping address"), res);
@@ -349,7 +350,7 @@ adminRoute.get("/get-shipping-address/:customerid", (req, res) => {
 adminRoute.put("/update-customer-shipping-address/:id", (req, res) => {
 	let jsonObj = req.body;
 
-	console.log("update-default-customer-discount " + JSON.stringify(jsonObj));
+	logger.debug.debug("update-default-customer-discount " + JSON.stringify(jsonObj));
 
 	updateCustomerShippingAddress(req.body, req.params.id, (err, rows) => {
 		if (err) return handleError(new ErrorHandler("500", "Error fetching sales master"), res);
@@ -377,7 +378,7 @@ adminRoute.get("/all-customer-default-discounts/:centerid", (req, res) => {
 
 // get customer discount values BY CUSTOMER
 adminRoute.get("/discounts-customer/:centerid/:customerid", (req, res) => {
-	console.log("dinesh test");
+	logger.debug.debug("dinesh test");
 	getDiscountsByCustomer(`${req.params.centerid}`, `${req.params.customerid}`, (err, rows) => {
 		if (err) return handleError(new ErrorHandler("500", "Error fetching sales master"), res);
 		return res.json(rows);
@@ -386,7 +387,7 @@ adminRoute.get("/discounts-customer/:centerid/:customerid", (req, res) => {
 
 // get customer discount values BY CUSTOMER
 adminRoute.get("/discounts-customer-brands/:centerid/:customerid", (req, res) => {
-	console.log("discounts-customer-brands ");
+	logger.debug.debug("discounts-customer-brands ");
 	getDiscountsByCustomerByBrand(`${req.params.centerid}`, `${req.params.customerid}`, (err, rows) => {
 		if (err) return handleError(new ErrorHandler("500", "Error fetching sales master"), res);
 		return res.json(rows);
@@ -397,7 +398,7 @@ adminRoute.get("/discounts-customer-brands/:centerid/:customerid", (req, res) =>
 adminRoute.put("/update-default-customer-discount", (req, res) => {
 	let jsonObj = req.body;
 
-	console.log("update-default-customer-discount " + JSON.stringify(jsonObj));
+	logger.debug.debug("update-default-customer-discount " + JSON.stringify(jsonObj));
 
 	updateDefaultCustomerDiscount(jsonObj, (err, rows) => {
 		if (err) return handleError(new ErrorHandler("500", "Error fetching sales master"), res);
@@ -409,7 +410,7 @@ adminRoute.put("/update-default-customer-discount", (req, res) => {
 adminRoute.put("/update-customer-discount", (req, res) => {
 	let jsonObj = req.body;
 
-	console.log("update-customer-discount > " + JSON.stringify(jsonObj));
+	logger.debug.debug("update-customer-discount > " + JSON.stringify(jsonObj));
 
 	// @from Customer file
 	updateCustomerDiscount(jsonObj, (err, rows) => {
@@ -424,7 +425,7 @@ adminRoute.post("/add-discounts-brand", (req, res) => {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error adding discounts by brand."), res);
 		} else {
-			console.log("dinesh");
+			logger.debug.debug("dinesh");
 			let resdata = JSON.stringify(data);
 			return res.status(200).json({
 				result: "success",

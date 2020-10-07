@@ -1,5 +1,6 @@
 var pool = require("../../helpers/db");
 const moment = require("moment");
+const logger = require("./../../helpers/log4js");
 
 const insertVendor = (insertValues, callback) => {
 	var today = new Date();
@@ -36,7 +37,7 @@ const insertVendor = (insertValues, callback) => {
 };
 
 const updateVendor = (updateValues, id, callback) => {
-	console.log("object >> " + JSON.stringify(updateValues));
+	logger.debug.debug("object >> " + JSON.stringify(updateValues));
 	var today = new Date();
 	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
 
@@ -67,7 +68,7 @@ const getSearchVendors = (centerid, searchstr, callback) => {
 	where 
 	v.state_id = s.id and isactive = 'A' and center_id = '${centerid}' and ( v.name like '%${searchstr}%') limit 50  `;
 
-	console.log("get-vendor-details > " + query);
+	logger.debug.debug("get-vendor-details > " + query);
 
 	let values = [centerid, searchstr];
 

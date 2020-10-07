@@ -1,4 +1,5 @@
 var pool = require("../../helpers/db");
+const logger = require("./../../helpers/log4js");
 
 // fetch rows from customer tbl & customer shipping addres tbl
 const getCenterDetails = (center_id) => {
@@ -10,7 +11,7 @@ const getCenterDetails = (center_id) => {
   c.state_id = s.id and
   c.id = '${center_id}'  `;
 
-	console.log("getCenterDetails > " + query);
+	logger.debug.debug("getCenterDetails > " + query);
 
 	return new Promise(function (resolve, reject) {
 		pool.query(query, function (err, data) {

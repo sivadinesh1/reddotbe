@@ -1,0 +1,15 @@
+[2020-09-17T21:10:18.382] [DEBUG] debug - hello dinesh sir debug
+		update customer set credit_amt = credit_amt + 2291 where 
+		center_id = '1' and  
+		id = '94'
+		 
+[2020-09-17T21:10:46.967] [DEBUG] debug - updateCustomerCreditMinus >> 
+		update customer set credit_amt = credit_amt - 2291 where 
+		center_id = '1' and  
+		id = '94'
+		 
+[2020-09-17T21:10:46.968] [DEBUG] debug - hello dinesh sir debug
+		update customer set credit_amt = credit_amt + 2300 where 
+		center_id = '1' and  
+		id = '94'
+		 

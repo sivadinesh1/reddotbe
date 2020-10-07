@@ -1,4 +1,5 @@
 var pool = require("../../helpers/db");
+const logger = require("./../../helpers/log4js");
 
 const getSalesMaster = (sales_id, callback) => {
 	let sql = `select s.* from sale s where s.id = '${sales_id}' `;

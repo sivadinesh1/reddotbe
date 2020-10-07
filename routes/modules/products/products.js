@@ -1,5 +1,6 @@
 var pool = require("../../helpers/db");
 const moment = require("moment");
+const logger = require("./../../helpers/log4js");
 
 const insertProduct = (insertValues, callback) => {
 	var today = new Date();
@@ -46,7 +47,7 @@ const insertProduct = (insertValues, callback) => {
 };
 
 const updateProduct = (updateValues, callback) => {
-	console.log("updateProduct >> " + JSON.stringify(updateValues));
+	logger.debug.debug("updateProduct >> " + JSON.stringify(updateValues));
 	var today = new Date();
 	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
 

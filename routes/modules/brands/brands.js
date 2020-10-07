@@ -1,5 +1,6 @@
 var pool = require("../../helpers/db");
 const moment = require("moment");
+const logger = require("./../../helpers/log4js");
 
 const insertBrand = (insertValues, callback) => {
 	var today = new Date();

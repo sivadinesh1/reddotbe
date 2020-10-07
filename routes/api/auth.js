@@ -1,5 +1,6 @@
 const express = require("express");
 const authRoute = express.Router();
+const logger = require("../../routes/helpers/log4js");
 
 var pool = require("./../helpers/db");
 const { handleError, ErrorHandler } = require("./../helpers/error");

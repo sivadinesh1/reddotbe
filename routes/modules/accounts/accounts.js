@@ -22,7 +22,7 @@ VALUES
 
 	pool.query(query, values, function (err, data) {
 		if (err) {
-			console.log("Error inside addSaleLedgerRecord" + JSON.stringify(err));
+			logger.debug.debug("Error inside addSaleLedgerRecord" + JSON.stringify(err));
 			return callback(err);
 		}
 		return callback(null, data);
@@ -69,13 +69,13 @@ VALUES
 		), '${today}'
   ) `;
 
-	console.log("dinesh .." + query);
+	logger.debug.debug("dinesh .." + query);
 
 	let values = [insertValues.center_id, insertValues.customerctrl.id, invoice_ref_id];
 
 	pool.query(query, values, function (err, data) {
 		if (err) {
-			console.log("Error inside addReverseSaleLedgerRecord " + JSON.stringify(err));
+			logger.debug.debug("Error inside addReverseSaleLedgerRecord " + JSON.stringify(err));
 			return callback(err);
 		}
 		return callback(null, data);
@@ -100,7 +100,7 @@ VALUES
 
 	pool.query(query, values, function (err, data) {
 		if (err) {
-			console.log("error inside addSaleLedgerAfterReversalRecord " + JSON.stringify(err));
+			logger.debug.debug("error inside addSaleLedgerAfterReversalRecord " + JSON.stringify(err));
 			return callback(err);
 		}
 		return callback(null, data);
@@ -125,7 +125,7 @@ const addPaymentLedgerRecord = (insertValues, payment_ref_id, receivedamount, sa
 
 	pool.query(query, values, function (err, data) {
 		if (err) {
-			console.log("error inside addPaymentLedgerRecord " + JSON.stringify(err));
+			logger.debug.debug("error inside addPaymentLedgerRecord " + JSON.stringify(err));
 			return callback(err);
 		}
 		return callback(null, data);
@@ -157,7 +157,7 @@ const addPaymentMaster = async (cloneReq, pymtNo, insertValues, callback) => {
 	return new Promise(function (resolve, reject) {
 		pool.query(query, values, function (err, data) {
 			if (err) {
-				console.log("dinesh err1 " + JSON.stringify(err));
+				logger.debug.debug("dinesh err1 " + JSON.stringify(err));
 				return reject(callback(err));
 			}
 			return resolve(callback(null, data));
@@ -179,7 +179,7 @@ const updatePymtSequenceGenerator = (center_id) => {
 				reject(err);
 			}
 			resolve(data);
-			//		console.log("dinesh UPdate completed" + JSON.stringify(data));
+			//		logger.debug.debug("dinesh UPdate completed" + JSON.stringify(data));
 		});
 	});
 };
@@ -197,11 +197,11 @@ const getPymtSequenceNo = (cloneReq) => {
 	return new Promise(function (resolve, reject) {
 		pool.query(pymtNoQry, function (err, data) {
 			if (err) {
-				console.log("error in getPymtSequenceNo " + JSON.stringify(err));
+				logger.debug.debug("error in getPymtSequenceNo " + JSON.stringify(err));
 				reject(err);
 			}
 			resolve(data[0].pymtNo);
-			console.log("dinesh REQUEST SEQ # completed" + JSON.stringify(data));
+			logger.debug.debug("dinesh REQUEST SEQ # completed" + JSON.stringify(data));
 		});
 	});
 };
@@ -221,7 +221,7 @@ const getPaymentsByCustomers = (center_id, customer_id, callback) => {
 
 	pool.query(query, function (err, data) {
 		if (err) {
-			console.log("error in getPaymentsByCustomers " + JSON.stringify(err));
+			logger.debug.debug("error in getPaymentsByCustomers " + JSON.stringify(err));
 			return callback(err);
 		}
 		return callback(null, data);
@@ -255,7 +255,7 @@ const getPymtTransactionByCustomers = (center_id, customer_id, callback) => {
 
 	pool.query(query, function (err, data) {
 		if (err) {
-			console.log("error in getPymtTransactionByCustomers " + JSON.stringify(err));
+			logger.debug.debug("error in getPymtTransactionByCustomers " + JSON.stringify(err));
 			return callback(err);
 		}
 		return callback(null, data);
@@ -294,7 +294,7 @@ const getPaymentsByCenter = (center_id, callback) => {
 
 	pool.query(query, function (err, data) {
 		if (err) {
-			console.log("object......" + JSON.stringify(err));
+			logger.debug.debug("object......" + JSON.stringify(err));
 			return callback(err);
 		}
 		return callback(null, data);
@@ -326,7 +326,7 @@ where
 
 	pool.query(query, function (err, data) {
 		if (err) {
-			console.log("error in getPymtTransactionsByCenter" + JSON.stringify(err));
+			logger.debug.debug("error in getPymtTransactionsByCenter" + JSON.stringify(err));
 			return callback(err);
 		}
 		return callback(null, data);
@@ -343,7 +343,7 @@ const getLedgerByCustomers = (center_id, customer_id, callback) => {
 
 	pool.query(query, function (err, data) {
 		if (err) {
-			console.log("error in getLegerByCustomers " + JSON.stringify(err));
+			logger.debug.debug("error in getLegerByCustomers " + JSON.stringify(err));
 			return callback(err);
 		}
 		return callback(null, data);
@@ -379,11 +379,11 @@ const getSaleInvoiceByCustomers = (center_id, customer_id, callback) => {
 	s.sale_type= 'gstinvoice'
 	`;
 
-	console.log("object" + query);
+	logger.debug.debug("object" + query);
 
 	pool.query(query, function (err, data) {
 		if (err) {
-			console.log("error in getSaleInvoiceByCustomers " + JSON.stringify(err));
+			logger.debug.debug("error in getSaleInvoiceByCustomers " + JSON.stringify(err));
 			return callback(err);
 		}
 		return callback(null, data);
@@ -417,11 +417,11 @@ const getSaleInvoiceByCenter = (center_id, callback) => {
 	s.sale_type= 'gstinvoice'
 	`;
 
-	console.log("getSaleInvoiceByCenter >> " + query);
+	logger.debug.debug("getSaleInvoiceByCenter >> " + query);
 
 	pool.query(query, function (err, data) {
 		if (err) {
-			console.log("error in getSaleInvoiceByCenter ...." + JSON.stringify(err));
+			logger.debug.debug("error in getSaleInvoiceByCenter ...." + JSON.stringify(err));
 			return callback(err);
 		}
 		return callback(null, data);
@@ -439,18 +439,18 @@ const updateCustomerCredit = (balanceamount, center_id, customer_id) => {
 		center_id = '${center_id}' and  
 		id = '${customer_id}'
 		 `;
-	console.log("print dinesh " + qryUpdateSqnc);
+	logger.debug.debug("print dinesh " + qryUpdateSqnc);
 
 	logger.debug.debug("hello dinesh sir debug" + qryUpdateSqnc);
 
 	return new Promise(function (resolve, reject) {
 		pool.query(qryUpdateSqnc, function (err, data) {
 			if (err) {
-				console.log("error in updateCustomerCredit " + JSON.stringify(err));
+				logger.debug.debug("error in updateCustomerCredit " + JSON.stringify(err));
 				reject(err);
 			}
 			resolve(data);
-			//		console.log("dinesh UPdate completed" + JSON.stringify(data));
+			//		logger.debug.debug("dinesh UPdate completed" + JSON.stringify(data));
 		});
 	});
 };
@@ -463,17 +463,17 @@ const updateCustomerCreditMinus = (creditusedamount, center_id, customer_id) => 
 		center_id = '${center_id}' and  
 		id = '${customer_id}'
 		 `;
-	//console.log("print dinesh " + qryUpdateSqnc);
+	//logger.debug.debug("print dinesh " + qryUpdateSqnc);
 	logger.debug.debug("updateCustomerCreditMinus >> " + qryUpdateSqnc);
 
 	return new Promise(function (resolve, reject) {
 		pool.query(qryUpdateSqnc, function (err, data) {
 			if (err) {
-				console.log("error in updateCustomerCreditMinus " + JSON.stringify(err));
+				logger.debug.debug("error in updateCustomerCreditMinus " + JSON.stringify(err));
 				reject(err);
 			}
 			resolve(data);
-			//		console.log("dinesh UPdate completed" + JSON.stringify(data));
+			//		logger.debug.debug("dinesh UPdate completed" + JSON.stringify(data));
 		});
 	});
 };

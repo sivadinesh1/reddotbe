@@ -3,7 +3,7 @@ const accountsRouter = express.Router();
 
 const mysql = require("mysql");
 const moment = require("moment");
-
+const logger = require("../../routes/helpers/log4js");
 var pool = require("../helpers/db");
 const { handleError, ErrorHandler } = require("./../helpers/error");
 
@@ -39,7 +39,7 @@ accountsRouter.post("/add-payment-received", async (req, res) => {
 
 		let pymtNo = await getPymtSequenceNo(cloneReq);
 
-		console.log("calling pymtNo >>>  " + pymtNo);
+		logger.debug.debug("calling pymtNo >>>  " + pymtNo);
 
 		// add payment master
 		addPaymentMaster(cloneReq, pymtNo, k, (err, data) => {
@@ -48,7 +48,7 @@ accountsRouter.post("/add-payment-received", async (req, res) => {
 			// (3) - updates pymt details
 			let process = processItems(cloneReq, newPK, k.sale_ref_id, k.receivedamount);
 		}).catch((err) => {
-			console.log("error: " + err);
+			logger.debug.debug("error: " + err);
 			return handleError(new ErrorHandler("500", "Error pymtMaster/Details Entry > " + err), res);
 		});
 
@@ -74,7 +74,7 @@ function processItems(cloneReq, newPK, sale_ref_id, receivedamount) {
 				addPaymentLedgerRecord(cloneReq, newPK, receivedamount, sale_ref_id, (err, data) => {
 					if (err) {
 						let errTxt = err.message;
-						console.log("error inserting payment ledger records " + errTxt);
+						logger.debug.debug("error inserting payment ledger records " + errTxt);
 					} else {
 						// todo
 					}
@@ -178,7 +178,7 @@ accountsRouter.post("/add-bulk-payment-received", async (req, res) => {
 			// (3) - updates pymt details
 			let process = processBulkItems(cloneReq, newPK, invoicesplit);
 		}).catch((err) => {
-			console.log("error: " + err);
+			logger.debug.debug("error: " + err);
 			return handleError(new ErrorHandler("500", "Error bulk pymtMaster/Details Entry > " + err), res);
 		});
 
@@ -187,7 +187,7 @@ accountsRouter.post("/add-bulk-payment-received", async (req, res) => {
 				updateCustomerCreditMinus(req.body.creditusedamount, cloneReq.centerid, cloneReq.customer.id, (err, data1) => {
 					if (err) {
 						let errTxt = err.message;
-						console.log("error updating updateCustomerCreditMinus " + errTxt);
+						logger.debug.debug("error updating updateCustomerCreditMinus " + errTxt);
 					} else {
 						// todo nothing
 					}
@@ -200,7 +200,7 @@ accountsRouter.post("/add-bulk-payment-received", async (req, res) => {
 				updateCustomerCredit(balanceamount, cloneReq.centerid, cloneReq.customer.id, (err, data1) => {
 					if (err) {
 						let errTxt = err.message;
-						console.log("error updating customer credit " + errTxt);
+						logger.debug.debug("error updating customer credit " + errTxt);
 					} else {
 						// todo nothing
 					}
@@ -227,7 +227,7 @@ function processBulkItems(cloneReq, newPK, invoicesplit) {
 					addPaymentLedgerRecord(cloneReq, newPK, e.applied_amount, e.id, (err, data2) => {
 						if (err) {
 							let errTxt = err.message;
-							console.log("error inserting payment ledger records " + errTxt);
+							logger.debug.debug("error inserting payment ledger records " + errTxt);
 						} else {
 							// do nothing
 						}

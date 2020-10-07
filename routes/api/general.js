@@ -3,6 +3,7 @@ const router = express.Router();
 
 const mysql = require("mysql");
 const moment = require("moment");
+const logger = require("../../routes/helpers/log4js");
 
 const { handleError, ErrorHandler } = require("./../helpers/error");
 
@@ -46,7 +47,7 @@ router.get("/sample-pdf", (req, res) => {
 });
 
 router.post("/search-product-information", (req, res) => {
-	console.log("object >>>" + JSON.stringify(req.body));
+	logger.debug.debug("object >>>" + JSON.stringify(req.body));
 	const [centerid, customerid, orderdate, searchstr] = Object.values(req.body);
 
 	// initially checks if product has custom discount for the selected customer. if yes, takes that discount
@@ -87,7 +88,7 @@ a.center_id = '${centerid}' and
 a.description like '%${searchstr}%' ) limit 50 
 `;
 
-	console.log("search-product-information > " + sql);
+	logger.debug.debug("search-product-information > " + sql);
 
 	pool.query(sql, function (err, data) {
 		if (err) {
@@ -117,7 +118,7 @@ router.post("/search-product", (req, res) => {
   a.description like '%${searchstr}%' ) limit 50 
  `;
 
-	console.log("query > " + sql);
+	logger.debug.debug("query > " + sql);
 
 	pool.query(sql, function (err, data) {
 		if (err) {
@@ -130,7 +131,7 @@ router.post("/search-product", (req, res) => {
 
 router.post("/search-customer", (req, res) => {
 	const [centerid, searchstr] = Object.values(req.body);
-	console.log("object..>" + centerid, searchstr);
+	logger.debug.debug("object..>" + centerid, searchstr);
 
 	getSearchCustomers(centerid, searchstr, (err, data) => {
 		if (err) {
@@ -143,7 +144,7 @@ router.post("/search-customer", (req, res) => {
 
 router.post("/search-vendor", (req, res) => {
 	const [centerid, searchstr] = Object.values(req.body);
-	console.log("object..> search vendor >" + centerid, searchstr);
+	logger.debug.debug("object..> search vendor >" + centerid, searchstr);
 
 	getSearchVendors(centerid, searchstr, (err, data) => {
 		if (err) {
@@ -194,7 +195,7 @@ router.get("/all-active-vendors/:centerid", (req, res) => {
 	where 
 	v.state_id = s.id and isactive = 'A' and center_id = ${centerid} order by v.name`;
 
-	console.log("all-active-vendors" + sql);
+	logger.debug.debug("all-active-vendors" + sql);
 
 	pool.query(sql, function (err, data) {
 		if (err) {
@@ -224,7 +225,7 @@ router.get("/vendor-exists/:name", (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			console.log("dinesh  " + JSON.stringify(err));
+			logger.debug.debug("dinesh  " + JSON.stringify(err));
 			return handleError(new ErrorHandler("500", "Error vendor exists."), res);
 		} else {
 			return res.status(200).json({
@@ -242,7 +243,7 @@ router.get("/brand-exists/:name", (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			console.log("dinesh  " + JSON.stringify(err));
+			logger.debug.debug("dinesh  " + JSON.stringify(err));
 			return handleError(new ErrorHandler("500", "Error brand exists."), res);
 		} else {
 			return res.status(200).json({
@@ -276,7 +277,7 @@ router.get("/brand-delete/:id", (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			console.log("dinesh  " + JSON.stringify(err));
+			logger.debug.debug("dinesh  " + JSON.stringify(err));
 			return handleError(new ErrorHandler("500", "Error delete brand"), res);
 		} else {
 			return res.status(200).json({
@@ -293,7 +294,7 @@ router.get("/enquiry-delete/:id", (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			console.log("dinesh  " + JSON.stringify(err));
+			logger.debug.debug("dinesh  " + JSON.stringify(err));
 			return handleError(new ErrorHandler("500", "Error delete vendor"), res);
 		} else {
 			return res.status(200).json({
@@ -310,7 +311,7 @@ router.get("/vendor-delete/:id", (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			console.log("dinesh  " + JSON.stringify(err));
+			logger.debug.debug("dinesh  " + JSON.stringify(err));
 			return handleError(new ErrorHandler("500", "Error delete vendor"), res);
 		} else {
 			return res.status(200).json({
@@ -351,14 +352,14 @@ router.get("/all-active-customers/:centerid", (req, res) => {
 });
 
 router.post("/add-parts-details-enquiry", (req, res) => {
-	console.log(" inside apply jobs ...");
+	logger.debug.debug(" inside apply jobs ...");
 	let yourJsonObj = req.body;
 
 	var objectKeysArray = Object.keys(yourJsonObj);
 	objectKeysArray.forEach(function (objKey) {
-		console.log("object..KEY..." + JSON.stringify(objKey));
+		logger.debug.debug("object..KEY..." + JSON.stringify(objKey));
 		var objValue = yourJsonObj[objKey];
-		console.log("object..VAL." + JSON.stringify(objValue));
+		logger.debug.debug("object..VAL." + JSON.stringify(objValue));
 
 		var today = new Date();
 		today = moment(today).format("YYYY-MM-DD HH:mm:ss");
@@ -375,7 +376,7 @@ router.post("/add-parts-details-enquiry", (req, res) => {
 module.exports = router;
 
 router.get("/get-enquiry/:enquiryid", (req, res) => {
-	console.log("object error......... ");
+	logger.debug.debug("object error......... ");
 	let enquiryid = req.params.enquiryid;
 
 	let sql = `select * 
@@ -391,7 +392,7 @@ router.get("/get-enquiry/:enquiryid", (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			console.log("object error " + err);
+			logger.debug.debug("object error " + err);
 			return handleError(new ErrorHandler("500", "Error fetching get enquiry"), res);
 		} else {
 			return res.json(data);
@@ -423,7 +424,7 @@ router.post("/update-taxrate", (req, res) => {
 	let taxrate = req.body.taxrate;
 	let id = req.body.productid;
 
-	console.log("object>>> update-giveqty-enquiry-details");
+	logger.debug.debug("object>>> update-giveqty-enquiry-details");
 
 	let query = `update product 
 	set 
@@ -464,7 +465,7 @@ router.get("/purchase/:purchaseid/:status", (req, res) => {
 //mgt
 router.get("/all-pymt-modes/:center_id/:status", (req, res) => {
 	let sql = `select * from payment_mode where center_id = '${req.params.center_id}' and is_active = '${req.params.status}'`;
-	console.log("dinesh  " + sql);
+	logger.debug.debug("dinesh  " + sql);
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error fetching all all-pymt-modes."), res);

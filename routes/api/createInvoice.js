@@ -5,6 +5,7 @@ const PDFDocument = require("pdfkit");
 const blobStream = require("blob-stream");
 
 var util = require("./../helpers/utils");
+const logger = require("../../routes/helpers/log4js");
 
 const { number2text } = require("./../helpers/utils");
 
@@ -639,7 +640,7 @@ function generateTableRow(
 	isIGST,
 	igst,
 ) {
-	console.log("sang " + igst);
+	logger.debug.debug("sang " + igst);
 	// Si.No Id
 	if (idx === "SNo") {
 		doc.fontSize(8).text(idx, x_start, y, { width: 29, align: "center" });
@@ -771,7 +772,7 @@ function generateSummaryLeftTableRow(doc, y, classhead, subtotal, disc, amount, 
 }
 
 function generateSummaryRightTableRow(doc, y, subtotal, discount, sgst, cgst, finalTotalAllTax, isIGST, igst, salemasterdata) {
-	console.log("dineh " + JSON.stringify(salemasterdata));
+	logger.debug.debug("dineh " + JSON.stringify(salemasterdata));
 	doc
 		.fontSize(9)
 		.font("Helvetica-Bold")

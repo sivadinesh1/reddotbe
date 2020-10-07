@@ -8,8 +8,6 @@ const { handleError, ErrorHandler } = require("./routes/helpers/error");
 
 const logger = require("./routes/helpers/log4js");
 
-const logger1 = require("./middleware/logger.ts");
-
 // const upload = require('./upload');
 
 const cors = require("cors");
@@ -26,12 +24,10 @@ var corsOptions = {
 	optionsSuccessStatus: 200,
 };
 
-// logger1 is middleware, not sure of middleware logger
-app.use(logger1);
 // logger is actual logging
 app.use(logger.express);
 
-logger.access.info("hello dinesh sir info ** ");
+//logger.access.info("hello dinesh sir info ** ");
 
 // app.use(function (req, res, next) {
 //     res.header("Access-Control-Allow-Origin", "*");
@@ -66,8 +62,8 @@ app.use("/api/reports", require("./routes/api/reports"));
 app.use("/api/dashboard", require("./routes/api/dashboard"));
 
 app.get("/openCV/:id/:filename", function (req, res) {
-	console.log("object ..SEND ME PDF.." + req.params.id);
-	console.log("object ..SEND ME filename PDF.." + req.params.filename);
+	logger.debug.debug("object ..SEND ME PDF.." + req.params.id);
+	logger.debug.debug("object ..SEND ME filename PDF.." + req.params.filename);
 
 	var dir = process.env.UPLOAD_PATH;
 
@@ -77,7 +73,7 @@ app.get("/openCV/:id/:filename", function (req, res) {
 		},
 	});
 
-	console.log("object ..SEND ME PDF.." + req.params.id);
+	logger.debug.debug("object ..SEND ME PDF.." + req.params.id);
 });
 
 app.get("/error", (req, res) => {
@@ -85,7 +81,7 @@ app.get("/error", (req, res) => {
 });
 
 app.use((err, req, res) => {
-	console.log("inside handle err");
+	logger.debug.debug("inside handle err");
 	handleError(err, res);
 });
 
