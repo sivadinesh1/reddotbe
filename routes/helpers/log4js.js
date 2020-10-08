@@ -32,7 +32,7 @@ module.exports = {
 	//	access: log4js.getLogger("access"),
 
 	debug: log4js.getLogger("debug"),
-	express: log4js.connectLogger(log4js.getLogger("access"), { level: log4js.levels.INFO }),
+	express: log4js.connectLogger(log4js.getLogger("access"), { level: log4js.levels.DEBUG }),
 };
 
 // https://www.youtube.com/watch?v=To9F0Xv3adk&ab_channel=IBMDeveloper

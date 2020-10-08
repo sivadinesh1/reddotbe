@@ -1,0 +1,106 @@
+[2020-10-07T14:13:06.786] [DEBUG] debug - printing getInquirySummary  select 
+  IFNULL(SUM(CASE WHEN e.estatus = 'O' THEN 1 ELSE 0 END), 0) AS 'new',
+  IFNULL(SUM(CASE WHEN e.estatus = 'D' THEN 1 ELSE 0 END), 0) AS 'draft',
+  IFNULL(SUM(CASE WHEN e.estatus = 'E' THEN 1 ELSE 0 END), 0) AS 'executed',
+  IFNULL(SUM(CASE WHEN e.estatus = 'P' THEN 1 ELSE 0 END), 0) AS 'invoiceready',
+  IFNULL(SUM(CASE WHEN e.estatus = 'C' THEN 1 ELSE 0 END), 0) AS 'completed',
+  IFNULL(SUM(CASE WHEN e.estatus = 'X' THEN 1 ELSE 0 END), 0) AS 'cancelled'                   
+from
+enquiry e
+where
+e.center_id =  '1' and
+str_to_date(DATE_FORMAT(enquiry_date,'%d-%m-%YYYY') , '%d-%m-%YYYY') between
+str_to_date('07-10-2020', '%d-%m-%YYYY') and
+str_to_date('07-10-2020', '%d-%m-%YYYY')  
+[2020-10-07T14:13:06.794] [DEBUG] debug - printing getSalesSummary  select 
+  IFNULL(SUM(CASE WHEN s.status = 'C' THEN 1 ELSE 0 END), 0) AS 'completed',
+  IFNULL(SUM(CASE WHEN s.status = 'D' THEN 1 ELSE 0 END), 0) AS 'draft'
+from
+sale s
+where
+s.center_id =  '1' and
+STR_TO_DATE(s.invoice_date,'%d-%m-%Y') between
+str_to_date('07-10-2020', '%d-%m-%YYYY') and
+str_to_date('07-10-2020', '%d-%m-%YYYY')      
+ 
+[2020-10-07T14:13:06.800] [DEBUG] debug - printing getPurchaseSummary  select 
+  IFNULL(SUM(CASE WHEN p.status = 'C' THEN 1 ELSE 0 END), 0) AS 'completed',
+  IFNULL(SUM(CASE WHEN p.status = 'D' THEN 1 ELSE 0 END), 0) AS 'draft'
+from
+purchase p
+where
+p.center_id =  '1' and
+STR_TO_DATE(p.invoice_date,'%d-%m-%Y') between
+str_to_date('07-10-2020', '%d-%m-%YYYY') and
+str_to_date('07-10-2020', '%d-%m-%YYYY')          
+ 
+[2020-10-07T14:13:06.803] [DEBUG] debug - printing getSaleTotal  
+
+  select 
+    IFNULL(SUM(s.net_total), 0) AS 'sales_total'
+  from
+  sale s
+  where
+  s.center_id =  '1' and
+STR_TO_DATE(s.invoice_date,'%d-%m-%Y') between
+str_to_date('07-10-2020', '%d-%m-%YYYY') and
+str_to_date('07-10-2020', '%d-%m-%YYYY')      
+          
+ 
+[2020-10-07T14:13:06.806] [DEBUG] debug - printing getSaleTotal  
+
+  select 
+    IFNULL(SUM(s.net_total), 0) AS 'sales_total'
+  from
+  sale s
+  where
+  s.center_id =  '1' and
+STR_TO_DATE(s.invoice_date,'%d-%m-%Y') between
+str_to_date('01-01-2020', '%d-%m-%YYYY') and
+str_to_date('07-10-2020', '%d-%m-%YYYY')      
+          
+ 
+[2020-10-07T14:13:06.815] [DEBUG] debug - printing getCenterSummary  select tbl1.active_customers, tbl2.active_vendors from (
+    select count(*) as 'active_customers' from customer where isactive = 'A' and center_id = '1' ) as tbl1,
+    (
+    select count(*) as 'active_vendors' from vendor where isactive = 'A' and center_id = '1'
+    ) as tbl2 
+[2020-10-07T14:13:06.859] [DEBUG] debug - printing getCenterSummary  select customer_id, (sum(credit_amt) - sum(debit_amt)) as balance from 
+  ledger l
+  where
+  l.center_id = '1' 
+  group by
+  customer_id
+   
+[2020-10-07T14:13:06.862] [DEBUG] debug - printing getPaymentsByCustomers  select c.name as customer_name, p.payment_now_amt
+  from 
+  payment p,
+  customer c
+  where
+  c.id = p.customer_id and
+  p.center_id =  '1' and
+  STR_TO_DATE(p.pymt_date,'%d-%m-%Y') between
+  str_to_date('07-10-2020', '%d-%m-%YYYY') and
+  str_to_date('07-10-2020', '%d-%m-%YYYY')    
+   
+[2020-10-07T14:13:12.480] [DEBUG] debug - search enquiry >> select e.*, c.id as customer_id, c.name as customer_name,
+    	case e.estatus
+				when 'O' then 'New'
+				when 'D' then 'Draft'
+				when 'E' then 'Executed'
+				when 'P' then 'Invoice Ready'
+				when 'C' then 'Completed'
+				when 'X' then 'Cancelled'
+    end as status_txt,
+	(select count(*) from enquiry_detail where enquiry_id = e.id)
+	as noofitems
+	from
+	enquiry e,
+	customer c
+	where
+	c.id = e.customer_id and
+
+	e.center_id =  '1' and
+	str_to_date(DATE_FORMAT(enquiry_date,'%d-%m-%YYYY') , '%d-%m-%YYYY') between
+	str_to_date('30-09-2020', '%d-%m-%YYYY') and
+	str_to_date('07-10-2020', '%d-%m-%YYYY')  

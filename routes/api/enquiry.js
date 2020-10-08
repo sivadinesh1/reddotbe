@@ -271,16 +271,18 @@ enquiryRoute.post("/insert-enquiry-details", (req, res) => {
 	let jsonObj = req.body;
 	logger.debug.debug("insert enq " + JSON.stringify(jsonObj));
 	var today = new Date();
+	let count = 0;
 	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
 	let query = `INSERT INTO enquiry ( center_id, customer_id, enquiry_date, estatus, remarks) 
 							values ( '${jsonObj.center_id}', '${jsonObj.customerctrl.id}', '${today}', 'O','${jsonObj.remarks}')`;
 
 	pool.query(query, function (err, data) {
 		if (err) {
-			return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
+			logger.debug.debug("error insert enquiry details..step1...", JSON.stringify(err));
+			console.log("error insert enquiry details.CL.step1..", JSON.stringify(err));
+			return handleError(new ErrorHandler("500", "error insert enquiry details..step1.."), res);
 		} else {
 			let tmpid = data.insertId;
-			logger.debug.debug("TCL: tmpid", tmpid);
 
 			const prodArr = jsonObj["productarr"];
 			// prodArr.reverse();
@@ -289,18 +291,26 @@ enquiryRoute.post("/insert-enquiry-details", (req, res) => {
 			prodArr.forEach(function (k) {
 				logger.debug.debug(".........xx..." + k.notes);
 				let query1 = `INSERT INTO enquiry_detail ( enquiry_id, product_id, askqty, product_code, notes, status)
-							values ( '${tmpid}', (select id from product where product_code='${k.product_code}'), '${k.quantity}', '${k.product_code}', '${k.notes}', 'O')`;
+							values ( '${tmpid}', (select id from product where product_code='${k.product_code}' and center_id = '${jsonObj.center_id}'), '${k.quantity}', '${k.product_code}', '${k.notes}', 'O')`;
 				pool.query(query1, function (err, data) {
 					if (err) {
-						return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
+						logger.debug.debug("error insert enquiry details....");
+						console.log("error insert enquiry details.CL..", JSON.stringify(err));
+						return handleError(new ErrorHandler("500", "error insert enquiry details...."), res);
 					} else {
 					}
 				});
+
+				count++; // <<=== increment count
+				//
+				if (count === prodArr.length) {
+					// and then test if all done
+					res.json({
+						result: "success",
+					});
+				}
 			});
 		}
-	});
-	res.json({
-		result: "success",
 	});
 });
 
