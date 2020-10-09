@@ -15,8 +15,9 @@ const { createInvoice } = require("./createInvoice.js");
 
 const { printSaleInvoice } = require("./../modules/sales/printSaleInvoice.js");
 
-printRouter.get("/invoice-pdf/:saleid", async (req, res) => {
+printRouter.get("/invoice-pdf/:saleid/:printtype", async (req, res) => {
 	let sale_id = req.params.saleid;
+	let print_type = req.params.printtype;
 
 	// createInvoice("", "", invoice, "invoice.pdf", res);
 
@@ -30,7 +31,7 @@ printRouter.get("/invoice-pdf/:saleid", async (req, res) => {
 
 	// once all the data received, now populate invoice
 
-	createInvoice(saleMaster, saleDetails, customerDetails, centerDetails, invoice, "invoice.pdf", res);
+	createInvoice(saleMaster, saleDetails, customerDetails, centerDetails, invoice, "invoice.pdf", res, print_type);
 });
 
 module.exports = printRouter;
