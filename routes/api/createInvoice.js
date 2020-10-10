@@ -349,7 +349,7 @@ function generateInvoiceTable(doc, salemasterdata, saledetailsdata) {
 			k.igst,
 		);
 
-		if (invoiceTableTop > 515) {
+		if (invoiceTableTop > 520) {
 			doc.fontSize(14);
 			doc.text("continue in next page", 50, invoiceTableTop + 50);
 			doc.fontSize(8);
@@ -825,21 +825,21 @@ function generateTableRow(
 
 	// Si.No Id
 	if (idx === "SNo") {
-		doc.fontSize(8).text(idx, x_start, y, { width: snow, align: "right" });
+		doc.fontSize(8).text(idx, x_start, y, { width: snow - 5, align: "left" });
 	} else {
-		doc.fontSize(8).text(idx, x_start, y, { width: snow, align: "center" });
+		doc.fontSize(8).text(idx, x_start, y, { width: snow - 5, align: "left" });
 	}
 
 	// P.CODE
 	if (product_code === "PCODE") {
-		doc.text(product_code, x_start + (snow + 2), y, { width: pcodew, align: "center" });
+		doc.text(product_code, x_start + (snow + 2), y, { width: pcodew, align: "left" });
 	} else {
 		doc.text(product_code, x_start + (snow + 3), y, { width: pcodew, align: "left" });
 	}
 
 	if (product_description !== "PRODUCT NAME") {
 		doc.text(
-			product_description.length > 33 ? product_description.substr(0, product_description.lastIndexOf(" ", 30)) + "..." : product_description,
+			product_description.length > 33 ? product_description.substr(0, 30) + "..." : product_description,
 			x_start + (snow + 2) + (pcodew + 3),
 			y,
 			{
@@ -849,7 +849,7 @@ function generateTableRow(
 			},
 		);
 	} else {
-		doc.text(product_description, x_start + (snow + 2) + (pcodew + 2), y, { width: pdescw, align: "center" });
+		doc.text(product_description, x_start + (snow + 2) + (pcodew + 2), y, { width: pdescw, align: "left" });
 	}
 
 	// HSNCode
@@ -1152,7 +1152,7 @@ function generateSummaryRightTableRow(doc, y, subtotal, discount, sgst, cgst, fi
 	doc
 		.text("Cr/Dr NOTE", 460, y + 60, { width: 70, align: "left" })
 
-		.text(0.0, 510, y + 60, { width: 70, align: "right" })
+		.text((0.0).toFixed(2), 510, y + 60, { width: 70, align: "right" })
 
 		.text("Misc.", 460, y + 75, { width: 70, align: "left" })
 

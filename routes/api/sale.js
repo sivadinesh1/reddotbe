@@ -1,5 +1,3 @@
-/** @format */
-
 const express = require("express");
 const saleRouter = express.Router();
 const logger = require("../../routes/helpers/log4js");
@@ -552,5 +550,18 @@ function insertItemHistory(k, vSale_id, vSale_det_id, cloneReq) {
 		}
 	});
 }
+
+// get sale master to display in sale invoice component
+saleRouter.get("/get-sale-master/:sale_id", async (req, res) => {
+	let sale_id = req.params.sale_id;
+	let saleMaster = await getSalesMaster(sale_id);
+	return res.json(saleMaster);
+});
+
+saleRouter.get("/get-sale-details/:sale_id", async (req, res) => {
+	let sale_id = req.params.sale_id;
+	let saleDetails = await getSalesDetails(sale_id);
+	return res.json(saleDetails);
+});
 
 module.exports = saleRouter;

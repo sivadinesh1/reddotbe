@@ -29,8 +29,6 @@ purchaseRouter.post("/insert-purchase-details", async (req, res) => {
 	}
 });
 
-module.exports = purchaseRouter;
-
 function purchaseMasterEntry(cloneReq) {
 	var today = new Date();
 	// today = moment(today).format("YYYY-MM-DD HH:mm:ss");
@@ -234,3 +232,5 @@ function insertItemHistory(k, vPurchase_id, vPurchase_det_id, cloneReq) {
 		}
 	});
 }
+
+module.exports = purchaseRouter;

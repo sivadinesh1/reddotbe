@@ -1,0 +1,4508 @@
+[2020-10-10T00:03:19.373] [DEBUG] debug - printing getInquirySummary  select 
+  IFNULL(SUM(CASE WHEN e.estatus = 'O' THEN 1 ELSE 0 END), 0) AS 'new',
+  IFNULL(SUM(CASE WHEN e.estatus = 'D' THEN 1 ELSE 0 END), 0) AS 'draft',
+  IFNULL(SUM(CASE WHEN e.estatus = 'E' THEN 1 ELSE 0 END), 0) AS 'executed',
+  IFNULL(SUM(CASE WHEN e.estatus = 'P' THEN 1 ELSE 0 END), 0) AS 'invoiceready',
+  IFNULL(SUM(CASE WHEN e.estatus = 'C' THEN 1 ELSE 0 END), 0) AS 'completed',
+  IFNULL(SUM(CASE WHEN e.estatus = 'X' THEN 1 ELSE 0 END), 0) AS 'cancelled'                   
+from
+enquiry e
+where
+e.center_id =  '2' and
+str_to_date(DATE_FORMAT(enquiry_date,'%d-%m-%YYYY') , '%d-%m-%YYYY') between
+str_to_date('10-10-2020', '%d-%m-%YYYY') and
+str_to_date('10-10-2020', '%d-%m-%YYYY')  
+[2020-10-10T00:03:19.376] [DEBUG] debug - printing getSalesSummary  select 
+  IFNULL(SUM(CASE WHEN s.status = 'C' THEN 1 ELSE 0 END), 0) AS 'completed',
+  IFNULL(SUM(CASE WHEN s.status = 'D' THEN 1 ELSE 0 END), 0) AS 'draft'
+from
+sale s
+where
+s.center_id =  '2' and
+STR_TO_DATE(s.invoice_date,'%d-%m-%Y') between
+str_to_date('10-10-2020', '%d-%m-%YYYY') and
+str_to_date('10-10-2020', '%d-%m-%YYYY')      
+ 
+[2020-10-10T00:03:19.379] [DEBUG] debug - printing getPurchaseSummary  select 
+  IFNULL(SUM(CASE WHEN p.status = 'C' THEN 1 ELSE 0 END), 0) AS 'completed',
+  IFNULL(SUM(CASE WHEN p.status = 'D' THEN 1 ELSE 0 END), 0) AS 'draft'
+from
+purchase p
+where
+p.center_id =  '2' and
+STR_TO_DATE(p.invoice_date,'%d-%m-%Y') between
+str_to_date('10-10-2020', '%d-%m-%YYYY') and
+str_to_date('10-10-2020', '%d-%m-%YYYY')          
+ 
+[2020-10-10T00:03:19.393] [DEBUG] debug - printing getSaleTotal  
+
+  select 
+    IFNULL(SUM(s.net_total), 0) AS 'sales_total'
+  from
+  sale s
+  where
+  s.center_id =  '2' and
+STR_TO_DATE(s.invoice_date,'%d-%m-%Y') between
+str_to_date('10-10-2020', '%d-%m-%YYYY') and
+str_to_date('10-10-2020', '%d-%m-%YYYY')      
+          
+ 
+[2020-10-10T00:03:19.423] [DEBUG] debug - printing getSaleTotal  
+
+  select 
+    IFNULL(SUM(s.net_total), 0) AS 'sales_total'
+  from
+  sale s
+  where
+  s.center_id =  '2' and
+STR_TO_DATE(s.invoice_date,'%d-%m-%Y') between
+str_to_date('01-01-2020', '%d-%m-%YYYY') and
+str_to_date('10-10-2020', '%d-%m-%YYYY')      
+          
+ 
+[2020-10-10T00:03:19.426] [DEBUG] debug - printing getCenterSummary  select tbl1.active_customers, tbl2.active_vendors from (
+    select count(*) as 'active_customers' from customer where isactive = 'A' and center_id = '2' ) as tbl1,
+    (
+    select count(*) as 'active_vendors' from vendor where isactive = 'A' and center_id = '2'
+    ) as tbl2 
+[2020-10-10T00:03:19.434] [DEBUG] debug - printing getCenterSummary  select customer_id, (sum(credit_amt) - sum(debit_amt)) as balance from 
+  ledger l
+  where
+  l.center_id = '2' 
+  group by
+  customer_id
+   
+[2020-10-10T00:03:19.465] [DEBUG] debug - printing getPaymentsByCustomers  select c.name as customer_name, p.payment_now_amt
+  from 
+  payment p,
+  customer c
+  where
+  c.id = p.customer_id and
+  p.center_id =  '2' and
+  STR_TO_DATE(p.pymt_date,'%d-%m-%Y') between
+  str_to_date('10-10-2020', '%d-%m-%YYYY') and
+  str_to_date('10-10-2020', '%d-%m-%YYYY')    
+   
+[2020-10-10T00:03:46.118] [DEBUG] debug - all-active-vendorsselect v.id, v.center_id, v.name, v.address1, v.address2, v.address3, v.district, s.id as state_id, s.code, s.description as state,
+	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp, v.email, v.isactive  from 
+	vendor v,
+	state s
+	where 
+	v.state_id = s.id and isactive = 'A' and center_id = 2 order by v.name
+[2020-10-10T00:03:46.134] [DEBUG] debug - all-active-vendorsselect v.id, v.center_id, v.name, v.address1, v.address2, v.address3, v.district, s.id as state_id, s.code, s.description as state,
+	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp, v.email, v.isactive  from 
+	vendor v,
+	state s
+	where 
+	v.state_id = s.id and isactive = 'A' and center_id = 2 order by v.name
+[2020-10-10T00:03:47.867] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('10-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T00:03:47.914] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T00:06:15.247] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T00:08:35.408] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T00:08:53.461] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T00:29:07.234] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T00:30:34.135] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T00:32:08.489] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T00:33:54.499] [DEBUG] debug - printing getInquirySummary  select 
+  IFNULL(SUM(CASE WHEN e.estatus = 'O' THEN 1 ELSE 0 END), 0) AS 'new',
+  IFNULL(SUM(CASE WHEN e.estatus = 'D' THEN 1 ELSE 0 END), 0) AS 'draft',
+  IFNULL(SUM(CASE WHEN e.estatus = 'E' THEN 1 ELSE 0 END), 0) AS 'executed',
+  IFNULL(SUM(CASE WHEN e.estatus = 'P' THEN 1 ELSE 0 END), 0) AS 'invoiceready',
+  IFNULL(SUM(CASE WHEN e.estatus = 'C' THEN 1 ELSE 0 END), 0) AS 'completed',
+  IFNULL(SUM(CASE WHEN e.estatus = 'X' THEN 1 ELSE 0 END), 0) AS 'cancelled'                   
+from
+enquiry e
+where
+e.center_id =  '1' and
+str_to_date(DATE_FORMAT(enquiry_date,'%d-%m-%YYYY') , '%d-%m-%YYYY') between
+str_to_date('10-10-2020', '%d-%m-%YYYY') and
+str_to_date('10-10-2020', '%d-%m-%YYYY')  
+[2020-10-10T00:33:54.501] [DEBUG] debug - printing getSalesSummary  select 
+  IFNULL(SUM(CASE WHEN s.status = 'C' THEN 1 ELSE 0 END), 0) AS 'completed',
+  IFNULL(SUM(CASE WHEN s.status = 'D' THEN 1 ELSE 0 END), 0) AS 'draft'
+from
+sale s
+where
+s.center_id =  '1' and
+STR_TO_DATE(s.invoice_date,'%d-%m-%Y') between
+str_to_date('10-10-2020', '%d-%m-%YYYY') and
+str_to_date('10-10-2020', '%d-%m-%YYYY')      
+ 
+[2020-10-10T00:33:54.510] [DEBUG] debug - printing getPurchaseSummary  select 
+  IFNULL(SUM(CASE WHEN p.status = 'C' THEN 1 ELSE 0 END), 0) AS 'completed',
+  IFNULL(SUM(CASE WHEN p.status = 'D' THEN 1 ELSE 0 END), 0) AS 'draft'
+from
+purchase p
+where
+p.center_id =  '1' and
+STR_TO_DATE(p.invoice_date,'%d-%m-%Y') between
+str_to_date('10-10-2020', '%d-%m-%YYYY') and
+str_to_date('10-10-2020', '%d-%m-%YYYY')          
+ 
+[2020-10-10T00:33:54.517] [DEBUG] debug - printing getSaleTotal  
+
+  select 
+    IFNULL(SUM(s.net_total), 0) AS 'sales_total'
+  from
+  sale s
+  where
+  s.center_id =  '1' and
+STR_TO_DATE(s.invoice_date,'%d-%m-%Y') between
+str_to_date('10-10-2020', '%d-%m-%YYYY') and
+str_to_date('10-10-2020', '%d-%m-%YYYY')      
+          
+ 
+[2020-10-10T00:33:54.524] [DEBUG] debug - printing getSaleTotal  
+
+  select 
+    IFNULL(SUM(s.net_total), 0) AS 'sales_total'
+  from
+  sale s
+  where
+  s.center_id =  '1' and
+STR_TO_DATE(s.invoice_date,'%d-%m-%Y') between
+str_to_date('01-01-2020', '%d-%m-%YYYY') and
+str_to_date('10-10-2020', '%d-%m-%YYYY')      
+          
+ 
+[2020-10-10T00:33:54.537] [DEBUG] debug - printing getCenterSummary  select tbl1.active_customers, tbl2.active_vendors from (
+    select count(*) as 'active_customers' from customer where isactive = 'A' and center_id = '1' ) as tbl1,
+    (
+    select count(*) as 'active_vendors' from vendor where isactive = 'A' and center_id = '1'
+    ) as tbl2 
+[2020-10-10T00:33:54.540] [DEBUG] debug - printing getCenterSummary  select customer_id, (sum(credit_amt) - sum(debit_amt)) as balance from 
+  ledger l
+  where
+  l.center_id = '1' 
+  group by
+  customer_id
+   
+[2020-10-10T00:33:54.545] [DEBUG] debug - printing getPaymentsByCustomers  select c.name as customer_name, p.payment_now_amt
+  from 
+  payment p,
+  customer c
+  where
+  c.id = p.customer_id and
+  p.center_id =  '1' and
+  STR_TO_DATE(p.pymt_date,'%d-%m-%Y') between
+  str_to_date('10-10-2020', '%d-%m-%YYYY') and
+  str_to_date('10-10-2020', '%d-%m-%YYYY')    
+   
+[2020-10-10T00:33:57.785] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '1' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('10-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T00:33:57.812] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '1' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T00:34:12.242] [DEBUG] debug - inside handle err
+[2020-10-10T00:34:20.051] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '1' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T00:34:33.130] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '1' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T00:35:18.407] [DEBUG] debug - inside handle err
+[2020-10-10T00:36:39.504] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '1' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T00:37:00.407] [DEBUG] debug - inside handle err
+[2020-10-10T00:37:50.940] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '1' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T00:37:54.544] [DEBUG] debug - inside handle err
+[2020-10-10T00:38:25.545] [DEBUG] debug - inside handle err
+[2020-10-10T00:38:47.896] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '1' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T00:38:51.119] [DEBUG] debug - inside handle err
+[2020-10-10T00:40:06.482] [DEBUG] debug - inside handle err
+[2020-10-10T00:42:00.732] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '1' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T00:45:39.578] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '1' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T00:52:10.586] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '66' and
+	c.center_id = '1' 
+[2020-10-10T00:52:10.608] [DEBUG] debug - dinesh test [object Object]
+[2020-10-10T00:52:10.608] [DEBUG] debug - dinesh test ** [{"id":52,"sale_id":13,"product_id":4267,"stock_id":3965,"qty":1,"unit_price":40.48,"mrp":"56","batchdate":"09-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":40.34,"total_value":47.6,"disc_value":7,"disc_percent":15,"disc_type":"NET","tax_value":40.34,"product_code":"M77770","description":"SEAL- OIL (50X72X8 mm)","packetsize":1,"taxrate":18,"hsncode":"40169330","unit":"PCS","stock_pk":3965,"stock_mrp":56,"stock_available_stock":494}]
+[2020-10-10T00:54:24.590] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '1' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('10-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T00:54:24.658] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '1' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T01:04:51.508] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '1' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T01:04:55.400] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = 'undefined' and
+	c.center_id = 'undefined' 
+[2020-10-10T01:05:22.549] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '1' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T01:05:29.604] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '66' and
+	c.center_id = '1' 
+[2020-10-10T01:07:12.448] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '66' and
+	c.center_id = '1' 
+[2020-10-10T01:07:12.453] [DEBUG] debug - getCenterDetails > select c.*, s.description 
+  from 
+  center c,
+  state s 
+  where 
+  c.state_id = s.id and
+  c.id = '1'  
+[2020-10-10T01:12:28.276] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '1' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T01:19:13.391] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '66' and
+	c.center_id = '1' 
+[2020-10-10T01:25:01.331] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '1' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T01:25:11.585] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '66' and
+	c.center_id = '1' 
+[2020-10-10T01:33:20.683] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '1' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T01:38:26.660] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '66' and
+	c.center_id = '1' 
+[2020-10-10T01:43:44.810] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '1' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T01:43:51.343] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '66' and
+	c.center_id = '1' 
+[2020-10-10T01:46:10.257] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '1' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T01:46:14.314] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '66' and
+	c.center_id = '1' 
+[2020-10-10T01:48:49.424] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '1' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T01:48:53.125] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '66' and
+	c.center_id = '1' 
+[2020-10-10T01:49:19.902] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '1' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T01:49:32.539] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '66' and
+	c.center_id = '1' 
+[2020-10-10T01:50:44.049] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '1' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T01:54:07.710] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '66' and
+	c.center_id = '1' 
+[2020-10-10T01:58:10.602] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '1' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T01:58:16.086] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '66' and
+	c.center_id = '1' 
+[2020-10-10T02:03:19.724] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '1' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T02:03:23.753] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '66' and
+	c.center_id = '1' 
+[2020-10-10T02:04:52.004] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '1' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T02:05:09.679] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '66' and
+	c.center_id = '1' 
+[2020-10-10T02:07:24.791] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '1' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T02:07:42.893] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '1' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T02:07:51.307] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '66' and
+	c.center_id = '1' 
+[2020-10-10T02:08:35.863] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '1' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T02:08:41.334] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '66' and
+	c.center_id = '1' 
+[2020-10-10T02:13:18.219] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '1' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T02:13:36.066] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '66' and
+	c.center_id = '1' 
+[2020-10-10T02:14:16.866] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '1' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T02:14:19.857] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '66' and
+	c.center_id = '1' 
+[2020-10-10T02:14:45.416] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '1' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T02:14:49.848] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '66' and
+	c.center_id = '1' 
+[2020-10-10T02:16:40.992] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '1' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T02:16:45.005] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '66' and
+	c.center_id = '1' 
+[2020-10-10T02:18:56.230] [DEBUG] debug - printing getInquirySummary  select 
+  IFNULL(SUM(CASE WHEN e.estatus = 'O' THEN 1 ELSE 0 END), 0) AS 'new',
+  IFNULL(SUM(CASE WHEN e.estatus = 'D' THEN 1 ELSE 0 END), 0) AS 'draft',
+  IFNULL(SUM(CASE WHEN e.estatus = 'E' THEN 1 ELSE 0 END), 0) AS 'executed',
+  IFNULL(SUM(CASE WHEN e.estatus = 'P' THEN 1 ELSE 0 END), 0) AS 'invoiceready',
+  IFNULL(SUM(CASE WHEN e.estatus = 'C' THEN 1 ELSE 0 END), 0) AS 'completed',
+  IFNULL(SUM(CASE WHEN e.estatus = 'X' THEN 1 ELSE 0 END), 0) AS 'cancelled'                   
+from
+enquiry e
+where
+e.center_id =  '1' and
+str_to_date(DATE_FORMAT(enquiry_date,'%d-%m-%YYYY') , '%d-%m-%YYYY') between
+str_to_date('10-10-2020', '%d-%m-%YYYY') and
+str_to_date('10-10-2020', '%d-%m-%YYYY')  
+[2020-10-10T02:18:56.261] [DEBUG] debug - printing getSalesSummary  select 
+  IFNULL(SUM(CASE WHEN s.status = 'C' THEN 1 ELSE 0 END), 0) AS 'completed',
+  IFNULL(SUM(CASE WHEN s.status = 'D' THEN 1 ELSE 0 END), 0) AS 'draft'
+from
+sale s
+where
+s.center_id =  '1' and
+STR_TO_DATE(s.invoice_date,'%d-%m-%Y') between
+str_to_date('10-10-2020', '%d-%m-%YYYY') and
+str_to_date('10-10-2020', '%d-%m-%YYYY')      
+ 
+[2020-10-10T02:18:56.262] [DEBUG] debug - printing getPurchaseSummary  select 
+  IFNULL(SUM(CASE WHEN p.status = 'C' THEN 1 ELSE 0 END), 0) AS 'completed',
+  IFNULL(SUM(CASE WHEN p.status = 'D' THEN 1 ELSE 0 END), 0) AS 'draft'
+from
+purchase p
+where
+p.center_id =  '1' and
+STR_TO_DATE(p.invoice_date,'%d-%m-%Y') between
+str_to_date('10-10-2020', '%d-%m-%YYYY') and
+str_to_date('10-10-2020', '%d-%m-%YYYY')          
+ 
+[2020-10-10T02:18:56.284] [DEBUG] debug - printing getSaleTotal  
+
+  select 
+    IFNULL(SUM(s.net_total), 0) AS 'sales_total'
+  from
+  sale s
+  where
+  s.center_id =  '1' and
+STR_TO_DATE(s.invoice_date,'%d-%m-%Y') between
+str_to_date('10-10-2020', '%d-%m-%YYYY') and
+str_to_date('10-10-2020', '%d-%m-%YYYY')      
+          
+ 
+[2020-10-10T02:18:56.286] [DEBUG] debug - printing getSaleTotal  
+
+  select 
+    IFNULL(SUM(s.net_total), 0) AS 'sales_total'
+  from
+  sale s
+  where
+  s.center_id =  '1' and
+STR_TO_DATE(s.invoice_date,'%d-%m-%Y') between
+str_to_date('01-01-2020', '%d-%m-%YYYY') and
+str_to_date('10-10-2020', '%d-%m-%YYYY')      
+          
+ 
+[2020-10-10T02:18:56.297] [DEBUG] debug - printing getCenterSummary  select tbl1.active_customers, tbl2.active_vendors from (
+    select count(*) as 'active_customers' from customer where isactive = 'A' and center_id = '1' ) as tbl1,
+    (
+    select count(*) as 'active_vendors' from vendor where isactive = 'A' and center_id = '1'
+    ) as tbl2 
+[2020-10-10T02:18:56.318] [DEBUG] debug - printing getCenterSummary  select customer_id, (sum(credit_amt) - sum(debit_amt)) as balance from 
+  ledger l
+  where
+  l.center_id = '1' 
+  group by
+  customer_id
+   
+[2020-10-10T02:18:56.320] [DEBUG] debug - printing getPaymentsByCustomers  select c.name as customer_name, p.payment_now_amt
+  from 
+  payment p,
+  customer c
+  where
+  c.id = p.customer_id and
+  p.center_id =  '1' and
+  STR_TO_DATE(p.pymt_date,'%d-%m-%Y') between
+  str_to_date('10-10-2020', '%d-%m-%YYYY') and
+  str_to_date('10-10-2020', '%d-%m-%YYYY')    
+   
+[2020-10-10T02:18:59.701] [DEBUG] debug - all-active-vendorsselect v.id, v.center_id, v.name, v.address1, v.address2, v.address3, v.district, s.id as state_id, s.code, s.description as state,
+	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp, v.email, v.isactive  from 
+	vendor v,
+	state s
+	where 
+	v.state_id = s.id and isactive = 'A' and center_id = 1 order by v.name
+[2020-10-10T02:18:59.721] [DEBUG] debug - all-active-vendorsselect v.id, v.center_id, v.name, v.address1, v.address2, v.address3, v.district, s.id as state_id, s.code, s.description as state,
+	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp, v.email, v.isactive  from 
+	vendor v,
+	state s
+	where 
+	v.state_id = s.id and isactive = 'A' and center_id = 1 order by v.name
+[2020-10-10T02:19:14.543] [DEBUG] debug - printing getSalesSummary  select 
+  IFNULL(SUM(CASE WHEN s.status = 'C' THEN 1 ELSE 0 END), 0) AS 'completed',
+  IFNULL(SUM(CASE WHEN s.status = 'D' THEN 1 ELSE 0 END), 0) AS 'draft'
+from
+sale s
+where
+s.center_id =  '2' and
+STR_TO_DATE(s.invoice_date,'%d-%m-%Y') between
+str_to_date('10-10-2020', '%d-%m-%YYYY') and
+str_to_date('10-10-2020', '%d-%m-%YYYY')      
+ 
+[2020-10-10T02:19:14.544] [DEBUG] debug - printing getInquirySummary  select 
+  IFNULL(SUM(CASE WHEN e.estatus = 'O' THEN 1 ELSE 0 END), 0) AS 'new',
+  IFNULL(SUM(CASE WHEN e.estatus = 'D' THEN 1 ELSE 0 END), 0) AS 'draft',
+  IFNULL(SUM(CASE WHEN e.estatus = 'E' THEN 1 ELSE 0 END), 0) AS 'executed',
+  IFNULL(SUM(CASE WHEN e.estatus = 'P' THEN 1 ELSE 0 END), 0) AS 'invoiceready',
+  IFNULL(SUM(CASE WHEN e.estatus = 'C' THEN 1 ELSE 0 END), 0) AS 'completed',
+  IFNULL(SUM(CASE WHEN e.estatus = 'X' THEN 1 ELSE 0 END), 0) AS 'cancelled'                   
+from
+enquiry e
+where
+e.center_id =  '2' and
+str_to_date(DATE_FORMAT(enquiry_date,'%d-%m-%YYYY') , '%d-%m-%YYYY') between
+str_to_date('10-10-2020', '%d-%m-%YYYY') and
+str_to_date('10-10-2020', '%d-%m-%YYYY')  
+[2020-10-10T02:19:14.554] [DEBUG] debug - printing getPurchaseSummary  select 
+  IFNULL(SUM(CASE WHEN p.status = 'C' THEN 1 ELSE 0 END), 0) AS 'completed',
+  IFNULL(SUM(CASE WHEN p.status = 'D' THEN 1 ELSE 0 END), 0) AS 'draft'
+from
+purchase p
+where
+p.center_id =  '2' and
+STR_TO_DATE(p.invoice_date,'%d-%m-%Y') between
+str_to_date('10-10-2020', '%d-%m-%YYYY') and
+str_to_date('10-10-2020', '%d-%m-%YYYY')          
+ 
+[2020-10-10T02:19:14.589] [DEBUG] debug - printing getSaleTotal  
+
+  select 
+    IFNULL(SUM(s.net_total), 0) AS 'sales_total'
+  from
+  sale s
+  where
+  s.center_id =  '2' and
+STR_TO_DATE(s.invoice_date,'%d-%m-%Y') between
+str_to_date('10-10-2020', '%d-%m-%YYYY') and
+str_to_date('10-10-2020', '%d-%m-%YYYY')      
+          
+ 
+[2020-10-10T02:19:14.590] [DEBUG] debug - printing getSaleTotal  
+
+  select 
+    IFNULL(SUM(s.net_total), 0) AS 'sales_total'
+  from
+  sale s
+  where
+  s.center_id =  '2' and
+STR_TO_DATE(s.invoice_date,'%d-%m-%Y') between
+str_to_date('01-01-2020', '%d-%m-%YYYY') and
+str_to_date('10-10-2020', '%d-%m-%YYYY')      
+          
+ 
+[2020-10-10T02:19:14.596] [DEBUG] debug - printing getCenterSummary  select tbl1.active_customers, tbl2.active_vendors from (
+    select count(*) as 'active_customers' from customer where isactive = 'A' and center_id = '2' ) as tbl1,
+    (
+    select count(*) as 'active_vendors' from vendor where isactive = 'A' and center_id = '2'
+    ) as tbl2 
+[2020-10-10T02:19:14.597] [DEBUG] debug - printing getCenterSummary  select customer_id, (sum(credit_amt) - sum(debit_amt)) as balance from 
+  ledger l
+  where
+  l.center_id = '2' 
+  group by
+  customer_id
+   
+[2020-10-10T02:19:14.670] [DEBUG] debug - printing getInquirySummary  select 
+  IFNULL(SUM(CASE WHEN e.estatus = 'O' THEN 1 ELSE 0 END), 0) AS 'new',
+  IFNULL(SUM(CASE WHEN e.estatus = 'D' THEN 1 ELSE 0 END), 0) AS 'draft',
+  IFNULL(SUM(CASE WHEN e.estatus = 'E' THEN 1 ELSE 0 END), 0) AS 'executed',
+  IFNULL(SUM(CASE WHEN e.estatus = 'P' THEN 1 ELSE 0 END), 0) AS 'invoiceready',
+  IFNULL(SUM(CASE WHEN e.estatus = 'C' THEN 1 ELSE 0 END), 0) AS 'completed',
+  IFNULL(SUM(CASE WHEN e.estatus = 'X' THEN 1 ELSE 0 END), 0) AS 'cancelled'                   
+from
+enquiry e
+where
+e.center_id =  '2' and
+str_to_date(DATE_FORMAT(enquiry_date,'%d-%m-%YYYY') , '%d-%m-%YYYY') between
+str_to_date('10-10-2020', '%d-%m-%YYYY') and
+str_to_date('10-10-2020', '%d-%m-%YYYY')  
+[2020-10-10T02:19:14.672] [DEBUG] debug - printing getSalesSummary  select 
+  IFNULL(SUM(CASE WHEN s.status = 'C' THEN 1 ELSE 0 END), 0) AS 'completed',
+  IFNULL(SUM(CASE WHEN s.status = 'D' THEN 1 ELSE 0 END), 0) AS 'draft'
+from
+sale s
+where
+s.center_id =  '2' and
+STR_TO_DATE(s.invoice_date,'%d-%m-%Y') between
+str_to_date('10-10-2020', '%d-%m-%YYYY') and
+str_to_date('10-10-2020', '%d-%m-%YYYY')      
+ 
+[2020-10-10T02:19:14.673] [DEBUG] debug - printing getPurchaseSummary  select 
+  IFNULL(SUM(CASE WHEN p.status = 'C' THEN 1 ELSE 0 END), 0) AS 'completed',
+  IFNULL(SUM(CASE WHEN p.status = 'D' THEN 1 ELSE 0 END), 0) AS 'draft'
+from
+purchase p
+where
+p.center_id =  '2' and
+STR_TO_DATE(p.invoice_date,'%d-%m-%Y') between
+str_to_date('10-10-2020', '%d-%m-%YYYY') and
+str_to_date('10-10-2020', '%d-%m-%YYYY')          
+ 
+[2020-10-10T02:19:14.674] [DEBUG] debug - printing getSaleTotal  
+
+  select 
+    IFNULL(SUM(s.net_total), 0) AS 'sales_total'
+  from
+  sale s
+  where
+  s.center_id =  '2' and
+STR_TO_DATE(s.invoice_date,'%d-%m-%Y') between
+str_to_date('10-10-2020', '%d-%m-%YYYY') and
+str_to_date('10-10-2020', '%d-%m-%YYYY')      
+          
+ 
+[2020-10-10T02:19:14.677] [DEBUG] debug - printing getSaleTotal  
+
+  select 
+    IFNULL(SUM(s.net_total), 0) AS 'sales_total'
+  from
+  sale s
+  where
+  s.center_id =  '2' and
+STR_TO_DATE(s.invoice_date,'%d-%m-%Y') between
+str_to_date('01-01-2020', '%d-%m-%YYYY') and
+str_to_date('10-10-2020', '%d-%m-%YYYY')      
+          
+ 
+[2020-10-10T02:19:14.678] [DEBUG] debug - printing getCenterSummary  select tbl1.active_customers, tbl2.active_vendors from (
+    select count(*) as 'active_customers' from customer where isactive = 'A' and center_id = '2' ) as tbl1,
+    (
+    select count(*) as 'active_vendors' from vendor where isactive = 'A' and center_id = '2'
+    ) as tbl2 
+[2020-10-10T02:19:14.689] [DEBUG] debug - printing getPaymentsByCustomers  select c.name as customer_name, p.payment_now_amt
+  from 
+  payment p,
+  customer c
+  where
+  c.id = p.customer_id and
+  p.center_id =  '2' and
+  STR_TO_DATE(p.pymt_date,'%d-%m-%Y') between
+  str_to_date('10-10-2020', '%d-%m-%YYYY') and
+  str_to_date('10-10-2020', '%d-%m-%YYYY')    
+   
+[2020-10-10T02:19:14.691] [DEBUG] debug - printing getCenterSummary  select customer_id, (sum(credit_amt) - sum(debit_amt)) as balance from 
+  ledger l
+  where
+  l.center_id = '2' 
+  group by
+  customer_id
+   
+[2020-10-10T02:19:14.700] [DEBUG] debug - printing getPaymentsByCustomers  select c.name as customer_name, p.payment_now_amt
+  from 
+  payment p,
+  customer c
+  where
+  c.id = p.customer_id and
+  p.center_id =  '2' and
+  STR_TO_DATE(p.pymt_date,'%d-%m-%Y') between
+  str_to_date('10-10-2020', '%d-%m-%YYYY') and
+  str_to_date('10-10-2020', '%d-%m-%YYYY')    
+   
+[2020-10-10T02:19:14.706] [DEBUG] debug - all-active-vendorsselect v.id, v.center_id, v.name, v.address1, v.address2, v.address3, v.district, s.id as state_id, s.code, s.description as state,
+	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp, v.email, v.isactive  from 
+	vendor v,
+	state s
+	where 
+	v.state_id = s.id and isactive = 'A' and center_id = 2 order by v.name
+[2020-10-10T02:19:16.752] [DEBUG] debug - all-active-vendorsselect v.id, v.center_id, v.name, v.address1, v.address2, v.address3, v.district, s.id as state_id, s.code, s.description as state,
+	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp, v.email, v.isactive  from 
+	vendor v,
+	state s
+	where 
+	v.state_id = s.id and isactive = 'A' and center_id = 2 order by v.name
+[2020-10-10T02:19:16.782] [DEBUG] debug - all-active-vendorsselect v.id, v.center_id, v.name, v.address1, v.address2, v.address3, v.district, s.id as state_id, s.code, s.description as state,
+	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp, v.email, v.isactive  from 
+	vendor v,
+	state s
+	where 
+	v.state_id = s.id and isactive = 'A' and center_id = 2 order by v.name
+[2020-10-10T02:19:25.708] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('10-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T02:19:25.748] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T02:19:33.994] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '290' and
+	c.center_id = '2' 
+[2020-10-10T02:19:34.025] [DEBUG] debug - dinesh test [object Object],[object Object],[object Object],[object Object]
+[2020-10-10T02:19:34.026] [DEBUG] debug - dinesh test ** [{"id":55,"sale_id":14,"product_id":67471,"stock_id":12311,"qty":1,"unit_price":4340.4,"mrp":"6688","batchdate":"09-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":4590.92,"total_value":5417.28,"disc_value":1077,"disc_percent":19,"disc_type":"NET","tax_value":4590.92,"product_code":"P10001300B","description":"Crown Wheel & Tail Pinion Set (Modified)","packetsize":1,"taxrate":18,"hsncode":"87087000","unit":"Pcs","stock_pk":12311,"stock_mrp":5800,"stock_available_stock":11},{"id":56,"sale_id":14,"product_id":73458,"stock_id":18298,"qty":6,"unit_price":271.28,"mrp":"418","batchdate":"09-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":1721.59,"total_value":2031.48,"disc_value":404,"disc_percent":19,"disc_type":"NET","tax_value":1721.59,"product_code":"P759203A","description":"Disc Plate (Steel)","packetsize":1,"taxrate":18,"hsncode":"87083000","unit":"Pcs","stock_pk":18298,"stock_mrp":418,"stock_available_stock":-8},{"id":57,"sale_id":14,"product_id":69240,"stock_id":14080,"qty":20,"unit_price":3.89,"mrp":"6","batchdate":"09-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":82.37,"total_value":97.2,"disc_value":19,"disc_percent":19,"disc_type":"NET","tax_value":82.37,"product_code":"P250049B","description":"Washer- Locking (Left) (With Bend)","packetsize":20,"taxrate":18,"hsncode":"73182200","unit":"Pcs","stock_pk":14080,"stock_mrp":7,"stock_available_stock":218},{"id":58,"sale_id":14,"product_id":73433,"stock_id":18273,"qty":10,"unit_price":27.26,"mrp":"42","batchdate":"09-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":288.31,"total_value":340.2,"disc_value":68,"disc_percent":19,"disc_type":"NET","tax_value":288.31,"product_code":"P759057A","description":"Shim (0.3 Mm)","packetsize":5,"taxrate":18,"hsncode":"87083000","unit":"Pcs","stock_pk":18273,"stock_mrp":45,"stock_available_stock":39}]
+[2020-10-10T02:20:22.061] [DEBUG] debug - object..insert-sale-details >> {"center_id":2,"salesid":14,"invoiceno":"20/10/00005","invoicedate":"2020-10-08T18:30:00.000Z","orderno":"49","orderdate":"2020-10-09T04:58:46.000Z","lrno":"","lrdate":"","noofboxes":null,"orderrcvddt":null,"noofitems":4,"totalqty":"37.00","value":7886.16,"totalvalue":"7886.16","igst":0,"cgst":"601.49","sgst":"601.49","transport_charges":0,"unloading_charges":0,"misc_charges":0,"net_total":7886.16,"taxable_value":"4642.83","status":"C","enqref":0,"revision":13,"invoicetype":"gstinvoice","customerctrl":{"id":290,"center_id":2,"state_id":26,"name":"Rajesh Trading Company","address1":"No 21","address2":"North Veli Street","address3":"null","district":"Madurai","pin":"625001","gst":"33AAGFR1704E1ZR","phone":"","whatsapp":"","mobile":"9842103903","mobile2":"","email":"","createdon":"","isactive":"A","contact":"","tin":null,"panno":"","credit_amt":0,"code":"33","description":"TAMIL NADU","csa_state":26,"csa_address1":"No 21","csa_address2":"North Veli Street","csa_address3":"Madurai","csa_district":"","csa_pin":"625001","def_address":"Y","csa_code":"33"},"productctrl":null,"tempdesc":"","tempqty":"1","productarr":[{"sales_id":14,"sale_det_id":55,"checkbox":false,"product_id":67471,"product_code":"P10001300B","product_desc":"Crown Wheel & Tail Pinion Set (Modified)","qty":1,"packetsize":1,"unit_price":4340.4,"mrp":"6688","mrp_change_flag":"N","taxrate":18,"sub_total":"6688.00","taxable_value":"4590.92","disc_value":"1076.88","disc_percent":19,"disc_type":"NET","total_value":"5417.28","tax_value":"826.36","igst":0,"cgst":9,"sgst":9,"old_val":1,"stock_pk":12311,"del_flag":"N","margin":""},{"sales_id":14,"sale_det_id":56,"checkbox":false,"product_id":73458,"product_code":"P759203A","product_desc":"Disc Plate (Steel)","qty":6,"packetsize":1,"unit_price":271.28,"mrp":"418","mrp_change_flag":"N","taxrate":18,"sub_total":"2508.00","taxable_value":"1721.59","disc_value":"403.83","disc_percent":19,"disc_type":"NET","total_value":"2031.48","tax_value":"309.89","igst":0,"cgst":9,"sgst":9,"old_val":6,"stock_pk":18298,"del_flag":"N","margin":""},{"sales_id":14,"sale_det_id":57,"checkbox":false,"product_id":69240,"product_code":"P250049B","product_desc":"Washer- Locking (Left) (With Bend)","qty":20,"packetsize":20,"unit_price":3.89,"mrp":"6","mrp_change_flag":"N","taxrate":18,"sub_total":"120.00","taxable_value":"82.37","disc_value":"19.32","disc_percent":19,"disc_type":"NET","total_value":"97.20","tax_value":"14.83","igst":0,"cgst":9,"sgst":9,"old_val":20,"stock_pk":14080,"del_flag":"N","margin":""},{"sales_id":14,"sale_det_id":58,"checkbox":false,"product_id":73433,"product_code":"P759057A","product_desc":"Shim (0.3 Mm)","qty":10,"packetsize":5,"unit_price":27.26,"mrp":"42","mrp_change_flag":"N","taxrate":18,"sub_total":"420.00","taxable_value":"288.31","disc_value":"67.63","disc_percent":19,"disc_type":"NET","total_value":"340.20","tax_value":"51.89","igst":0,"cgst":9,"sgst":9,"old_val":10,"stock_pk":18273,"del_flag":"N","margin":""}]}
+[2020-10-10T02:20:22.127] [DEBUG] debug - New PK14
+[2020-10-10T02:20:22.127] [DEBUG] debug - objectINSERT INTO sale_detail(sale_id, product_id, qty, disc_percent, disc_value, disc_type, unit_price, mrp, batchdate, tax,
+												igst, cgst, sgst, taxable_value, total_value, stock_id) VALUES
+												( '14', '67471', '1', '19', '1076.88', 'NET', '4340.4', '6688', 
+												'10-10-2020', '18', '0', 
+												'9', '9', '4590.92', '5417.28', '12311')
+[2020-10-10T02:20:22.128] [DEBUG] debug - objectINSERT INTO sale_detail(sale_id, product_id, qty, disc_percent, disc_value, disc_type, unit_price, mrp, batchdate, tax,
+												igst, cgst, sgst, taxable_value, total_value, stock_id) VALUES
+												( '14', '73458', '6', '19', '403.83', 'NET', '271.27500000000003', '418', 
+												'10-10-2020', '18', '0', 
+												'9', '9', '1721.59', '2031.48', '18298')
+[2020-10-10T02:20:22.128] [DEBUG] debug - objectINSERT INTO sale_detail(sale_id, product_id, qty, disc_percent, disc_value, disc_type, unit_price, mrp, batchdate, tax,
+												igst, cgst, sgst, taxable_value, total_value, stock_id) VALUES
+												( '14', '69240', '20', '19', '19.32', 'NET', '3.8939999999999997', '6', 
+												'10-10-2020', '18', '0', 
+												'9', '9', '82.37', '97.20', '14080')
+[2020-10-10T02:20:22.128] [DEBUG] debug - objectINSERT INTO sale_detail(sale_id, product_id, qty, disc_percent, disc_value, disc_type, unit_price, mrp, batchdate, tax,
+												igst, cgst, sgst, taxable_value, total_value, stock_id) VALUES
+												( '14', '73433', '10', '19', '67.63', 'NET', '27.256999999999998', '42', 
+												'10-10-2020', '18', '0', 
+												'9', '9', '288.31', '340.20', '18273')
+[2020-10-10T02:20:22.129] [DEBUG] debug - dinesh ..
+INSERT INTO ledger ( center_id, customer_id, invoice_ref_id, ledger_detail, debit_amt, balance_amt, ledger_date)
+VALUES
+	( ? , ?, ?, 'Invoice Reversal', 
+	
+	IFNULL((select credit_amt from (select (credit_amt) as credit_amt
+    FROM ledger
+		where center_id = '2'  and customer_id = '290'
+		and ledger_detail = 'Invoice' and invoice_ref_id = '14'
+    ORDER BY  id DESC
+		LIMIT 1) a), 0),
+		
+		(
+			
+	
+	 IFNULL((select balance_amt from (select (balance_amt ) as balance_amt
+    FROM ledger
+		where center_id = '2'  and customer_id = '290'
+		
+    ORDER BY  id DESC
+		LIMIT 1) a), 0)
+		-
+		IFNULL((select credit_amt from (select (credit_amt) as credit_amt
+			FROM ledger
+			where center_id = '2'  and customer_id = '290'
+			and ledger_detail = 'Invoice' and invoice_ref_id = '14'
+			ORDER BY  id DESC
+			LIMIT 1) a), 0)
+		
+		), '2020-10-10 02:20:22'
+  ) 
+[2020-10-10T02:20:22.135] [DEBUG] debug - sql for insertItemHistory
+			insert into item_history (center_id, module, product_ref_id, sale_id, sale_det_id, actn, actn_type, txn_qty, stock_level, txn_date)
+			values ('2', 'Sale', '67471', '14', '55', 'SAL', 'SUB', '0', 
+							(select (available_stock)  from stock where product_id = '67471' and mrp = '67471' ), '10-10-2020' ) 
+[2020-10-10T02:20:22.137] [DEBUG] debug - sql for insertItemHistory
+			insert into item_history (center_id, module, product_ref_id, sale_id, sale_det_id, actn, actn_type, txn_qty, stock_level, txn_date)
+			values ('2', 'Sale', '69240', '14', '57', 'SAL', 'SUB', '0', 
+							(select (available_stock)  from stock where product_id = '69240' and mrp = '69240' ), '10-10-2020' ) 
+[2020-10-10T02:20:22.151] [DEBUG] debug - sql for insertItemHistory
+			insert into item_history (center_id, module, product_ref_id, sale_id, sale_det_id, actn, actn_type, txn_qty, stock_level, txn_date)
+			values ('2', 'Sale', '73433', '14', '58', 'SAL', 'SUB', '0', 
+							(select (available_stock)  from stock where product_id = '73433' and mrp = '73433' ), '10-10-2020' ) 
+[2020-10-10T02:20:22.164] [DEBUG] debug - sql for insertItemHistory
+			insert into item_history (center_id, module, product_ref_id, sale_id, sale_det_id, actn, actn_type, txn_qty, stock_level, txn_date)
+			values ('2', 'Sale', '73458', '14', '56', 'SAL', 'SUB', '0', 
+							(select (available_stock)  from stock where product_id = '73458' and mrp = '73458' ), '10-10-2020' ) 
+[2020-10-10T02:20:22.178] [DEBUG] debug - object..stock update .
+[2020-10-10T02:20:22.183] [DEBUG] debug - object..stock update .
+[2020-10-10T02:20:22.184] [DEBUG] debug - object..stock update .
+[2020-10-10T02:20:22.193] [DEBUG] debug - object..stock update .
+[2020-10-10T02:20:22.250] [DEBUG] debug - invoice type l30gstinvoice
+[2020-10-10T02:20:22.329] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T02:20:25.097] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '290' and
+	c.center_id = '2' 
+[2020-10-10T02:20:25.104] [DEBUG] debug - getCenterDetails > select c.*, s.description 
+  from 
+  center c,
+  state s 
+  where 
+  c.state_id = s.id and
+  c.id = '2'  
+[2020-10-10T02:25:19.185] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T02:25:20.940] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T02:25:33.975] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '290' and
+	c.center_id = '2' 
+[2020-10-10T02:26:13.319] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T02:26:13.953] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T02:26:21.825] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '290' and
+	c.center_id = '2' 
+[2020-10-10T02:26:56.820] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '380' and
+	c.center_id = '2' 
+[2020-10-10T02:28:23.709] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T02:28:28.733] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T02:58:18.821] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T02:58:18.853] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T03:11:30.954] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T03:11:32.055] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T03:20:42.111] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T03:20:42.771] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T03:49:54.843] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T03:49:55.075] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T03:55:21.550] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T03:55:21.609] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T10:19:33.671] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T10:25:35.245] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T10:25:37.385] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T10:25:42.260] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T10:26:30.309] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T10:26:34.264] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T10:26:41.386] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T10:29:53.521] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T10:30:00.375] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T10:31:57.528] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T10:31:57.541] [DEBUG] debug - dinesh test [object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object]
+[2020-10-10T10:31:57.541] [DEBUG] debug - dinesh test ** [{"id":24,"sale_id":11,"product_id":69552,"stock_id":14392,"qty":10,"unit_price":182.17,"mrp":"252","batchdate":"08-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":1815.25,"total_value":2142,"disc_value":320,"disc_percent":15,"disc_type":"NET","tax_value":1815.25,"product_code":"P295100H","description":"Cap Assembly- Fuel Tank(Stainless Steel)","packetsize":1,"taxrate":18,"hsncode":"87089900","unit":"Pcs","stock_pk":14392,"stock_mrp":252,"stock_available_stock":56},{"id":25,"sale_id":11,"product_id":65475,"stock_id":10315,"qty":5,"unit_price":456.14,"mrp":"631","batchdate":"08-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":2272.67,"total_value":2681.75,"disc_value":401,"disc_percent":15,"disc_type":"NET","tax_value":2272.67,"product_code":"M21607","description":"Bearing- Taper Roller","packetsize":1,"taxrate":18,"hsncode":"84822090","unit":"Pcs","stock_pk":10315,"stock_mrp":631,"stock_available_stock":-5},{"id":26,"sale_id":11,"product_id":69038,"stock_id":13878,"qty":5,"unit_price":190.84,"mrp":"264","batchdate":"08-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":950.85,"total_value":1122,"disc_value":168,"disc_percent":15,"disc_type":"NET","tax_value":950.85,"product_code":"P219411A","description":"Pipe- Hose","packetsize":1,"taxrate":18,"hsncode":"40094200","unit":"Pcs","stock_pk":13878,"stock_mrp":264,"stock_available_stock":10},{"id":27,"sale_id":11,"product_id":73912,"stock_id":18752,"qty":1,"unit_price":2605.99,"mrp":"3605","batchdate":"08-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":2596.82,"total_value":3064.25,"disc_value":458,"disc_percent":15,"disc_type":"NET","tax_value":2596.82,"product_code":"P783322A","description":"Valve Assembly- Control","packetsize":1,"taxrate":18,"hsncode":"84818090","unit":"Pcs","stock_pk":18752,"stock_mrp":3605,"stock_available_stock":-1},{"id":28,"sale_id":11,"product_id":69214,"stock_id":14054,"qty":8,"unit_price":88.19,"mrp":"122","batchdate":"08-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":703.05,"total_value":829.6,"disc_value":124,"disc_percent":15,"disc_type":"NET","tax_value":703.05,"product_code":"P250008A","description":"Sleeve- Power Take Off","packetsize":4,"taxrate":18,"hsncode":"73079290","unit":"Pcs","stock_pk":14054,"stock_mrp":122,"stock_available_stock":195},{"id":29,"sale_id":11,"product_id":69027,"stock_id":13867,"qty":10,"unit_price":213.25,"mrp":"295","batchdate":"08-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":2125,"total_value":2507.5,"disc_value":375,"disc_percent":15,"disc_type":"NET","tax_value":2125,"product_code":"P219225A","description":"Hose (Manifold,Water Inlet To Water Pump","packetsize":2,"taxrate":18,"hsncode":"40094100","unit":"Pcs","stock_pk":13867,"stock_mrp":295,"stock_available_stock":14},{"id":30,"sale_id":11,"product_id":74560,"stock_id":19400,"qty":2,"unit_price":2500.45,"mrp":"3459","batchdate":"08-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":4983.31,"total_value":5880.3,"disc_value":879,"disc_percent":15,"disc_type":"NET","tax_value":4983.31,"product_code":"Q720065","description":"Shaft- Intermediate (Z16/12-52,332 Mm Lo","packetsize":1,"taxrate":18,"hsncode":"87084000","unit":"Pcs","stock_pk":19400,"stock_mrp":3459,"stock_available_stock":-2},{"id":31,"sale_id":11,"product_id":65429,"stock_id":10269,"qty":5,"unit_price":318.07,"mrp":"440","batchdate":"08-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":1584.75,"total_value":1870,"disc_value":280,"disc_percent":15,"disc_type":"NET","tax_value":1584.75,"product_code":"M20473","description":"Bearing- Radial Ball (6209 Nr)","packetsize":1,"taxrate":18,"hsncode":"84829119","unit":"Pcs","stock_pk":10269,"stock_mrp":440,"stock_available_stock":-3},{"id":32,"sale_id":11,"product_id":72606,"stock_id":17446,"qty":4,"unit_price":131.57,"mrp":"182","batchdate":"08-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":524.41,"total_value":618.8,"disc_value":93,"disc_percent":15,"disc_type":"NET","tax_value":524.41,"product_code":"P722550","description":"Plate- Spacer","packetsize":2,"taxrate":18,"hsncode":"73181900","unit":"Pcs","stock_pk":17446,"stock_mrp":182,"stock_available_stock":0},{"id":33,"sale_id":11,"product_id":65395,"stock_id":10235,"qty":5,"unit_price":284.09,"mrp":"393","batchdate":"08-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":1415.47,"total_value":1670.25,"disc_value":250,"disc_percent":15,"disc_type":"NET","tax_value":1415.47,"product_code":"M20115","description":"Bearing- Radial Ball (6208)","packetsize":1,"taxrate":18,"hsncode":"84829119","unit":"Pcs","stock_pk":10235,"stock_mrp":393,"stock_available_stock":-10},{"id":34,"sale_id":11,"product_id":73892,"stock_id":18732,"qty":1,"unit_price":2349.36,"mrp":"3250","batchdate":"08-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":2341.1,"total_value":2762.5,"disc_value":413,"disc_percent":15,"disc_type":"NET","tax_value":2341.1,"product_code":"P783220C","description":"Valve Assembly- Control","packetsize":1,"taxrate":18,"hsncode":"84818090","unit":"Pcs","stock_pk":18732,"stock_mrp":3250,"stock_available_stock":4},{"id":35,"sale_id":11,"product_id":67646,"stock_id":12486,"qty":2,"unit_price":433.73,"mrp":"600","batchdate":"08-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":864.41,"total_value":1020,"disc_value":153,"disc_percent":15,"disc_type":"NET","tax_value":864.41,"product_code":"P10002171A","description":"Pipe- External Tap Off","packetsize":1,"taxrate":18,"hsncode":"87089900","unit":"Pcs","stock_pk":12486,"stock_mrp":600,"stock_available_stock":6},{"id":36,"sale_id":11,"product_id":65454,"stock_id":10294,"qty":20,"unit_price":630.35,"mrp":"872","batchdate":"08-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":12562.71,"total_value":14824,"disc_value":2217,"disc_percent":15,"disc_type":"NET","tax_value":12562.71,"product_code":"M21521","description":"Bearing- Taper Roller (32212)","packetsize":1,"taxrate":18,"hsncode":"84822090","unit":"Pcs","stock_pk":10294,"stock_mrp":872,"stock_available_stock":-19},{"id":37,"sale_id":11,"product_id":71934,"stock_id":16774,"qty":1,"unit_price":4389.34,"mrp":"6072","batchdate":"08-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":4373.9,"total_value":5161.2,"disc_value":772,"disc_percent":15,"disc_type":"NET","tax_value":4373.9,"product_code":"P713723","description":"Disc Plate Assembly (304.8 Mm, Dc)","packetsize":1,"taxrate":18,"hsncode":"87089300","unit":"Pcs","stock_pk":16774,"stock_mrp":6072,"stock_available_stock":0},{"id":38,"sale_id":11,"product_id":65398,"stock_id":10238,"qty":5,"unit_price":312.28,"mrp":"432","batchdate":"08-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":1555.93,"total_value":1836,"disc_value":275,"disc_percent":15,"disc_type":"NET","tax_value":1555.93,"product_code":"M20119","description":"Bearing- Radial Ball (6209)","packetsize":1,"taxrate":18,"hsncode":"84821090","unit":"Pcs","stock_pk":10238,"stock_mrp":432,"stock_available_stock":-1},{"id":39,"sale_id":11,"product_id":74600,"stock_id":19440,"qty":2,"unit_price":2397.08,"mrp":"3316","batchdate":"08-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":4777.29,"total_value":5637.2,"disc_value":843,"disc_percent":15,"disc_type":"NET","tax_value":4777.29,"product_code":"Q722521","description":"Shaft- Intermediate(Z16,Z20/12,311 Mm Lo","packetsize":1,"taxrate":18,"hsncode":"87084000","unit":"Pcs","stock_pk":19440,"stock_mrp":3316,"stock_available_stock":-5},{"id":40,"sale_id":11,"product_id":74326,"stock_id":19166,"qty":2,"unit_price":3116.34,"mrp":"4311","batchdate":"08-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":6210.76,"total_value":7328.7,"disc_value":1096,"disc_percent":15,"disc_type":"NET","tax_value":6210.76,"product_code":"Q204436","description":"Shaft- Intermediate (Z16,Z20/12-52,356 M","packetsize":1,"taxrate":18,"hsncode":"87084000","unit":"Pcs","stock_pk":19166,"stock_mrp":4311,"stock_available_stock":-4},{"id":41,"sale_id":11,"product_id":72555,"stock_id":17395,"qty":4,"unit_price":113.49,"mrp":"157","batchdate":"08-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":452.37,"total_value":533.8,"disc_value":80,"disc_percent":15,"disc_type":"NET","tax_value":452.37,"product_code":"P722033B","description":"Plate- Inner","packetsize":2,"taxrate":18,"hsncode":"87089900","unit":"Pcs","stock_pk":17395,"stock_mrp":157,"stock_available_stock":-1},{"id":42,"sale_id":11,"product_id":74382,"stock_id":19222,"qty":2,"unit_price":2029.85,"mrp":"2808","batchdate":"08-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":4045.42,"total_value":4773.6,"disc_value":714,"disc_percent":15,"disc_type":"NET","tax_value":4045.42,"product_code":"Q322522","description":"Shaft- Intermediate (Z16/12,311 Mm Long)","packetsize":1,"taxrate":18,"hsncode":"87084000","unit":"Pcs","stock_pk":19222,"stock_mrp":2808,"stock_available_stock":1},{"id":43,"sale_id":11,"product_id":67647,"stock_id":12487,"qty":2,"unit_price":420,"mrp":"581","batchdate":"08-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":837.03,"total_value":987.7,"disc_value":148,"disc_percent":15,"disc_type":"NET","tax_value":837.03,"product_code":"P10002172A","description":"Pipe- External Tap Off","packetsize":1,"taxrate":18,"hsncode":"87089900","unit":"Pcs","stock_pk":12487,"stock_mrp":581,"stock_available_stock":7},{"id":44,"sale_id":11,"product_id":69084,"stock_id":13924,"qty":4,"unit_price":86.75,"mrp":"120","batchdate":"08-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":345.76,"total_value":408,"disc_value":61,"disc_percent":15,"disc_type":"NET","tax_value":345.76,"product_code":"P222036","description":"Plate- Outer","packetsize":3,"taxrate":18,"hsncode":"87089900","unit":"Pcs","stock_pk":13924,"stock_mrp":120,"stock_available_stock":1},{"id":45,"sale_id":11,"product_id":74607,"stock_id":19447,"qty":1,"unit_price":2810.56,"mrp":"3888","batchdate":"08-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":2800.68,"total_value":3304.8,"disc_value":494,"disc_percent":15,"disc_type":"NET","tax_value":2800.68,"product_code":"Q722580","description":"Planet Gear & Carrier Assembly","packetsize":1,"taxrate":18,"hsncode":"87084000","unit":"Pcs","stock_pk":19447,"stock_mrp":3888,"stock_available_stock":4},{"id":46,"sale_id":11,"product_id":74601,"stock_id":19441,"qty":2,"unit_price":2007.44,"mrp":"2777","batchdate":"08-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":4000.76,"total_value":4720.9,"disc_value":706,"disc_percent":15,"disc_type":"NET","tax_value":4000.76,"product_code":"Q722522","description":"Shaft- Intermediate(Z16,Z21/12,311 Mm Lo","packetsize":1,"taxrate":18,"hsncode":"87084000","unit":"Pcs","stock_pk":19441,"stock_mrp":2777,"stock_available_stock":-3},{"id":47,"sale_id":11,"product_id":74600,"stock_id":19440,"qty":2,"unit_price":2397.08,"mrp":"3316","batchdate":"08-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":4777.29,"total_value":5637.2,"disc_value":843,"disc_percent":15,"disc_type":"NET","tax_value":4777.29,"product_code":"Q722521","description":"Shaft- Intermediate(Z16,Z20/12,311 Mm Lo","packetsize":1,"taxrate":18,"hsncode":"87084000","unit":"Pcs","stock_pk":19440,"stock_mrp":3316,"stock_available_stock":-5},{"id":48,"sale_id":11,"product_id":74382,"stock_id":19222,"qty":2,"unit_price":2029.85,"mrp":"2808","batchdate":"08-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":4045.42,"total_value":4773.6,"disc_value":714,"disc_percent":15,"disc_type":"NET","tax_value":4045.42,"product_code":"Q322522","description":"Shaft- Intermediate (Z16/12,311 Mm Long)","packetsize":1,"taxrate":18,"hsncode":"87084000","unit":"Pcs","stock_pk":19222,"stock_mrp":2808,"stock_available_stock":1},{"id":49,"sale_id":11,"product_id":74580,"stock_id":19420,"qty":2,"unit_price":739.51,"mrp":"1023","batchdate":"08-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":1473.81,"total_value":1739.1,"disc_value":260,"disc_percent":15,"disc_type":"NET","tax_value":1473.81,"product_code":"Q722065","description":"Gear Z-29","packetsize":1,"taxrate":18,"hsncode":"87084000","unit":"Pcs","stock_pk":19420,"stock_mrp":1023,"stock_available_stock":-2},{"id":50,"sale_id":11,"product_id":74326,"stock_id":19166,"qty":2,"unit_price":3116.34,"mrp":"4311","batchdate":"08-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":6210.76,"total_value":7328.7,"disc_value":1096,"disc_percent":15,"disc_type":"NET","tax_value":6210.76,"product_code":"Q204436","description":"Shaft- Intermediate (Z16,Z20/12-52,356 M","packetsize":1,"taxrate":18,"hsncode":"87084000","unit":"Pcs","stock_pk":19166,"stock_mrp":4311,"stock_available_stock":-4}]
+[2020-10-10T10:33:32.637] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('10-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T10:33:32.651] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T11:16:46.709] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T11:16:51.183] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T11:19:07.477] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T11:32:39.823] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T11:35:01.923] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T11:39:28.762] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T11:43:30.096] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T11:45:46.697] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T11:47:41.912] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '380' and
+	c.center_id = '2' 
+[2020-10-10T11:47:41.930] [DEBUG] debug - dinesh test [object Object]
+[2020-10-10T11:47:41.930] [DEBUG] debug - dinesh test ** [{"id":51,"sale_id":12,"product_id":65668,"stock_id":10508,"qty":8,"unit_price":164.82,"mrp":"228","batchdate":"08-10-2020","tax":18,"igst":0,"cgst":9,"sgst":9,"taxable_value":1313.9,"total_value":1550.4,"disc_value":232,"disc_percent":15,"disc_type":"NET","tax_value":1313.9,"product_code":"P000736","description":"Kit- Diesel Filter & Oil Filter","packetsize":30,"taxrate":18,"hsncode":"84212300","unit":"Pcs","stock_pk":10508,"stock_mrp":235,"stock_available_stock":80}]
+[2020-10-10T11:49:11.412] [DEBUG] debug - search enquiry >> select e.*, c.id as customer_id, c.name as customer_name,
+    	case e.estatus
+				when 'O' then 'New'
+				when 'D' then 'Draft'
+				when 'E' then 'Executed'
+				when 'P' then 'Invoice Ready'
+				when 'C' then 'Completed'
+				when 'X' then 'Cancelled'
+    end as status_txt,
+	(select count(*) from enquiry_detail where enquiry_id = e.id)
+	as noofitems
+	from
+	enquiry e,
+	customer c
+	where
+	c.id = e.customer_id and
+
+	e.center_id =  '2' and
+	str_to_date(DATE_FORMAT(enquiry_date,'%d-%m-%YYYY') , '%d-%m-%YYYY') between
+	str_to_date('03-10-2020', '%d-%m-%YYYY') and
+	str_to_date('10-10-2020', '%d-%m-%YYYY')  
+[2020-10-10T11:49:13.921] [DEBUG] debug - all-active-vendorsselect v.id, v.center_id, v.name, v.address1, v.address2, v.address3, v.district, s.id as state_id, s.code, s.description as state,
+	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp, v.email, v.isactive  from 
+	vendor v,
+	state s
+	where 
+	v.state_id = s.id and isactive = 'A' and center_id = 2 order by v.name
+[2020-10-10T11:49:13.930] [DEBUG] debug - all-active-vendorsselect v.id, v.center_id, v.name, v.address1, v.address2, v.address3, v.district, s.id as state_id, s.code, s.description as state,
+	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp, v.email, v.isactive  from 
+	vendor v,
+	state s
+	where 
+	v.state_id = s.id and isactive = 'A' and center_id = 2 order by v.name
+[2020-10-10T11:49:19.980] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('10-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T11:49:20.008] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T11:49:26.952] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T11:50:30.156] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T11:51:27.158] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T11:51:32.786] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T11:52:55.758] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T11:53:43.464] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T11:53:49.393] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T11:58:29.790] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T11:58:34.855] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T11:59:22.739] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T11:59:27.030] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T12:00:58.740] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T12:01:02.823] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T12:09:13.053] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T12:09:17.240] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T12:11:53.050] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T12:12:07.841] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T12:14:15.333] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T12:16:02.119] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T12:16:07.916] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T12:18:04.253] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T14:07:00.302] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T14:13:20.330] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T14:13:23.617] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T14:15:23.460] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T14:15:29.941] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T14:16:13.878] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T14:16:45.294] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T14:26:19.712] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T14:26:40.403] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T14:28:23.847] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T14:28:32.012] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T14:29:46.733] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T16:31:05.748] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T18:17:11.009] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T18:18:31.280] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T18:18:35.349] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T18:19:37.647] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T18:19:42.010] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T18:26:54.224] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T18:26:59.309] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T18:28:16.078] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T18:28:21.908] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T18:31:50.130] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T18:33:28.871] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T18:33:33.864] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T18:36:40.301] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T18:36:47.746] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T18:38:02.723] [DEBUG] debug - invoice type l30gstinvoice
+[2020-10-10T18:38:05.903] [DEBUG] debug - object..>2 abi
+[2020-10-10T18:38:05.906] [DEBUG] debug - get-customer-details > 
+	select c.id, c.center_id, c.name, c.address1, c.address2, c.district, s.code, s.description,
+	c.pin, c.gst, c.phone, c.mobile, c.mobile2, c.whatsapp,  c.email, c.isactive,
+		csa.state_id as csa_state,
+csa.address1 as csa_address1,
+csa.address2 as csa_address2, 
+csa.address3 as csa_address3,
+csa.district as csa_district,
+csa.pin as csa_pin,
+csa.def_address as def_address,
+s1.code as csa_code
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	csa.customer_id = c.id and
+	csa.def_address = 'Y' and
+	c.state_id = s.id and isactive = 'A' and center_id = '2' and ( c.name like '%abi%') limit 50 
+[2020-10-10T18:38:08.122] [DEBUG] debug - inside get vendor details
+[2020-10-10T18:38:08.152] [DEBUG] debug - dinesh test
+[2020-10-10T18:38:08.152] [DEBUG] debug - latest >  
+	SELECT 
+	c.name,  '' as 'brand_name',  d.type, d.brand_id as brand_id, 
+     sum(if( d.gst_slab = 0, d.value, 0 ) ) AS gstzero,  
+     sum(if( d.gst_slab = 5, d.value, 0 ) ) AS gstfive, 
+     sum(if( d.gst_slab = 12, d.value, 0 ) ) AS gsttwelve, 
+     sum(if( d.gst_slab = 18, d.value, 0 ) ) AS gsteighteen, 
+		 sum(if( d.gst_slab = 28, d.value, 0 ) ) AS gsttwentyeight,
+		 c.id as id, d.startdate  
+FROM 
+	customer c,
+    discount d
+    where 
+    d.brand_id = 0 and
+		d.center_id = ? and
+		c.id = ? and
+		d.customer_id = ?
+    group by 
+    c.name, d.type, d.brand_id,c.id, d.startdate      
+    order by
+    c.name
+	
+[2020-10-10T18:39:24.991] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('10-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T18:39:25.040] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T18:39:28.411] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T18:40:06.985] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '380' and
+	c.center_id = '2' 
+[2020-10-10T18:40:11.902] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '380' and
+	c.center_id = '2' 
+[2020-10-10T18:40:17.521] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '380' and
+	c.center_id = '2' 
+[2020-10-10T18:44:48.011] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T18:44:56.215] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T18:56:16.715] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T18:56:32.838] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T18:57:20.226] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T18:58:27.102] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T18:58:32.994] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T18:59:47.382] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T18:59:53.330] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T19:01:17.001] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T19:10:36.645] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T19:11:37.624] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T19:12:35.463] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T19:24:44.804] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T19:24:47.597] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T19:25:28.545] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T19:25:51.594] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T19:26:51.136] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T19:27:15.754] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T19:28:36.999] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T19:28:39.214] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T19:32:17.204] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T19:33:37.005] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T19:34:39.216] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T19:38:55.378] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T19:39:01.242] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T19:41:10.267] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T19:41:14.140] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T19:42:10.662] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T19:42:50.155] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T19:44:08.338] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T19:45:44.312] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T19:45:49.847] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T19:47:37.040] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T19:47:39.781] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T19:47:44.176] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T19:47:44.180] [DEBUG] debug - getCenterDetails > select c.*, s.description 
+  from 
+  center c,
+  state s 
+  where 
+  c.state_id = s.id and
+  c.id = '2'  
+[2020-10-10T19:52:12.151] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T19:52:12.178] [DEBUG] debug - getCenterDetails > select c.*, s.description 
+  from 
+  center c,
+  state s 
+  where 
+  c.state_id = s.id and
+  c.id = '2'  
+[2020-10-10T19:53:17.720] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T19:53:17.749] [DEBUG] debug - getCenterDetails > select c.*, s.description 
+  from 
+  center c,
+  state s 
+  where 
+  c.state_id = s.id and
+  c.id = '2'  
+[2020-10-10T19:54:19.709] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T19:54:19.721] [DEBUG] debug - getCenterDetails > select c.*, s.description 
+  from 
+  center c,
+  state s 
+  where 
+  c.state_id = s.id and
+  c.id = '2'  
+[2020-10-10T19:56:14.554] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T19:56:14.567] [DEBUG] debug - getCenterDetails > select c.*, s.description 
+  from 
+  center c,
+  state s 
+  where 
+  c.state_id = s.id and
+  c.id = '2'  
+[2020-10-10T19:57:21.028] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T19:57:21.034] [DEBUG] debug - getCenterDetails > select c.*, s.description 
+  from 
+  center c,
+  state s 
+  where 
+  c.state_id = s.id and
+  c.id = '2'  
+[2020-10-10T20:00:12.474] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T20:00:12.477] [DEBUG] debug - getCenterDetails > select c.*, s.description 
+  from 
+  center c,
+  state s 
+  where 
+  c.state_id = s.id and
+  c.id = '2'  
+[2020-10-10T20:03:54.349] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T20:04:02.392] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T20:05:09.169] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T20:06:55.601] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T20:07:30.158] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T20:07:46.463] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T20:09:10.489] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T20:09:47.447] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T20:13:00.879] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T20:15:41.670] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T20:17:35.271] [DEBUG] debug - sql search sale select s.*, c.id as customer_id, c.name as customer_name
+        from
+        sale s,
+        customer c
+        where
+        c.id = s.customer_id and
+        
+				s.center_id = '2' and
+				
+				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date('03-10-2020 00:00:00',  '%d-%m-%Y %T') and
+				str_to_date('10-10-2020 23:59:00',  '%d-%m-%Y %T')  order by invoice_no 
+[2020-10-10T20:22:52.469] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = '266' and
+	c.center_id = '2' 
+[2020-10-10T20:23:07.172] [DEBUG] debug - all-active-vendorsselect v.id, v.center_id, v.name, v.address1, v.address2, v.address3, v.district, s.id as state_id, s.code, s.description as state,
+	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp, v.email, v.isactive  from 
+	vendor v,
+	state s
+	where 
+	v.state_id = s.id and isactive = 'A' and center_id = 2 order by v.name
+[2020-10-10T20:23:07.186] [DEBUG] debug - all-active-vendorsselect v.id, v.center_id, v.name, v.address1, v.address2, v.address3, v.district, s.id as state_id, s.code, s.description as state,
+	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp, v.email, v.isactive  from 
+	vendor v,
+	state s
+	where 
+	v.state_id = s.id and isactive = 'A' and center_id = 2 order by v.name
+[2020-10-10T20:23:19.309] [DEBUG] debug - object..> search vendor >2 swa
+[2020-10-10T20:23:19.309] [DEBUG] debug - get-vendor-details > 
+	select v.id, v.center_id, v.name, v.address1, v.address2, v.district, 
+	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp,  v.email, v.isactive, s.code as code
+	from
+	vendor v,
+	state s
+	where 
+	v.state_id = s.id and isactive = 'A' and center_id = '2' and ( v.name like '%swa%') limit 50  
+[2020-10-10T20:23:21.901] [DEBUG] debug - object..> search vendor >2 sw
+[2020-10-10T20:23:21.901] [DEBUG] debug - get-vendor-details > 
+	select v.id, v.center_id, v.name, v.address1, v.address2, v.district, 
+	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp,  v.email, v.isactive, s.code as code
+	from
+	vendor v,
+	state s
+	where 
+	v.state_id = s.id and isactive = 'A' and center_id = '2' and ( v.name like '%sw%') limit 50  
+[2020-10-10T20:24:18.497] [DEBUG] debug - all-active-vendorsselect v.id, v.center_id, v.name, v.address1, v.address2, v.address3, v.district, s.id as state_id, s.code, s.description as state,
+	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp, v.email, v.isactive  from 
+	vendor v,
+	state s
+	where 
+	v.state_id = s.id and isactive = 'A' and center_id = 2 order by v.name
+[2020-10-10T20:24:18.526] [DEBUG] debug - all-active-vendorsselect v.id, v.center_id, v.name, v.address1, v.address2, v.address3, v.district, s.id as state_id, s.code, s.description as state,
+	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp, v.email, v.isactive  from 
+	vendor v,
+	state s
+	where 
+	v.state_id = s.id and isactive = 'A' and center_id = 2 order by v.name
+[2020-10-10T20:25:42.793] [DEBUG] debug - all-active-vendorsselect v.id, v.center_id, v.name, v.address1, v.address2, v.address3, v.district, s.id as state_id, s.code, s.description as state,
+	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp, v.email, v.isactive  from 
+	vendor v,
+	state s
+	where 
+	v.state_id = s.id and isactive = 'A' and center_id = 2 order by v.name
+[2020-10-10T20:25:44.203] [DEBUG] debug - inside get vendor details
+[2020-10-10T20:26:21.392] [DEBUG] debug - all-active-vendorsselect v.id, v.center_id, v.name, v.address1, v.address2, v.address3, v.district, s.id as state_id, s.code, s.description as state,
+	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp, v.email, v.isactive  from 
+	vendor v,
+	state s
+	where 
+	v.state_id = s.id and isactive = 'A' and center_id = 2 order by v.name
+[2020-10-10T20:26:27.775] [DEBUG] debug - all-active-vendorsselect v.id, v.center_id, v.name, v.address1, v.address2, v.address3, v.district, s.id as state_id, s.code, s.description as state,
+	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp, v.email, v.isactive  from 
+	vendor v,
+	state s
+	where 
+	v.state_id = s.id and isactive = 'A' and center_id = 2 order by v.name
+[2020-10-10T20:26:31.490] [DEBUG] debug - object..> search vendor >2 am
+[2020-10-10T20:26:31.490] [DEBUG] debug - get-vendor-details > 
+	select v.id, v.center_id, v.name, v.address1, v.address2, v.district, 
+	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp,  v.email, v.isactive, s.code as code
+	from
+	vendor v,
+	state s
+	where 
+	v.state_id = s.id and isactive = 'A' and center_id = '2' and ( v.name like '%am%') limit 50  
+[2020-10-10T20:26:40.159] [DEBUG] debug - query > select a.product_code as product_code, a.description, b.mrp, a.taxrate, b.available_stock,
+	a.packetsize, a.unit_price, a.purchase_price as purchase_price, a.id as product_id, b.id as stock_pk, a.packetsize as qty, a.rackno, bd.name,
+	bd.id as brand_id, a.unit as uom, a.hsncode as hsncode, a.minqty as minqty, a.avgpurprice as avgpurprice,
+	a.unit_price as unit_price
+	from 
+	brand bd,
+	product a
+	LEFT outer JOIN   stock b
+	ON b.product_id = a.id
+  where 
+	a.center_id = '2' and
+	a.brand_id = bd.id and
+  ( a.product_code like '%000%' or
+  a.description like '%000%' ) limit 50 
+ 
+[2020-10-10T20:26:49.143] [DEBUG] debug - query > select a.product_code as product_code, a.description, b.mrp, a.taxrate, b.available_stock,
+	a.packetsize, a.unit_price, a.purchase_price as purchase_price, a.id as product_id, b.id as stock_pk, a.packetsize as qty, a.rackno, bd.name,
+	bd.id as brand_id, a.unit as uom, a.hsncode as hsncode, a.minqty as minqty, a.avgpurprice as avgpurprice,
+	a.unit_price as unit_price
+	from 
+	brand bd,
+	product a
+	LEFT outer JOIN   stock b
+	ON b.product_id = a.id
+  where 
+	a.center_id = '2' and
+	a.brand_id = bd.id and
+  ( a.product_code like '%000%' or
+  a.description like '%000%' ) limit 50 
+ 
+[2020-10-10T20:26:54.917] [DEBUG] debug - query > select a.product_code as product_code, a.description, b.mrp, a.taxrate, b.available_stock,
+	a.packetsize, a.unit_price, a.purchase_price as purchase_price, a.id as product_id, b.id as stock_pk, a.packetsize as qty, a.rackno, bd.name,
+	bd.id as brand_id, a.unit as uom, a.hsncode as hsncode, a.minqty as minqty, a.avgpurprice as avgpurprice,
+	a.unit_price as unit_price
+	from 
+	brand bd,
+	product a
+	LEFT outer JOIN   stock b
+	ON b.product_id = a.id
+  where 
+	a.center_id = '2' and
+	a.brand_id = bd.id and
+  ( a.product_code like '%000%' or
+  a.description like '%000%' ) limit 50 
+ 
+[2020-10-10T20:27:00.622] [DEBUG] debug - query > select a.product_code as product_code, a.description, b.mrp, a.taxrate, b.available_stock,
+	a.packetsize, a.unit_price, a.purchase_price as purchase_price, a.id as product_id, b.id as stock_pk, a.packetsize as qty, a.rackno, bd.name,
+	bd.id as brand_id, a.unit as uom, a.hsncode as hsncode, a.minqty as minqty, a.avgpurprice as avgpurprice,
+	a.unit_price as unit_price
+	from 
+	brand bd,
+	product a
+	LEFT outer JOIN   stock b
+	ON b.product_id = a.id
+  where 
+	a.center_id = '2' and
+	a.brand_id = bd.id and
+  ( a.product_code like '%000%' or
+  a.description like '%000%' ) limit 50 
+ 
+[2020-10-10T20:27:05.571] [DEBUG] debug - query > select a.product_code as product_code, a.description, b.mrp, a.taxrate, b.available_stock,
+	a.packetsize, a.unit_price, a.purchase_price as purchase_price, a.id as product_id, b.id as stock_pk, a.packetsize as qty, a.rackno, bd.name,
+	bd.id as brand_id, a.unit as uom, a.hsncode as hsncode, a.minqty as minqty, a.avgpurprice as avgpurprice,
+	a.unit_price as unit_price
+	from 
+	brand bd,
+	product a
+	LEFT outer JOIN   stock b
+	ON b.product_id = a.id
+  where 
+	a.center_id = '2' and
+	a.brand_id = bd.id and
+  ( a.product_code like '%000%' or
+  a.description like '%000%' ) limit 50 
+ 
+[2020-10-10T20:27:39.087] [DEBUG] debug - din {"centerid":2,"purchaseid":"","vendor":null,"invoiceno":"abcd","invoicedate":"2020-10-09T18:30:00.000Z","orderno":"","orderdate":"","lrno":"","lrdate":"","noofboxes":0,"orderrcvddt":"","noofitems":5,"totalqty":"0.00","value":0,"totalvalue":"0.00","igst":"0.00","cgst":0,"sgst":0,"transport_charges":0,"unloading_charges":0,"misc_charges":0,"net_total":0,"taxable_value":"45.82","status":"C","vendorctrl":{"id":10,"center_id":2,"name":"ambani bros","address1":"","address2":"","district":"","pin":"","gst":"","phone":"9999999999","mobile":"9999999999","mobile2":"","whatsapp":"9999999999","email":"","isactive":"A","code":"29"},"productctrl":"","tempdesc":"","temppurchaseprice":"","tempqty":1,"productarr":[{"purchase_id":"","pur_det_id":"","checkbox":false,"product_id":63356,"product_code":"000012128P04","product_desc":"Shim Speed Driving Shaft Rear Heavy","qty":0,"packetsize":0,"unit_price":"11.15","purchase_price":"11.15","mrp":18,"mrp_change_flag":"N","taxrate":18,"tax_value":"0.00","taxable_value":0,"total_value":"0.00","igst":18,"cgst":0,"sgst":0,"old_val":0,"stock_pk":8196},{"purchase_id":"","pur_det_id":"","checkbox":false,"product_id":63357,"product_code":"000012196P04","product_desc":"Pin Dowel (10.015X25)","qty":0,"packetsize":0,"unit_price":"6.81","purchase_price":"6.81","mrp":11,"mrp_change_flag":"N","taxrate":18,"tax_value":"0.00","taxable_value":0,"total_value":"0.00","igst":18,"cgst":0,"sgst":0,"old_val":0,"stock_pk":8197},{"purchase_id":"","pur_det_id":"","checkbox":false,"product_id":63355,"product_code":"000011104P03","product_desc":"Bolt Hex (M12X1.75X25X8.8)","qty":0,"packetsize":0,"unit_price":"11.76","purchase_price":"11.76","mrp":19,"mrp_change_flag":"N","taxrate":18,"tax_value":"0.00","taxable_value":0,"total_value":"0.00","igst":18,"cgst":0,"sgst":0,"old_val":0,"stock_pk":8195},{"purchase_id":"","pur_det_id":"","checkbox":false,"product_id":63358,"product_code":"000012204P04","product_desc":"Shim Speed Driving Shaft Rear Medium","qty":0,"packetsize":0,"unit_price":"8.05","purchase_price":"8.05","mrp":13,"mrp_change_flag":"N","taxrate":18,"tax_value":"0.00","taxable_value":0,"total_value":"0.00","igst":18,"cgst":0,"sgst":0,"old_val":0,"stock_pk":8198},{"purchase_id":"","pur_det_id":"","checkbox":false,"product_id":63365,"product_code":"000012506P04","product_desc":"Bolt Hexagonal (M12X1.75X30X10.9)","qty":0,"packetsize":0,"unit_price":"8.05","purchase_price":"8.05","mrp":13,"mrp_change_flag":"N","taxrate":18,"tax_value":"0.00","taxable_value":0,"total_value":"0.00","igst":18,"cgst":0,"sgst":0,"old_val":0,"stock_pk":8205}]}
+[2020-10-10T20:27:39.095] [DEBUG] debug - dinesh  update purchase set center_id = '2', vendor_id = '10',
+			invoice_no = 'abcd', invoice_date = '10-10-2020', lr_no = '',
+			lr_date = '', received_date = '', purchase_type = 'GST Inovoice',
+			order_no = '', order_date = '', total_qty = '0.00', 
+			no_of_items = '5', taxable_value = '45.82', cgst = '0', 
+			sgst = '0', igst = '0.00', total_value = '0.00', 
+			transport_charges = '0', unloading_charges = '0', 
+			misc_charges = '0', net_total = '0', no_of_boxes = '0',
+			status =  'C', stock_inwards_datetime =  '10-10-2020 20:27:39' where id = '' 
+[2020-10-10T20:27:39.167] [DEBUG] debug - object.. di..
+
+update product set purchase_price = '8.05', unit_price = '8.05'
+where id = '63358'  
+[2020-10-10T20:27:39.167] [DEBUG] debug - old val > 0
+[2020-10-10T20:27:39.168] [DEBUG] debug - qty val > 0
+[2020-10-10T20:27:39.168] [DEBUG] debug - qty_to_update val > 0
+[2020-10-10T20:27:39.168] [DEBUG] debug - delete this {"fieldCount":0,"affectedRows":1,"insertId":123,"serverStatus":2,"warningCount":0,"message":"","protocol41":true,"changedRows":0}
+[2020-10-10T20:27:39.168] [DEBUG] debug - inside insert item history {"centerid":2,"purchaseid":"","vendor":null,"invoiceno":"abcd","invoicedate":"2020-10-09T18:30:00.000Z","orderno":"","orderdate":"","lrno":"","lrdate":"","noofboxes":0,"orderrcvddt":"","noofitems":5,"totalqty":"0.00","value":0,"totalvalue":"0.00","igst":"0.00","cgst":0,"sgst":0,"transport_charges":0,"unloading_charges":0,"misc_charges":0,"net_total":0,"taxable_value":"45.82","status":"C","vendorctrl":{"id":10,"center_id":2,"name":"ambani bros","address1":"","address2":"","district":"","pin":"","gst":"","phone":"9999999999","mobile":"9999999999","mobile2":"","whatsapp":"9999999999","email":"","isactive":"A","code":"29"},"productctrl":"","tempdesc":"","temppurchaseprice":"","tempqty":1,"productarr":[{"purchase_id":"","pur_det_id":"","checkbox":false,"product_id":63356,"product_code":"000012128P04","product_desc":"Shim Speed Driving Shaft Rear Heavy","qty":0,"packetsize":0,"unit_price":"11.15","purchase_price":"11.15","mrp":18,"mrp_change_flag":"N","taxrate":18,"tax_value":"0.00","taxable_value":0,"total_value":"0.00","igst":18,"cgst":0,"sgst":0,"old_val":0,"stock_pk":8196},{"purchase_id":"","pur_det_id":"","checkbox":false,"product_id":63357,"product_code":"000012196P04","product_desc":"Pin Dowel (10.015X25)","qty":0,"packetsize":0,"unit_price":"6.81","purchase_price":"6.81","mrp":11,"mrp_change_flag":"N","taxrate":18,"tax_value":"0.00","taxable_value":0,"total_value":"0.00","igst":18,"cgst":0,"sgst":0,"old_val":0,"stock_pk":8197},{"purchase_id":"","pur_det_id":"","checkbox":false,"product_id":63355,"product_code":"000011104P03","product_desc":"Bolt Hex (M12X1.75X25X8.8)","qty":0,"packetsize":0,"unit_price":"11.76","purchase_price":"11.76","mrp":19,"mrp_change_flag":"N","taxrate":18,"tax_value":"0.00","taxable_value":0,"total_value":"0.00","igst":18,"cgst":0,"sgst":0,"old_val":0,"stock_pk":8195},{"purchase_id":"","pur_det_id":"","checkbox":false,"product_id":63358,"product_code":"000012204P04","product_desc":"Shim Speed Driving Shaft Rear Medium","qty":0,"packetsize":0,"unit_price":"8.05","purchase_price":"8.05","mrp":13,"mrp_change_flag":"N","taxrate":18,"tax_value":"0.00","taxable_value":0,"total_value":"0.00","igst":18,"cgst":0,"sgst":0,"old_val":0,"stock_pk":8198},{"purchase_id":"","pur_det_id":"","checkbox":false,"product_id":63365,"product_code":"000012506P04","product_desc":"Bolt Hexagonal (M12X1.75X30X10.9)","qty":0,"packetsize":0,"unit_price":"8.05","purchase_price":"8.05","mrp":13,"mrp_change_flag":"N","taxrate":18,"tax_value":"0.00","taxable_value":0,"total_value":"0.00","igst":18,"cgst":0,"sgst":0,"old_val":0,"stock_pk":8205}]}
+[2020-10-10T20:27:39.169] [DEBUG] debug - delete ME 2 123
+[2020-10-10T20:27:39.169] [DEBUG] debug - object.. di..
+
+update product set purchase_price = '11.15', unit_price = '11.15'
+where id = '63356'  
+[2020-10-10T20:27:39.170] [DEBUG] debug - old val > 0
+[2020-10-10T20:27:39.170] [DEBUG] debug - qty val > 0
+[2020-10-10T20:27:39.170] [DEBUG] debug - qty_to_update val > 0
+[2020-10-10T20:27:39.170] [DEBUG] debug - delete this {"fieldCount":0,"affectedRows":1,"insertId":121,"serverStatus":2,"warningCount":0,"message":"","protocol41":true,"changedRows":0}
+[2020-10-10T20:27:39.170] [DEBUG] debug - inside insert item history {"centerid":2,"purchaseid":"","vendor":null,"invoiceno":"abcd","invoicedate":"2020-10-09T18:30:00.000Z","orderno":"","orderdate":"","lrno":"","lrdate":"","noofboxes":0,"orderrcvddt":"","noofitems":5,"totalqty":"0.00","value":0,"totalvalue":"0.00","igst":"0.00","cgst":0,"sgst":0,"transport_charges":0,"unloading_charges":0,"misc_charges":0,"net_total":0,"taxable_value":"45.82","status":"C","vendorctrl":{"id":10,"center_id":2,"name":"ambani bros","address1":"","address2":"","district":"","pin":"","gst":"","phone":"9999999999","mobile":"9999999999","mobile2":"","whatsapp":"9999999999","email":"","isactive":"A","code":"29"},"productctrl":"","tempdesc":"","temppurchaseprice":"","tempqty":1,"productarr":[{"purchase_id":"","pur_det_id":"","checkbox":false,"product_id":63356,"product_code":"000012128P04","product_desc":"Shim Speed Driving Shaft Rear Heavy","qty":0,"packetsize":0,"unit_price":"11.15","purchase_price":"11.15","mrp":18,"mrp_change_flag":"N","taxrate":18,"tax_value":"0.00","taxable_value":0,"total_value":"0.00","igst":18,"cgst":0,"sgst":0,"old_val":0,"stock_pk":8196},{"purchase_id":"","pur_det_id":"","checkbox":false,"product_id":63357,"product_code":"000012196P04","product_desc":"Pin Dowel (10.015X25)","qty":0,"packetsize":0,"unit_price":"6.81","purchase_price":"6.81","mrp":11,"mrp_change_flag":"N","taxrate":18,"tax_value":"0.00","taxable_value":0,"total_value":"0.00","igst":18,"cgst":0,"sgst":0,"old_val":0,"stock_pk":8197},{"purchase_id":"","pur_det_id":"","checkbox":false,"product_id":63355,"product_code":"000011104P03","product_desc":"Bolt Hex (M12X1.75X25X8.8)","qty":0,"packetsize":0,"unit_price":"11.76","purchase_price":"11.76","mrp":19,"mrp_change_flag":"N","taxrate":18,"tax_value":"0.00","taxable_value":0,"total_value":"0.00","igst":18,"cgst":0,"sgst":0,"old_val":0,"stock_pk":8195},{"purchase_id":"","pur_det_id":"","checkbox":false,"product_id":63358,"product_code":"000012204P04","product_desc":"Shim Speed Driving Shaft Rear Medium","qty":0,"packetsize":0,"unit_price":"8.05","purchase_price":"8.05","mrp":13,"mrp_change_flag":"N","taxrate":18,"tax_value":"0.00","taxable_value":0,"total_value":"0.00","igst":18,"cgst":0,"sgst":0,"old_val":0,"stock_pk":8198},{"purchase_id":"","pur_det_id":"","checkbox":false,"product_id":63365,"product_code":"000012506P04","product_desc":"Bolt Hexagonal (M12X1.75X30X10.9)","qty":0,"packetsize":0,"unit_price":"8.05","purchase_price":"8.05","mrp":13,"mrp_change_flag":"N","taxrate":18,"tax_value":"0.00","taxable_value":0,"total_value":"0.00","igst":18,"cgst":0,"sgst":0,"old_val":0,"stock_pk":8205}]}
+[2020-10-10T20:27:39.170] [DEBUG] debug - delete ME 2 121
+[2020-10-10T20:27:39.171] [DEBUG] debug - object.. di..
+
+update product set purchase_price = '6.81', unit_price = '6.81'
+where id = '63357'  
+[2020-10-10T20:27:39.172] [DEBUG] debug - old val > 0
+[2020-10-10T20:27:39.172] [DEBUG] debug - qty val > 0
+[2020-10-10T20:27:39.172] [DEBUG] debug - qty_to_update val > 0
+[2020-10-10T20:27:39.173] [DEBUG] debug - delete this {"fieldCount":0,"affectedRows":1,"insertId":120,"serverStatus":2,"warningCount":0,"message":"","protocol41":true,"changedRows":0}
+[2020-10-10T20:27:39.173] [DEBUG] debug - inside insert item history {"centerid":2,"purchaseid":"","vendor":null,"invoiceno":"abcd","invoicedate":"2020-10-09T18:30:00.000Z","orderno":"","orderdate":"","lrno":"","lrdate":"","noofboxes":0,"orderrcvddt":"","noofitems":5,"totalqty":"0.00","value":0,"totalvalue":"0.00","igst":"0.00","cgst":0,"sgst":0,"transport_charges":0,"unloading_charges":0,"misc_charges":0,"net_total":0,"taxable_value":"45.82","status":"C","vendorctrl":{"id":10,"center_id":2,"name":"ambani bros","address1":"","address2":"","district":"","pin":"","gst":"","phone":"9999999999","mobile":"9999999999","mobile2":"","whatsapp":"9999999999","email":"","isactive":"A","code":"29"},"productctrl":"","tempdesc":"","temppurchaseprice":"","tempqty":1,"productarr":[{"purchase_id":"","pur_det_id":"","checkbox":false,"product_id":63356,"product_code":"000012128P04","product_desc":"Shim Speed Driving Shaft Rear Heavy","qty":0,"packetsize":0,"unit_price":"11.15","purchase_price":"11.15","mrp":18,"mrp_change_flag":"N","taxrate":18,"tax_value":"0.00","taxable_value":0,"total_value":"0.00","igst":18,"cgst":0,"sgst":0,"old_val":0,"stock_pk":8196},{"purchase_id":"","pur_det_id":"","checkbox":false,"product_id":63357,"product_code":"000012196P04","product_desc":"Pin Dowel (10.015X25)","qty":0,"packetsize":0,"unit_price":"6.81","purchase_price":"6.81","mrp":11,"mrp_change_flag":"N","taxrate":18,"tax_value":"0.00","taxable_value":0,"total_value":"0.00","igst":18,"cgst":0,"sgst":0,"old_val":0,"stock_pk":8197},{"purchase_id":"","pur_det_id":"","checkbox":false,"product_id":63355,"product_code":"000011104P03","product_desc":"Bolt Hex (M12X1.75X25X8.8)","qty":0,"packetsize":0,"unit_price":"11.76","purchase_price":"11.76","mrp":19,"mrp_change_flag":"N","taxrate":18,"tax_value":"0.00","taxable_value":0,"total_value":"0.00","igst":18,"cgst":0,"sgst":0,"old_val":0,"stock_pk":8195},{"purchase_id":"","pur_det_id":"","checkbox":false,"product_id":63358,"product_code":"000012204P04","product_desc":"Shim Speed Driving Shaft Rear Medium","qty":0,"packetsize":0,"unit_price":"8.05","purchase_price":"8.05","mrp":13,"mrp_change_flag":"N","taxrate":18,"tax_value":"0.00","taxable_value":0,"total_value":"0.00","igst":18,"cgst":0,"sgst":0,"old_val":0,"stock_pk":8198},{"purchase_id":"","pur_det_id":"","checkbox":false,"product_id":63365,"product_code":"000012506P04","product_desc":"Bolt Hexagonal (M12X1.75X30X10.9)","qty":0,"packetsize":0,"unit_price":"8.05","purchase_price":"8.05","mrp":13,"mrp_change_flag":"N","taxrate":18,"tax_value":"0.00","taxable_value":0,"total_value":"0.00","igst":18,"cgst":0,"sgst":0,"old_val":0,"stock_pk":8205}]}
+[2020-10-10T20:27:39.173] [DEBUG] debug - delete ME 2 120
+[2020-10-10T20:27:39.174] [DEBUG] debug - object.. di..
+
+update product set purchase_price = '11.76', unit_price = '11.76'
+where id = '63355'  
+[2020-10-10T20:27:39.175] [DEBUG] debug - old val > 0
+[2020-10-10T20:27:39.175] [DEBUG] debug - qty val > 0
+[2020-10-10T20:27:39.175] [DEBUG] debug - qty_to_update val > 0
+[2020-10-10T20:27:39.175] [DEBUG] debug - delete this {"fieldCount":0,"affectedRows":1,"insertId":122,"serverStatus":2,"warningCount":0,"message":"","protocol41":true,"changedRows":0}
+[2020-10-10T20:27:39.175] [DEBUG] debug - inside insert item history {"centerid":2,"purchaseid":"","vendor":null,"invoiceno":"abcd","invoicedate":"2020-10-09T18:30:00.000Z","orderno":"","orderdate":"","lrno":"","lrdate":"","noofboxes":0,"orderrcvddt":"","noofitems":5,"totalqty":"0.00","value":0,"totalvalue":"0.00","igst":"0.00","cgst":0,"sgst":0,"transport_charges":0,"unloading_charges":0,"misc_charges":0,"net_total":0,"taxable_value":"45.82","status":"C","vendorctrl":{"id":10,"center_id":2,"name":"ambani bros","address1":"","address2":"","district":"","pin":"","gst":"","phone":"9999999999","mobile":"9999999999","mobile2":"","whatsapp":"9999999999","email":"","isactive":"A","code":"29"},"productctrl":"","tempdesc":"","temppurchaseprice":"","tempqty":1,"productarr":[{"purchase_id":"","pur_det_id":"","checkbox":false,"product_id":63356,"product_code":"000012128P04","product_desc":"Shim Speed Driving Shaft Rear Heavy","qty":0,"packetsize":0,"unit_price":"11.15","purchase_price":"11.15","mrp":18,"mrp_change_flag":"N","taxrate":18,"tax_value":"0.00","taxable_value":0,"total_value":"0.00","igst":18,"cgst":0,"sgst":0,"old_val":0,"stock_pk":8196},{"purchase_id":"","pur_det_id":"","checkbox":false,"product_id":63357,"product_code":"000012196P04","product_desc":"Pin Dowel (10.015X25)","qty":0,"packetsize":0,"unit_price":"6.81","purchase_price":"6.81","mrp":11,"mrp_change_flag":"N","taxrate":18,"tax_value":"0.00","taxable_value":0,"total_value":"0.00","igst":18,"cgst":0,"sgst":0,"old_val":0,"stock_pk":8197},{"purchase_id":"","pur_det_id":"","checkbox":false,"product_id":63355,"product_code":"000011104P03","product_desc":"Bolt Hex (M12X1.75X25X8.8)","qty":0,"packetsize":0,"unit_price":"11.76","purchase_price":"11.76","mrp":19,"mrp_change_flag":"N","taxrate":18,"tax_value":"0.00","taxable_value":0,"total_value":"0.00","igst":18,"cgst":0,"sgst":0,"old_val":0,"stock_pk":8195},{"purchase_id":"","pur_det_id":"","checkbox":false,"product_id":63358,"product_code":"000012204P04","product_desc":"Shim Speed Driving Shaft Rear Medium","qty":0,"packetsize":0,"unit_price":"8.05","purchase_price":"8.05","mrp":13,"mrp_change_flag":"N","taxrate":18,"tax_value":"0.00","taxable_value":0,"total_value":"0.00","igst":18,"cgst":0,"sgst":0,"old_val":0,"stock_pk":8198},{"purchase_id":"","pur_det_id":"","checkbox":false,"product_id":63365,"product_code":"000012506P04","product_desc":"Bolt Hexagonal (M12X1.75X30X10.9)","qty":0,"packetsize":0,"unit_price":"8.05","purchase_price":"8.05","mrp":13,"mrp_change_flag":"N","taxrate":18,"tax_value":"0.00","taxable_value":0,"total_value":"0.00","igst":18,"cgst":0,"sgst":0,"old_val":0,"stock_pk":8205}]}
+[2020-10-10T20:27:39.175] [DEBUG] debug - delete ME 2 122
+[2020-10-10T20:27:39.177] [DEBUG] debug - object.. di..
+
+update product set purchase_price = '8.05', unit_price = '8.05'
+where id = '63365'  
+[2020-10-10T20:27:39.177] [DEBUG] debug - old val > 0
+[2020-10-10T20:27:39.177] [DEBUG] debug - qty val > 0
+[2020-10-10T20:27:39.177] [DEBUG] debug - qty_to_update val > 0
+[2020-10-10T20:27:39.178] [DEBUG] debug - delete this {"fieldCount":0,"affectedRows":1,"insertId":124,"serverStatus":2,"warningCount":0,"message":"","protocol41":true,"changedRows":0}
+[2020-10-10T20:27:39.178] [DEBUG] debug - inside insert item history {"centerid":2,"purchaseid":"","vendor":null,"invoiceno":"abcd","invoicedate":"2020-10-09T18:30:00.000Z","orderno":"","orderdate":"","lrno":"","lrdate":"","noofboxes":0,"orderrcvddt":"","noofitems":5,"totalqty":"0.00","value":0,"totalvalue":"0.00","igst":"0.00","cgst":0,"sgst":0,"transport_charges":0,"unloading_charges":0,"misc_charges":0,"net_total":0,"taxable_value":"45.82","status":"C","vendorctrl":{"id":10,"center_id":2,"name":"ambani bros","address1":"","address2":"","district":"","pin":"","gst":"","phone":"9999999999","mobile":"9999999999","mobile2":"","whatsapp":"9999999999","email":"","isactive":"A","code":"29"},"productctrl":"","tempdesc":"","temppurchaseprice":"","tempqty":1,"productarr":[{"purchase_id":"","pur_det_id":"","checkbox":false,"product_id":63356,"product_code":"000012128P04","product_desc":"Shim Speed Driving Shaft Rear Heavy","qty":0,"packetsize":0,"unit_price":"11.15","purchase_price":"11.15","mrp":18,"mrp_change_flag":"N","taxrate":18,"tax_value":"0.00","taxable_value":0,"total_value":"0.00","igst":18,"cgst":0,"sgst":0,"old_val":0,"stock_pk":8196},{"purchase_id":"","pur_det_id":"","checkbox":false,"product_id":63357,"product_code":"000012196P04","product_desc":"Pin Dowel (10.015X25)","qty":0,"packetsize":0,"unit_price":"6.81","purchase_price":"6.81","mrp":11,"mrp_change_flag":"N","taxrate":18,"tax_value":"0.00","taxable_value":0,"total_value":"0.00","igst":18,"cgst":0,"sgst":0,"old_val":0,"stock_pk":8197},{"purchase_id":"","pur_det_id":"","checkbox":false,"product_id":63355,"product_code":"000011104P03","product_desc":"Bolt Hex (M12X1.75X25X8.8)","qty":0,"packetsize":0,"unit_price":"11.76","purchase_price":"11.76","mrp":19,"mrp_change_flag":"N","taxrate":18,"tax_value":"0.00","taxable_value":0,"total_value":"0.00","igst":18,"cgst":0,"sgst":0,"old_val":0,"stock_pk":8195},{"purchase_id":"","pur_det_id":"","checkbox":false,"product_id":63358,"product_code":"000012204P04","product_desc":"Shim Speed Driving Shaft Rear Medium","qty":0,"packetsize":0,"unit_price":"8.05","purchase_price":"8.05","mrp":13,"mrp_change_flag":"N","taxrate":18,"tax_value":"0.00","taxable_value":0,"total_value":"0.00","igst":18,"cgst":0,"sgst":0,"old_val":0,"stock_pk":8198},{"purchase_id":"","pur_det_id":"","checkbox":false,"product_id":63365,"product_code":"000012506P04","product_desc":"Bolt Hexagonal (M12X1.75X30X10.9)","qty":0,"packetsize":0,"unit_price":"8.05","purchase_price":"8.05","mrp":13,"mrp_change_flag":"N","taxrate":18,"tax_value":"0.00","taxable_value":0,"total_value":"0.00","igst":18,"cgst":0,"sgst":0,"old_val":0,"stock_pk":8205}]}
+[2020-10-10T20:27:39.178] [DEBUG] debug - delete ME 2 124
+[2020-10-10T20:27:39.251] [DEBUG] debug - all-active-vendorsselect v.id, v.center_id, v.name, v.address1, v.address2, v.address3, v.district, s.id as state_id, s.code, s.description as state,
+	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp, v.email, v.isactive  from 
+	vendor v,
+	state s
+	where 
+	v.state_id = s.id and isactive = 'A' and center_id = 2 order by v.name
+[2020-10-10T20:27:39.252] [DEBUG] debug - object..purchase price updated .
+[2020-10-10T20:27:39.273] [DEBUG] debug - object..purchase price updated .
+[2020-10-10T20:27:39.279] [DEBUG] debug - object..stock update .
+[2020-10-10T20:27:39.282] [DEBUG] debug - object..purchase price updated .
+[2020-10-10T20:27:39.282] [DEBUG] debug - object..purchase price updated .
+[2020-10-10T20:27:39.288] [DEBUG] debug - object..stock update .
+[2020-10-10T20:27:39.288] [DEBUG] debug - object..stock update .
+[2020-10-10T20:27:39.289] [DEBUG] debug - object..stock update .
+[2020-10-10T20:27:39.289] [DEBUG] debug - object..stock update .
+[2020-10-10T20:27:39.297] [DEBUG] debug - object..stock update .
+[2020-10-10T20:27:39.297] [DEBUG] debug - object..stock update .
+[2020-10-10T20:27:39.297] [DEBUG] debug - object..purchase price updated .
+[2020-10-10T20:27:39.297] [DEBUG] debug - object..stock update .
+[2020-10-10T20:27:39.302] [DEBUG] debug - object..stock update .
+[2020-10-10T20:27:39.305] [DEBUG] debug - object..stock update .
+[2020-10-10T20:28:40.218] [DEBUG] debug - all-active-vendorsselect v.id, v.center_id, v.name, v.address1, v.address2, v.address3, v.district, s.id as state_id, s.code, s.description as state,
+	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp, v.email, v.isactive  from 
+	vendor v,
+	state s
+	where 
+	v.state_id = s.id and isactive = 'A' and center_id = 2 order by v.name
+[2020-10-10T23:03:35.235] [DEBUG] debug - all-active-vendorsselect v.id, v.center_id, v.name, v.address1, v.address2, v.address3, v.district, s.id as state_id, s.code, s.description as state,
+	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp, v.email, v.isactive  from 
+	vendor v,
+	state s
+	where 
+	v.state_id = s.id and isactive = 'A' and center_id = 2 order by v.name
+[2020-10-10T23:08:08.353] [DEBUG] debug - get-customer-details > select c.*, s.code,  s.description,
+	csa.state_id as csa_state,
+	csa.address1 as csa_address1,
+	csa.address2 as csa_address2, 
+	csa.address3 as csa_address3,
+	csa.district as csa_district,
+	csa.pin as csa_pin,
+	csa.def_address as def_address,
+	s1.code as csa_code,
+	c.credit_amt
+	from 
+	customer c,
+	state s,
+	state s1,
+	customer_shipping_address csa  
+	where 
+	s1.id = csa.state_id and
+	s.id = c.state_id and
+	csa.customer_id = c.id and
+	csa.def_address= 'Y' and
+	
+	c.id = 'undefined' and
+	c.center_id = '2' 
