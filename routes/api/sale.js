@@ -346,22 +346,23 @@ function processItems(cloneReq, newPK) {
 			 where product_id = '${k.product_id}' and id = '${k.stock_pk}'  `;
 
 				let stockTblPromise = new Promise(function (resolve, reject) {
-					pool.query(query2, function (err, data) {
+					pool.query(query2, function (err, stockupdatedata) {
 						if (err) {
 							reject(err);
 						}
-						resolve(data);
+						resolve(stockupdatedata);
 					});
 				});
 
 				let productTblPromise = new Promise(function (resolve, reject) {
 					// update current stock in product tables
-					let query300 = ` update product set currentstock = (select sum(available_stock) from stock where product_id = '${k.product_id}')`;
-					pool.query(query300, function (err, data) {
+					let query300 = ` update product set currentstock = (select sum(available_stock) from stock where product_id = '${k.product_id}' and id = '${k.stock_pk}')`;
+					console.log("print dinesh" + query300);
+					pool.query(query300, function (err, productupdatedata) {
 						if (err) {
 							reject(err);
 						}
-						resolve(data);
+						resolve(productupdatedata);
 					});
 				});
 				insertItemHistory(k, newPK, data.insertId, cloneReq);

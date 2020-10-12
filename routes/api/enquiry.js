@@ -8,6 +8,8 @@ var pool = require("./../helpers/db");
 const moment = require("moment");
 const logger = require("../../routes/helpers/log4js");
 
+const { insertEnquiryDetail } = require("../modules/enquiry/enquiry");
+
 enquiryRoute.post("/draft-enquiry", (req, res) => {
 	let jsonObj = req.body;
 
@@ -276,7 +278,7 @@ enquiryRoute.post("/insert-enquiry-details", (req, res) => {
 	let query = `INSERT INTO enquiry ( center_id, customer_id, enquiry_date, estatus, remarks) 
 							values ( '${jsonObj.center_id}', '${jsonObj.customerctrl.id}', '${today}', 'O','${jsonObj.remarks}')`;
 
-	pool.query(query, function (err, data) {
+	pool.query(query, async function (err, data) {
 		if (err) {
 			logger.debug.debug("error insert enquiry details..step1...", JSON.stringify(err));
 			console.log("error insert enquiry details.CL.step1..", JSON.stringify(err));
@@ -286,30 +288,61 @@ enquiryRoute.post("/insert-enquiry-details", (req, res) => {
 
 			const prodArr = jsonObj["productarr"];
 			// prodArr.reverse();
-			logger.debug.debug("TCL: prodArr", prodArr);
+			logger.debug.debug("PRINT ENQUIRY ARRAY LIST >> ", prodArr);
 
-			prodArr.forEach(function (k) {
-				logger.debug.debug(".........xx..." + k.notes);
-				let query1 = `INSERT INTO enquiry_detail ( enquiry_id, product_id, askqty, product_code, notes, status)
-							values ( '${tmpid}', (select id from product where product_code='${k.product_code}' and center_id = '${jsonObj.center_id}'), '${k.quantity}', '${k.product_code}', '${k.notes}', 'O')`;
-				pool.query(query1, function (err, data) {
+			// for (const file of files) {
+			// 	const contents = await fs.readFile(file, 'utf8');
+			// 	console.log(contents);
+			// }
+
+			for (const k of prodArr) {
+				await insertEnquiryDetail(k, jsonObj, tmpid, (err, data) => {
 					if (err) {
-						logger.debug.debug("error insert enquiry details....");
-						console.log("error insert enquiry details.CL..", JSON.stringify(err));
-						return handleError(new ErrorHandler("500", "error insert enquiry details...."), res);
+						let errTxt = err.message;
+						logger.debug.debug("error in enquiry details insert >> ", errTxt);
+						return handleError(new ErrorHandler("500", "error in enquiry details insert."), res);
 					} else {
+						let newPK = data.insertId;
+						// do nothing...
 					}
 				});
 
-				count++; // <<=== increment count
-				//
+				count++;
 				if (count === prodArr.length) {
-					// and then test if all done
 					res.json({
 						result: "success",
 					});
 				}
-			});
+
+				// logger.debug.debug(" CHECK ORDER OR ARRAY LOOPING ...xx..." + k.notes);
+				// let query1 = `INSERT INTO enquiry_detail ( enquiry_id, product_id, askqty, product_code, notes, status)
+				// 			values ( '${tmpid}', (select id from product where product_code='${k.product_code}' and center_id = '${jsonObj.center_id}'), '${k.quantity}', '${k.product_code}', '${k.notes}', 'O')`;
+				// logger.debug.debug(" CHECK ORDER OR ARRAY LOOPING ...xx..QRY..." + query1);
+
+				// const { data } = await new Promise((resolve, reject) =>
+				// 	setTimeout(
+				// 		() =>
+				// 			resolve(
+				// 				pool.query(query1, function (err, data) {
+				// 					if (err) {
+				// 						console.log("error insert enquiry details.CL..", JSON.stringify(err));
+				// 						return handleError(new ErrorHandler("500", "error insert enquiry details...."), res);
+				// 					} else {
+				// 						logger.debug.debug("INQUIRY DETAIL INSERTED SUCCESS...." + data.insertId);
+				// 					}
+				// 				}),
+				// 			),
+				// 		1000,
+				// 	),
+				// );
+
+				// count++;
+				// if (count === prodArr.length) {
+				// 	res.json({
+				// 		result: "success",
+				// 	});
+				// }
+			}
 		}
 	});
 });
