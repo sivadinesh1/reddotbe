@@ -540,6 +540,47 @@ from
 	});
 });
 
+enquiryRoute.get("/get-enquiry-master/:enqid", (req, res) => {
+	let enqid = req.params.enqid;
+	logger.debug.debug("enqid >> ", enqid);
+
+	let sql = `
+	select 
+	e.id as enqid,
+	e.enquiry_date as enquiry_date,
+	e.estatus as estatus,
+	e.sale_id as sale_id,
+	e.processed_date as processed_date,
+	c.id as customer_id,
+	 c.name as customer_name,
+	 c.address1 as address1,
+	 c.address2 as address2,
+	 c.address3 as address3,
+	 c.gst as gst,
+	 c.mobile as mobile,
+	 c.credit_amt,
+	 csa.address1 as csa_address1,
+	 csa.address2 as csa_address2
+	from enquiry e,
+	customer c,
+	customer_shipping_address csa
+	where 
+	c.id = e.customer_id and
+	csa.customer_id = c.id and
+	e.id = ${enqid}	
+
+	`;
+	//	logger.debug.debug("get enq details " + sql);
+
+	pool.query(sql, function (err, data) {
+		if (err) {
+			return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
+		} else {
+			return res.json(data);
+		}
+	});
+});
+
 enquiryRoute.get("/get-customer-data/:enqid", (req, res) => {
 	let enqid = req.params.enqid;
 
