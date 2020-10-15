@@ -413,7 +413,7 @@ enquiryRoute.post("/insert-enquiry-details", (req, res) => {
 
 enquiryRoute.post("/add-more-enquiry-details", (req, res) => {
 	let jsonObj = req.body;
-
+	// console.log("dinesh >> " + JSON.stringify(jsonObj));
 	var today = new Date();
 	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
 
@@ -425,9 +425,11 @@ enquiryRoute.post("/add-more-enquiry-details", (req, res) => {
 	prodArr.forEach(function (k) {
 		logger.debug.debug(".........xx..." + k.notes);
 		let query1 = `INSERT INTO enquiry_detail ( enquiry_id, product_id, askqty, product_code, notes, status)
-							values ( '${req.body.enquiry_id}', (select id from product where product_code='${k.product_code}'), '${k.quantity}', '${k.product_code}', '${k.notes}', 'O')`;
+							values ( '${req.body.enquiry_id}', (select id from product where product_code='${k.product_code}' and center_id = '${jsonObj.centerid}'), '${k.quantity}', '${k.product_code}', '${k.notes}', 'O')`;
+		console.log("enquiry dinesh test >> " + query1);
 		pool.query(query1, function (err, data) {
 			if (err) {
+				console.log("error : enquiry dinesh test >> " + JSON.stringify(err));
 				return handleError(new ErrorHandler("500", "Error add-more-enquiry-details."), res);
 			} else {
 				let tmpid = data.insertId;
