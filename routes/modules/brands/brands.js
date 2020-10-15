@@ -43,7 +43,7 @@ const getAllBrands = (center_id, status, callback) => {
 };
 
 const getBrandsMissingDiscountsByCustomer = (center_id, status, customer_id, callback) => {
-	let query = `select b.id, b.name from brand b where b.id not in 
+	let query = `select b.id, b.name from brand b where b.center_id = '${center_id}' and b.id not in 
 						(select distinct d.brand_id 
 						from 
 						discount d
@@ -51,7 +51,7 @@ const getBrandsMissingDiscountsByCustomer = (center_id, status, customer_id, cal
 						b.center_id = '${center_id}' and isactive = '${status}' and
 						d.customer_id = '${customer_id}'
 						) order by b.name`;
-
+	console.log("test.. " + query);
 	pool.query(query, function (err, data) {
 		if (err) return callback(err);
 		return callback(null, data);
