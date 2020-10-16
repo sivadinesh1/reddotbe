@@ -333,7 +333,9 @@ function processItems(cloneReq, newPK) {
 												where
 												id = '${k.sale_det_id}' `;
 
-		logger.debug.debug("object" + insQuery100);
+		logger.debug.debug("insQuery100....." + insQuery100);
+		logger.debug.debug("upQuery100 ....." + insQuery100);
+
 		let saleTblPromise = new Promise(function (resolve, reject) {
 			pool.query(k.sale_det_id === "" ? insQuery100 : upQuery100, function (err, data) {
 				if (err) {
@@ -357,7 +359,7 @@ function processItems(cloneReq, newPK) {
 				let productTblPromise = new Promise(function (resolve, reject) {
 					// update current stock in product tables
 					let query300 = ` update product set currentstock = (select sum(available_stock) from stock where product_id = '${k.product_id}' and id = '${k.stock_pk}')`;
-					console.log("print dinesh" + query300);
+					//	console.log("print dinesh" + query300);
 					pool.query(query300, function (err, productupdatedata) {
 						if (err) {
 							reject(err);
@@ -365,7 +367,12 @@ function processItems(cloneReq, newPK) {
 						resolve(productupdatedata);
 					});
 				});
-				insertItemHistory(k, newPK, data.insertId, cloneReq);
+
+				// its a hack to avoid data.insertid fix it
+				if (data != null || data != undefined) {
+					insertItemHistory(k, newPK, data.insertId, cloneReq);
+				}
+
 				resolve(data);
 			});
 		});
