@@ -49,14 +49,14 @@ function purchaseMasterEntry(cloneReq) {
 	let insQry = `
 			INSERT INTO purchase ( center_id, vendor_id, invoice_no, invoice_date, lr_no, lr_date, received_date, 
 			purchase_type, order_no, order_date, total_qty, no_of_items, taxable_value, cgst, sgst, igst, 
-			total_value, transport_charges, unloading_charges, misc_charges, net_total, no_of_boxes, status, stock_inwards_datetime)
+			total_value, transport_charges, unloading_charges, misc_charges, net_total, no_of_boxes, status, stock_inwards_datetime, roundoff)
 			VALUES
 			( '${cloneReq.centerid}', '${cloneReq.vendorctrl.id}', '${cloneReq.invoiceno}', '${invoicedate}', '${cloneReq.lrno}', '${lrdate}', 
 			'${orderrcvddt}', 'GST Inovoice', '${cloneReq.orderno}', '${orderdate}', 
 			'${cloneReq.totalqty}', '${cloneReq.noofitems}', '${cloneReq.taxable_value}', '${cloneReq.cgst}', 
 			'${cloneReq.sgst}', '${cloneReq.igst}', '${cloneReq.totalvalue}', '${cloneReq.transport_charges}', 
 			'${cloneReq.unloading_charges}', '${cloneReq.misc_charges}', '${cloneReq.net_total}', 
-			'${cloneReq.noofboxes}', '${cloneReq.status}' , '${today}' )`;
+			'${cloneReq.noofboxes}', '${cloneReq.status}' , '${today}', '${cloneReq.roundoff}' )`;
 
 	let updQry = ` update purchase set center_id = '${cloneReq.centerid}', vendor_id = '${cloneReq.vendorctrl.id}',
 			invoice_no = '${cloneReq.invoiceno}', invoice_date = '${moment(cloneReq.invoicedate).format("DD-MM-YYYY")}', lr_no = '${cloneReq.lrno}',
@@ -66,7 +66,7 @@ function purchaseMasterEntry(cloneReq) {
 			sgst = '${cloneReq.sgst}', igst = '${cloneReq.igst}', total_value = '${cloneReq.totalvalue}', 
 			transport_charges = '${cloneReq.transport_charges}', unloading_charges = '${cloneReq.unloading_charges}', 
 			misc_charges = '${cloneReq.misc_charges}', net_total = '${cloneReq.net_total}', no_of_boxes = '${cloneReq.noofboxes}',
-			status =  '${cloneReq.status}', stock_inwards_datetime =  '${today}' where id = '${cloneReq.purchaseid}' `;
+			status =  '${cloneReq.status}', stock_inwards_datetime =  '${today}', roundoff = '${cloneReq.roundoff}' where id = '${cloneReq.purchaseid}' `;
 
 	logger.debug.debug("dinesh " + updQry);
 

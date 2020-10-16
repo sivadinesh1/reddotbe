@@ -150,7 +150,7 @@ saleRouter.post("/insert-sale-details", async (req, res) => {
 			logger.debug.debug("New PK" + newPK);
 
 			// if sale came from enquiry, then update the enq table with the said id {status = E (executed)}
-			if (cloneReq.enqref !== 0) {
+			if (cloneReq.enqref !== 0 && cloneReq.enqref !== null) {
 				await updateEnquiry(newPK, cloneReq.enqref);
 			}
 
@@ -266,7 +266,7 @@ function saleMasterEntry(cloneReq, invNo) {
 	let insQry = `
 			INSERT INTO sale (center_id, customer_id, invoice_no, invoice_date, order_no, order_date, 
 			lr_no, lr_date, sale_type,  total_qty, no_of_items, taxable_value, cgst, sgst, igst, 
-			total_value, net_total, transport_charges, unloading_charges, misc_charges, status, sale_datetime)
+			total_value, net_total, transport_charges, unloading_charges, misc_charges, status, sale_datetime, roundoff)
 			VALUES
 			('${cloneReq.center_id}', '${cloneReq.customerctrl.id}', 
 			'${invNo}',
@@ -274,7 +274,7 @@ function saleMasterEntry(cloneReq, invNo) {
 	 '${cloneReq.invoicetype}','${cloneReq.totalqty}', 
 			'${cloneReq.noofitems}', '${cloneReq.taxable_value}', '${cloneReq.cgst}', '${cloneReq.sgst}', '${cloneReq.igst}', '${cloneReq.totalvalue}', 
 			'${cloneReq.net_total}', '${cloneReq.transport_charges}', '${cloneReq.unloading_charges}', '${cloneReq.misc_charges}', '${cloneReq.status}',
-			'${moment().format("DD-MM-YYYY")}'
+			'${moment().format("DD-MM-YYYY")}', '${cloneReq.roundoff}'
 			)`;
 
 	let upQry = `
@@ -284,7 +284,7 @@ function saleMasterEntry(cloneReq, invNo) {
 			taxable_value = '${cloneReq.taxable_value}', cgst = '${cloneReq.cgst}', sgst = '${cloneReq.sgst}', igst = '${cloneReq.igst}',
 			total_value = '${cloneReq.totalvalue}', net_total = '${cloneReq.net_total}', transport_charges = '${cloneReq.transport_charges}', 
 			unloading_charges = '${cloneReq.unloading_charges}', misc_charges = '${cloneReq.misc_charges}', status = '${cloneReq.status}',
-			sale_datetime = '${moment().format("DD-MM-YYYY")}', revision = '${revisionCnt}'
+			sale_datetime = '${moment().format("DD-MM-YYYY")}', revision = '${revisionCnt}', roundoff = '${cloneReq.roundoff}'
 			where id= '${cloneReq.salesid}' `;
 
 	return new Promise(function (resolve, reject) {

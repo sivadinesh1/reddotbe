@@ -323,6 +323,8 @@ function generateInvoiceTable(doc, salemasterdata, saledetailsdata) {
 	}
 
 	saledetailsdata.forEach(function (k, idx) {
+		console.log("dinesh **  " + JSON.stringify(k));
+
 		if (idx === 0) {
 			invoiceTableTop = invoiceTableTop + 16;
 		} else {
@@ -728,7 +730,7 @@ function generateSummaryLeft(doc, saledetailsdata, isIGST, salemasterdata) {
 
 function numberToText(doc, finalTotalAllTax, start) {
 	doc.font("Helvetica-Bold");
-	doc.fontSize(9).text(number2text(finalTotalAllTax), 24, start + 125, {
+	doc.fontSize(9).text(number2text(roundOffFn(finalTotalAllTax, "rounding")), 24, start + 125, {
 		align: "left",
 	});
 	doc.font("Helvetica");
@@ -1150,28 +1152,31 @@ function generateSummaryRightTableRow(doc, y, subtotal, discount, sgst, cgst, fi
 	}
 
 	doc
-		.text("Cr/Dr NOTE", 460, y + 60, { width: 70, align: "left" })
+		.text("Misc.", 460, y + 60, { width: 70, align: "left" })
 
-		.text((0.0).toFixed(2), 510, y + 60, { width: 70, align: "right" })
+		.text((+(+salemasterdata.transport_charges + +salemasterdata.unloading_charges + +salemasterdata.misc_charges)).toFixed(2), 510, y + 60, {
+			width: 70,
+			align: "right",
+		});
 
-		.text("Misc.", 460, y + 75, { width: 70, align: "left" })
+	let finalSumTotal = +(+finalTotalAllTax + +salemasterdata.transport_charges + +salemasterdata.unloading_charges + +salemasterdata.misc_charges);
 
-		.text((+(+salemasterdata.transport_charges + +salemasterdata.unloading_charges + +salemasterdata.misc_charges)).toFixed(2), 510, y + 75, {
+	doc
+		.text("ROUNDED OFF", 460, y + 75, { width: 70, align: "left" })
+
+		.text((roundOffFn(finalSumTotal, "rounding") - roundOffFn(finalSumTotal, "withoutrounding")).toFixed(2), 510, y + 75, {
+			width: 70,
+			align: "right",
+		});
+
+	doc.font("Helvetica-Bold");
+	doc
+		.text("TOTAL", 460, y + 95, { width: 70, align: "left" })
+
+		.text(roundOffFn(finalSumTotal, "rounding"), 510, y + 95, {
 			width: 70,
 			align: "right",
 		})
-		.font("Helvetica-Bold")
-		.text("TOTAL", 460, y + 95, { width: 70, align: "left" })
-
-		.text(
-			(+(+finalTotalAllTax + +salemasterdata.transport_charges + +salemasterdata.unloading_charges + +salemasterdata.misc_charges)).toFixed(2),
-			510,
-			y + 95,
-			{
-				width: 70,
-				align: "right",
-			},
-		)
 		.font("Helvetica");
 }
 
@@ -1229,6 +1234,14 @@ function getSumByTotalByPercent(dataArr, tax_percent) {
 		.reduce((a, c) => {
 			return a + c.total_value;
 		}, 0);
+}
+
+function roundOffFn(value, param) {
+	if (param === "rounding") {
+		return Math.round(+value.toFixed(2));
+	} else if (param === "withoutrounding") {
+		return +value.toFixed(2);
+	}
 }
 
 module.exports = {
