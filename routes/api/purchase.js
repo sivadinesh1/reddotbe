@@ -73,8 +73,8 @@ function purchaseMasterEntry(cloneReq) {
 	return new Promise(function (resolve, reject) {
 		pool.query(cloneReq.purchaseid === "" ? insQry : updQry, function (err, data) {
 			if (err) {
-				logger.debug.debug("print error 1 " + err);
-				return reject(err);
+				logger.debug.debug("Error Purchase master entry. " + JSON.stringify(err));
+				return reject(new ErrorHandler("500", "Error Purchase master entry."), res);
 			}
 			if (cloneReq.purchaseid === "") {
 				newPK = data.insertId;
@@ -103,7 +103,8 @@ function processItems(cloneReq, newPK) {
 		new Promise(function (resolve, reject) {
 			pool.query(k.pur_det_id === "" ? insQuery1 : updQuery1, function (err, data) {
 				if (err) {
-					reject(err);
+					logger.debug.debug("Error Purchase master entry. " + JSON.stringify(err));
+					return reject(new ErrorHandler("500", "Error Purchase master entry."), res);
 				} else {
 					updateLatestPurchasePrice(k);
 
@@ -152,7 +153,7 @@ function insertStock(k, pdetailid) {
 
 			update purchase_detail set stock_id =  '${data.insertId}'
 			where id  = '${pdetailid}' `;
-			logger.debug.debug("dinesh *** " + query3);
+
 			pool.query(query3, function (err, data) {
 				if (err) {
 					logger.debug.debug("object" + err);

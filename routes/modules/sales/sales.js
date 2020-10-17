@@ -33,7 +33,6 @@ function getSalesDetails(sales_id) {
 			if (err) {
 				reject(err);
 			}
-			console.log("print again " + JSON.stringify(data));
 			resolve(data);
 		});
 	});

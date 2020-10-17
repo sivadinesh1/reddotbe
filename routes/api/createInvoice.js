@@ -17,24 +17,32 @@ function createInvoice(saleMaster, saleDetails, customerDetails, centerDetails, 
 	let customerdata = customerDetails[0];
 	let salemasterdata = saleMaster[0];
 	let saledetailsdata = saleDetails;
-	// {'page-size':'A4', 'dpi':400}
-	// options = { 'disable-smart-shrinking': ''}
+	res.contentType("application/pdf");
+
 	let doc = new PDFDocument({
 		"page-size": "A4",
 		dpi: 400,
 		margin: 24,
+		autoFirstPage: false,
 		layout: "portrait", // can be 'landscape'
 	});
-	doc.font("Helvetica");
-	generateHeader(doc, centerdata, print_type);
-	generateCustomerInformation(doc, customerdata, salemasterdata);
-	generateInvoiceTable(doc, salemasterdata, saledetailsdata);
-	generateFooterSummary(doc, centerdata);
 
-	doc.end();
-	doc.pipe(fs.createWriteStream(path));
+	// first check if print_type is an array
+	if (Array.isArray(print_type)) {
+		// loop through the different print types and add pages and send response
+		print_type.forEach((e) => {
+			doc.addPage();
+			doc.font("Helvetica");
+			generateHeader(doc, centerdata, e);
+			generateCustomerInformation(doc, customerdata, salemasterdata);
+			generateInvoiceTable(doc, salemasterdata, saledetailsdata);
+			generateFooterSummary(doc, centerdata);
 
-	var stream = doc.pipe(blobStream());
+			//		doc[counter].pipe(fs.createWriteStream(path));
+		});
+	}
+
+	//	var stream = doc.pipe(blobStream());
 	// stream.on("finish", function() {
 
 	// get a blob you can do whatever you like with
@@ -48,8 +56,8 @@ function createInvoice(saleMaster, saleDetails, customerDetails, centerDetails, 
 	// res.send(url);
 	// });
 
-	res.contentType("application/pdf");
-
+	// pipe the resposne
+	doc.end();
 	doc.pipe(res);
 }
 
@@ -121,7 +129,7 @@ function generateCustomerInformation(doc, customerdata, salemasterdata) {
 
 	doc
 		.text("State: " + customerdata.code + "-" + customerdata.description, 40, 181)
-		.text("Phone: " + customerdata.phone + " " + customerdata.gst, 40, 196)
+		.text("Phone: " + customerdata.mobile + " " + customerdata.gst, 40, 196)
 		.moveDown();
 
 	// line end of customer section
@@ -323,8 +331,6 @@ function generateInvoiceTable(doc, salemasterdata, saledetailsdata) {
 	}
 
 	saledetailsdata.forEach(function (k, idx) {
-		console.log("dinesh **  " + JSON.stringify(k));
-
 		if (idx === 0) {
 			invoiceTableTop = invoiceTableTop + 16;
 		} else {
@@ -575,11 +581,11 @@ function generateSummaryLeft(doc, saledetailsdata, isIGST, salemasterdata) {
 	let sum_CGST_28 = getSumByTaxtypeAndTaxPercent(saledetailsdata, "CGST", 28).toFixed(2);
 	let sum_IGST_28 = getSumByTaxtypeAndTaxPercent(saledetailsdata, "IGST", 28).toFixed(2);
 
-	let GST_0 = +sum_SGST_0 + +sum_CGST_0 + +sum_IGST_0;
-	let GST_5 = +sum_SGST_5 + +sum_CGST_5 + +sum_IGST_5;
-	let GST_12 = +sum_SGST_12 + +sum_CGST_12 + +sum_IGST_12;
-	let GST_18 = +sum_SGST_18 + +sum_CGST_18 + +sum_IGST_18;
-	let GST_28 = +sum_SGST_28 + +sum_CGST_28 + +sum_IGST_28;
+	let GST_0 = +sum_SGST_0 / 2 + +sum_CGST_0 / 2 + +sum_IGST_0;
+	let GST_5 = +sum_SGST_5 / 2 + +sum_CGST_5 / 2 + +sum_IGST_5;
+	let GST_12 = +sum_SGST_12 / 2 + +sum_CGST_12 / 2 + +sum_IGST_12;
+	let GST_18 = +sum_SGST_18 / 2 + +sum_CGST_18 / 2 + +sum_IGST_18;
+	let GST_28 = +sum_SGST_28 / 2 + +sum_CGST_28 / 2 + +sum_IGST_28;
 
 	let sumDiscountPercent_0 = getSumByDiscountPercent(saledetailsdata, 0).toFixed(2);
 	let sumDiscountPercent_5 = getSumByDiscountPercent(saledetailsdata, 5).toFixed(2);
@@ -778,10 +784,10 @@ function generateFooterSummary(doc, centerdata) {
 		.text("A/C NAME          : 1121135000015560", 320, start + 10, { lineGap: 1.8 })
 		.text("A/C NO               : IFSC -KVBL0001121,", 320, start + 20, { lineGap: 1.8 });
 	doc.font("Times-BoldItalic");
-	doc.fontSize(6).text("Plz pay Cash/Cheque/DD in favour of 'THE THIRUMURUGAN TRACTOR SPARES'.", 320, start + 35, { lineGap: 1.8 });
+	doc.fontSize(6).text("Plz pay Cash/Cheque/DD in favour of 'THE THIRUMURUGAN TRACTOR SPARES'.", 320, start + 30, { lineGap: 1.4 });
 
-	doc.fontSize(7).text("For    " + centerdata.name, 330, start + 50);
-	doc.fontSize(7).text("Authorised signatory", 400, start + 70);
+	doc.fontSize(7).text("For    " + centerdata.name, 400, start + 40);
+	doc.fontSize(7).text("Authorised signatory", 400, start + 75);
 
 	//  doc.fontSize(8).text("Checked By    " + centerdata.name, 350, 680);
 	//  doc.fontSize(8).text("  E.&O.E.", 350, 700);
