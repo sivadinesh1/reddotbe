@@ -347,70 +347,6 @@ enquiryRoute.post("/insert-enquiry-details", (req, res) => {
 	});
 });
 
-// enquiryRoute.post("/add-more-enquiry-details", (req, res) => {
-// 	let jsonObj = req.body;
-
-// 	var today = new Date();
-// 	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
-
-// 	const prodArr = jsonObj["productarr"];
-// 	logger.debug.debug("TCL: prodArr", prodArr.length);
-
-// 	let newProdArr = [];
-
-// 	prodArr.forEach(function (k) {
-// 		logger.debug.debug(".........xx..." + k.notes);
-// 		let query1 = `INSERT INTO enquiry_detail ( enquiry_id, product_id, askqty, product_code, notes, status)
-// 							values ( '${req.body.enquiry_id}', (select id from product where product_code='${k.product_code}'), '${k.quantity}', '${k.product_code}', '${k.notes}', 'O')`;
-// 		pool.query(query1, function (err, data) {
-// 			if (err) {
-// 				return handleError(new ErrorHandler("500", "Error add-more-enquiry-details."), res);
-// 			} else {
-// 				let tmpid = data.insertId;
-
-// 				let sql = `
-// 				select orig.*, s.available_stock, s.id as stock_pk
-// 				from
-// 				(select ed.*, c.id as customer_id, c.name, c.address1, c.address2, c.district, c.pin, c.gst, c.mobile2, e.remarks, e.estatus,
-// 					p.id as pid, p.center_id, p.vendor_id, p.product_code as pcode, p.description as pdesc, p.unit, p.packetsize, p.hsncode,
-// 					p.currentstock, p.unit_price, p.mrp, p.purchase_price,
-// 					p.salesprice, p.rackno, p.location, p.maxdiscount, p.taxrate,
-// 					p.minqty, p.itemdiscount, p.reorderqty, p.avgpurprice,
-// 					p.avgsaleprice, p.margin
-// 					from
-// 					enquiry e,
-// 					customer c,
-// 					enquiry_detail ed
-// 					LEFT outer JOIN product p
-// 					ON p.id = ed.product_id where
-// 					e.id = ed.enquiry_id and
-// 					e.customer_id = c.id and ed.id =  ${tmpid}) as orig
-// 					LEFT outer JOIN stock s
-// 					ON orig.product_id = s.product_id and
-// 					s.mrp = orig.mrp `;
-
-// 				//		logger.debug.debug("get enq details1 " + sql);
-
-// 				pool.query(sql, function (err, data) {
-// 					if (err) {
-// 						return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
-// 					} else {
-// 						logger.debug.debug("dinesh >> " + JSON.stringify(data));
-// 						newProdArr.push(data[0]);
-// 						logger.debug.debug("pring the new prod arr " + JSON.stringify(newProdArr));
-
-// 						if (newProdArr.length === prodArr.length) {
-// 							res.json({
-// 								result: newProdArr,
-// 							});
-// 						}
-// 					}
-// 				});
-// 			}
-// 		});
-// 	});
-// });
-
 enquiryRoute.post("/add-more-enquiry-details", (req, res) => {
 	let jsonObj = req.body;
 	// console.log("dinesh >> " + JSON.stringify(jsonObj));
@@ -757,5 +693,63 @@ enquiryRoute.get("/search-enquiries/:centerid/:customerid/:status/:fromdate/:tod
 		}
 	});
 });
+
+//**** START */
+
+enquiryRoute.post("/delete-enquiry-details", async (req, res) => {
+	let id = req.body.id;
+	let enq_id = req.body.enquiry_id;
+
+	console.log("dinesh " + id + "   " + enq_id);
+
+	var today = new Date();
+	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+
+	// step 1
+	let auditQuery = `
+	INSERT INTO audit_tbl (module, module_ref_id, module_ref_det_id, actn, old_value, new_value, audit_date)
+	VALUES
+		('Enquiry', '${enq_id}', '${id}', 'delete', 
+		(SELECT CONCAT('[{', result, '}]') as final
+		FROM (
+			SELECT GROUP_CONCAT(CONCAT_WS(',', CONCAT('"saleId": ', enquiry_id), CONCAT('"productId": "', product_id, '"'), CONCAT('"askqty": "', askqty, '"')) SEPARATOR '},{') as result
+			FROM (
+				SELECT enquiry_id, product_id, askqty, notes
+				FROM enquiry_detail where id = '${id}'
+			) t1
+		) t2)
+		, '', '${today}'
+		) `;
+
+	// step 1
+	let auditPromise = await new Promise(function (resolve, reject) {
+		pool.query(auditQuery, function (err, data) {
+			if (err) {
+				logger.debug.debug("error: " + err);
+				return reject(handleError(new ErrorHandler("500", "Error adding sale audit."), res));
+			}
+			resolve(data);
+		});
+	});
+
+	// step 2
+	let deletePromise = await new Promise(function (resolve, reject) {
+		let query = `
+			delete from enquiry_detail where id = '${id}' `;
+
+		pool.query(query, function (err, data) {
+			if (err) {
+				return reject(handleError(new ErrorHandler("500", "Error deleting enquiry details"), res));
+			}
+			resolve(data);
+		});
+	});
+
+	return res.json({
+		result: "success",
+	});
+});
+
+/** END */
 
 module.exports = enquiryRoute;
