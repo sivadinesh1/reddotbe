@@ -235,11 +235,12 @@ router.get("/vendor-exists/:name", (req, res) => {
 	});
 });
 
-router.get("/brand-exists/:name", (req, res) => {
+router.get("/brand-exists/:name/:center_id", (req, res) => {
 	let name = req.params.name;
+	let center_id = req.params.center_id;
 
 	let sql = `select * from brand b where 
-	b.name = '${name}' `;
+	b.name = '${name}' and b.center_id = '${center_id}' `;
 
 	pool.query(sql, function (err, data) {
 		if (err) {
