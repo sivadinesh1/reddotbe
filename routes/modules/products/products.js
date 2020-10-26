@@ -41,8 +41,25 @@ const insertProduct = (insertValues, callback) => {
 	];
 
 	pool.query(query, values, function (err, data) {
-		if (err) return callback(err);
-		return callback(null, data);
+		if (err) {
+			return callback(err);
+		} else {
+			let upDate = new Date();
+			todayYYMMDD = moment(upDate).format("YYYY-MM-DD");
+			let query2 = `
+			insert into stock (product_id, mrp, available_stock, open_stock, updateddate)
+			values ('${data.insertId}', '${insertValues.mrp}', '${insertValues.currentstock}', '${insertValues.currentstock}' , '${todayYYMMDD}')`;
+
+			pool.query(query2, function (err, data1) {
+				if (err) {
+					logger.debug.debug("object" + err);
+					console.log("insertProduct + insert stock " + JSON.stringify(err));
+				} else {
+					logger.debug.debug("object..stock update .");
+					return callback(null, data1);
+				}
+			});
+		}
 	});
 };
 

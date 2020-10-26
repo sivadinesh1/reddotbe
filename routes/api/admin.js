@@ -79,7 +79,7 @@ adminRoute.post("/add-product", (req, res, next) => {
 				return handleError(new ErrorHandler("555", "Duplicate product code"), res);
 			}
 		} else {
-			let newPK = data.insertId;
+			//	let newPK = data.insertId;
 			return res.status(200).json({
 				result: "success",
 			});

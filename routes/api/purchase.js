@@ -103,7 +103,8 @@ function processItems(cloneReq, newPK) {
 		new Promise(function (resolve, reject) {
 			pool.query(k.pur_det_id === "" ? insQuery1 : updQuery1, function (err, data) {
 				if (err) {
-					logger.debug.debug("Error Purchase master entry. " + JSON.stringify(err));
+					logger.debug.debug("Error Purchase Details entry... processItems " + JSON.stringify(err));
+					console.log("Error Purchase Details entry... processItems " + JSON.stringify(err));
 					return reject(new ErrorHandler("500", "Error Purchase master entry."), res);
 				} else {
 					updateLatestPurchasePrice(k);
