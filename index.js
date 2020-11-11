@@ -81,7 +81,6 @@ app.get("/error", (req, res) => {
 });
 
 app.use((err, req, res) => {
-	logger.debug.debug("inside handle err");
 	handleError(err, res);
 });
 

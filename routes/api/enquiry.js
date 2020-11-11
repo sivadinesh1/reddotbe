@@ -8,7 +8,7 @@ var pool = require("./../helpers/db");
 const moment = require("moment");
 const logger = require("../../routes/helpers/log4js");
 
-const { insertEnquiryDetail } = require("../modules/enquiry/enquiry");
+const { insertEnquiryDetail, fetchEnquiryDetailByEnqId, fetchCustomerDetailsByEnqId } = require("../modules/enquiry/enquiry");
 
 enquiryRoute.post("/draft-enquiry", (req, res) => {
 	let jsonObj = req.body;
@@ -74,13 +74,10 @@ enquiryRoute.post("/draft-enquiry", (req, res) => {
 enquiryRoute.post("/move-to-sale", (req, res) => {
 	let jsonObj = req.body;
 
-	logger.debug.debug("object>>> move-to-sale");
 	let today = new Date();
-
 	let now = new Date();
 
 	today = moment(today).format("DD-MM-YYYY");
-
 	now = moment(now).format("YYYY-MM-DD HH:mm:ss");
 
 	var objectKeysArray = Object.keys(jsonObj);
@@ -90,8 +87,8 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 
 		logger.debug.debug("(objValue.product_id " + objValue.product_id);
 
+		/** No Product Id, obviously its a backorder */
 		if (objValue.product_id === "" || objValue.product_id === null) {
-			logger.debug.debug("this is a back order ");
 			// b - full back order
 			// updt enq_det_tbl status as B , giveqty = 0
 			// insert backorder tbl with reason prodcut code not found
@@ -104,8 +101,7 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 
 			pool.query(upQuery, function (err, data) {
 				if (err) {
-					logger.debug.debug("error update enquiry detai" + JSON.stringify(err));
-					return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
+					return handleError(new ErrorHandler("500", "Error Updating move to sale. Backorder failure"), res);
 				}
 			});
 
@@ -118,11 +114,43 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 					return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
 				}
 			});
-		}
+		} else if (objValue.askqty > objValue.giveqty && objValue.giveqty === 0) {
+			// item code is present but given qty is 0, so effectively this goes in to backorder straight
 
-		if (objValue.askqty > objValue.giveqty) {
-			//p- partial fullfilment
-			// updt enq_det_tbl status as P, give qty = actual given
+			const bqty = objValue.askqty - objValue.giveqty;
+
+			let upQuery1 = `update enquiry_detail
+			set
+			product_id = '${objValue.product_id}',
+			stock_id = '${objValue.stockid}',
+			giveqty = '${objValue.giveqty}',
+			processed = '${objValue.processed}',
+			status = 'B'
+			where id = '${objValue.id}' `;
+
+			logger.debug.debug("object upQuery1 a> g " + upQuery1);
+
+			pool.query(upQuery1, function (err, data) {
+				if (err) {
+					console.log("error update enquiry detai.... partial fullfilment..." + JSON.stringify(err));
+					return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
+				}
+			});
+
+			let insQry2 = `INSERT INTO backorder (center_id, customer_id, enquiry_detail_id, qty, reason, status, order_date)
+			VALUES ('${objValue.center_id}', '${objValue.customer_id}', '${objValue.id}', '${bqty}', 'Zero Quantity Alloted', 'O', '${today}') `;
+
+			logger.debug.debug("object insQry2 a>g " + insQry2);
+
+			pool.query(insQry2, function (err, data) {
+				if (err) {
+					logger.debug.debug("object insQry2 a>g >>>>>>>> " + +JSON.stringify(err));
+					return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
+				}
+			});
+		} else if (objValue.askqty > objValue.giveqty && objValue.giveqty !== 0) {
+			// p - partial fullfilment, customer asks 100 Nos, given 50 Nos
+			// updt enq_det_tbl status as P (Partial), give qty = actual given
 			// insert backorder tbl with reason Partial fullfillmeent
 
 			const bqty = objValue.askqty - objValue.giveqty;
@@ -140,13 +168,13 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 
 			pool.query(upQuery1, function (err, data) {
 				if (err) {
-					logger.debug.debug("error update enquiry detai.... partial fullfilment..." + JSON.stringify(err));
+					console.log("error update enquiry detai.... partial fullfilment..." + JSON.stringify(err));
 					return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
 				}
 			});
 
-			let insQry2 = `INSERT INTO backorder (center_id, enquiry_detail_id, qty, reason, status, order_date)
-			VALUES ('${objValue.center_id}', '${objValue.id}', '${bqty}', 'Partial fullfillmeent', 'O', '${today}') `;
+			let insQry2 = `INSERT INTO backorder (center_id, customer_id, enquiry_detail_id, qty, reason, status, order_date)
+			VALUES ('${objValue.center_id}', '${objValue.customer_id}', '${objValue.id}', '${bqty}', 'Partial fullfillmeent', 'O', '${today}') `;
 
 			logger.debug.debug("object insQry2 a>g " + insQry2);
 
@@ -156,9 +184,7 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 					return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
 				}
 			});
-		}
-
-		if (objValue.giveqty >= objValue.askqty && objValue.product_id !== "" && objValue.product_id !== null) {
+		} else if (objValue.giveqty >= objValue.askqty && objValue.product_id !== "" && objValue.product_id !== null) {
 			// F- fullfilled
 			// updt enq_det_tbl status as F, give qty = actual given
 
@@ -440,42 +466,49 @@ enquiryRoute.get("/open-enquiries/:centerid/:status", (req, res) => {
 	});
 });
 
-enquiryRoute.get("/get-enquiry-details/:enqid", (req, res) => {
+enquiryRoute.get("/get-enquiry-details/:enqid", async (req, res) => {
 	let enqid = req.params.enqid;
 	logger.debug.debug("TCL: enqid", enqid);
+	let enquiryDetails;
+	let customerDetails;
+	// let sql = `
 
-	let sql = `
-	
-
-select orig.*, s.available_stock, s.id as stock_pk
-from
-(select ed.*, c.id as customer_id, c.name, c.address1, c.address2, c.district, c.pin, c.gst, c.mobile2, e.remarks, e.estatus,
-	p.id as pid, p.center_id, p.brand_id, p.product_code as pcode, p.description as pdesc, p.unit, p.packetsize, p.hsncode,
-	p.currentstock, p.unit_price, p.mrp, p.purchase_price,
-	p.salesprice, p.rackno, p.location, p.maxdiscount, p.taxrate, 
-	p.minqty, p.itemdiscount, p.reorderqty, p.avgpurprice,
-	p.avgsaleprice, p.margin
-	from 
-	enquiry e,
-	customer c,
-	enquiry_detail ed
-	LEFT outer JOIN product p
-	ON p.id = ed.product_id where
-	e.id = ed.enquiry_id and
-	e.customer_id = c.id and e.id =  ${enqid}) as orig
-	LEFT outer JOIN stock s
-	ON orig.product_id = s.product_id and
-	s.mrp = orig.mrp
-	`;
+	// `;
 	//	logger.debug.debug("get enq details " + sql);
 
-	pool.query(sql, function (err, data) {
+	// console.log("get enq details " + sql);
+
+	// pool.query(sql, function (err, data) {
+	// 	if (err) {
+	// 		return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
+	// 	} else {
+	// 		return res.json(data);
+	// 	}
+	// });
+
+	await fetchEnquiryDetailByEnqId(enqid, (err, data) => {
 		if (err) {
-			return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
+			let errTxt = err.message;
+			logger.debug.debug("error in enquiry details insert >> ", errTxt);
+			return handleError(new ErrorHandler("500", "error in fetch enquiry details ."), res);
 		} else {
-			return res.json(data);
+			enquiryDetails = data;
+			// do nothing...
 		}
 	});
+
+	await fetchCustomerDetailsByEnqId(enqid, (err, data) => {
+		if (err) {
+			let errTxt = err.message;
+			logger.debug.debug("error in enquiry details insert >> ", errTxt);
+			return handleError(new ErrorHandler("500", "error in fetch enquiry details ."), res);
+		} else {
+			customerDetails = data;
+			// do nothing...
+		}
+	});
+
+	return res.json({ enquiryDetails: enquiryDetails, customerDetails: customerDetails });
 });
 
 enquiryRoute.get("/get-enquiry-master/:enqid", (req, res) => {
