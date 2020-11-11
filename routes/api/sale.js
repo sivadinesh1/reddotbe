@@ -314,9 +314,10 @@ function updateEnquiry(newPK, enqref) {
 	});
 }
 
-function processItems(cloneReq, newPK) {
-	// if sale master insert success, then insert in invoice details.
-	cloneReq.productarr.forEach(function (k) {
+async function processItems(cloneReq, newPK) {
+	// if sale master insert success, then insert in sale details.
+
+	for (const k of cloneReq.productarr) {
 		let insQuery100 = `INSERT INTO sale_detail(sale_id, product_id, qty, disc_percent, disc_value, disc_type, unit_price, mrp, batchdate, tax,
 												igst, cgst, sgst, taxable_value, total_value, stock_id) VALUES
 												( '${newPK}', '${k.product_id}', '${k.qty}', '${k.disc_percent}', '${k.disc_value}', '${k.disc_type}', '${
@@ -333,10 +334,7 @@ function processItems(cloneReq, newPK) {
 												where
 												id = '${k.sale_det_id}' `;
 
-		logger.debug.debug("insQuery100....." + insQuery100);
-		logger.debug.debug("upQuery100 ....." + insQuery100);
-
-		let saleTblPromise = new Promise(function (resolve, reject) {
+		let saleTblPromise = await new Promise(function (resolve, reject) {
 			pool.query(k.sale_det_id === "" ? insQuery100 : upQuery100, function (err, data) {
 				if (err) {
 					reject(err);
@@ -376,7 +374,7 @@ function processItems(cloneReq, newPK) {
 				resolve(data);
 			});
 		});
-	});
+	}
 }
 
 // saleRouter.post("/convert-sale/:center_id/:sales_id/:oldinvoiceno", async (req, res) => {

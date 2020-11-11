@@ -614,8 +614,9 @@ function generateSummaryLeft(doc, saledetailsdata, isIGST, salemasterdata) {
 	let subtotalAllTax = +sumTaxablePercent_0 + +sumTaxablePercent_5 + +sumTaxablePercent_12 + +sumTaxablePercent_18 + +sumTaxablePercent_28;
 	let discountAllTax = +sumDiscountPercent_0 + +sumDiscountPercent_5 + +sumDiscountPercent_12 + +sumDiscountPercent_18 + +sumDiscountPercent_28;
 	let totalAllTax = +sumTotalPercent_0 + +sumTotalPercent_5 + +sumTotalPercent_12 + +sumTotalPercent_18 + +sumTotalPercent_28;
-	let SGSTAllTax = +sum_SGST_0 + +sum_SGST_5 + +sum_SGST_12 + +sum_SGST_18 + +sum_SGST_28;
-	let CGSTAllTax = +sum_CGST_0 + +sum_CGST_5 + +sum_CGST_12 + +sum_CGST_18 + +sum_CGST_28;
+
+	let SGSTAllTax = +sum_SGST_0 / 2 + +sum_SGST_5 / 2 + +sum_SGST_12 / 2 + +sum_SGST_18 / 2 + +sum_SGST_28 / 2;
+	let CGSTAllTax = +sum_CGST_0 / 2 + +sum_CGST_5 / 2 + +sum_CGST_12 / 2 + +sum_CGST_18 / 2 + +sum_CGST_28 / 2;
 	let IGSTAllTax = +sum_IGST_0 + +sum_IGST_5 + +sum_IGST_12 + +sum_IGST_18 + +sum_IGST_28;
 
 	let finalTotalAllTax = +sumTotalPercent_0 + +sumTotalPercent_5 + +sumTotalPercent_12 + +sumTotalPercent_18 + +sumTotalPercent_28;
@@ -708,8 +709,8 @@ function generateSummaryLeft(doc, saledetailsdata, isIGST, salemasterdata) {
 		discountAllTax,
 		subtotalAllTax,
 
-		SGSTAllTax,
-		CGSTAllTax,
+		SGSTAllTax * 2,
+		CGSTAllTax * 2,
 		SGSTAllTax + CGSTAllTax + IGSTAllTax,
 		finalTotalAllTax,
 		isIGST,

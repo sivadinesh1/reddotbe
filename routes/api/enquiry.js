@@ -339,35 +339,6 @@ enquiryRoute.post("/insert-enquiry-details", (req, res) => {
 						result: "success",
 					});
 				}
-
-				// logger.debug.debug(" CHECK ORDER OR ARRAY LOOPING ...xx..." + k.notes);
-				// let query1 = `INSERT INTO enquiry_detail ( enquiry_id, product_id, askqty, product_code, notes, status)
-				// 			values ( '${tmpid}', (select id from product where product_code='${k.product_code}' and center_id = '${jsonObj.center_id}'), '${k.quantity}', '${k.product_code}', '${k.notes}', 'O')`;
-				// logger.debug.debug(" CHECK ORDER OR ARRAY LOOPING ...xx..QRY..." + query1);
-
-				// const { data } = await new Promise((resolve, reject) =>
-				// 	setTimeout(
-				// 		() =>
-				// 			resolve(
-				// 				pool.query(query1, function (err, data) {
-				// 					if (err) {
-				// 						console.log("error insert enquiry details.CL..", JSON.stringify(err));
-				// 						return handleError(new ErrorHandler("500", "error insert enquiry details...."), res);
-				// 					} else {
-				// 						logger.debug.debug("INQUIRY DETAIL INSERTED SUCCESS...." + data.insertId);
-				// 					}
-				// 				}),
-				// 			),
-				// 		1000,
-				// 	),
-				// );
-
-				// count++;
-				// if (count === prodArr.length) {
-				// 	res.json({
-				// 		result: "success",
-				// 	});
-				// }
 			}
 		}
 	});

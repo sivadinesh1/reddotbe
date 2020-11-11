@@ -38,7 +38,25 @@ function getSalesDetails(sales_id) {
 	});
 }
 
+const insertSaleDetails = (k, callback) => {
+	var today = new Date();
+	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+
+	let query = `INSERT INTO enquiry_detail ( enquiry_id, product_id, askqty, product_code, notes, status)
+        values ( '${tmpid}', (select id from product where product_code='${k.product_code}' and center_id = '${jsonObj.center_id}'), '${k.quantity}', '${k.product_code}', '${k.notes}', 'O')`;
+
+	return new Promise(function (resolve, reject) {
+		pool.query(query, function (err, data) {
+			if (err) {
+				return reject(callback(err));
+			}
+			return resolve(callback(null, data));
+		});
+	});
+};
+
 module.exports = {
 	getSalesMaster,
 	getSalesDetails,
+	insertSaleDetails,
 };

@@ -87,8 +87,8 @@ function purchaseMasterEntry(cloneReq) {
 	});
 }
 
-function processItems(cloneReq, newPK) {
-	cloneReq.productarr.forEach(function (k) {
+async function processItems(cloneReq, newPK) {
+	for (const k of cloneReq.productarr) {
 		let insQuery1 = ` INSERT INTO purchase_detail(purchase_id, product_id, qty, purchase_price, mrp, batchdate, tax,
 			igst, cgst, sgst, taxable_value, total_value, stock_id) VALUES
 			( '${newPK}', '${k.product_id}', '${k.qty}', '${k.purchase_price}', '${k.mrp}', '${moment().format("DD-MM-YYYY")}', '${k.taxrate}', '${k.igst}', 
@@ -100,7 +100,7 @@ function processItems(cloneReq, newPK) {
 			taxable_value =  '${k.taxable_value}', total_value = '${k.total_value}', stock_id = '${k.stock_pk}' where
 			id = '${k.pur_det_id}' `;
 
-		new Promise(function (resolve, reject) {
+		await new Promise(function (resolve, reject) {
 			pool.query(k.pur_det_id === "" ? insQuery1 : updQuery1, function (err, data) {
 				if (err) {
 					logger.debug.debug("Error Purchase Details entry... processItems " + JSON.stringify(err));
@@ -134,7 +134,7 @@ function processItems(cloneReq, newPK) {
 				}
 			});
 		});
-	});
+	}
 }
 
 function insertStock(k, pdetailid) {
