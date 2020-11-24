@@ -60,6 +60,7 @@ app.use("/api/print", require("./routes/api/print"));
 app.use("/api/accounts", require("./routes/api/accounts"));
 app.use("/api/reports", require("./routes/api/reports"));
 app.use("/api/dashboard", require("./routes/api/dashboard"));
+app.use("/api/returns", require("./routes/api/returns"));
 
 app.get("/openCV/:id/:filename", function (req, res) {
 	logger.debug.debug("object ..SEND ME PDF.." + req.params.id);

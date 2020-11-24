@@ -85,26 +85,32 @@ stockRouter.get("/search-purchase/:centerid/:vendorid/:status/:fromdate/:todate"
 	});
 });
 
-stockRouter.get("/search-sales/:centerid/:customerid/:status/:fromdate/:todate/:saletype", (req, res) => {
-	let center_id = req.params.centerid;
-	let status = req.params.status;
-	let customer_id = req.params.customerid;
-	let from_date = req.params.fromdate;
-	let to_date = req.params.todate;
-	let sale_type = req.params.saletype;
+stockRouter.post("/search-sales", (req, res) => {
+	let center_id = req.body.centerid;
+	let status = req.body.status;
+	let customer_id = req.body.customerid;
+	let from_date = req.body.fromdate;
+	let to_date = req.body.todate;
+	let sale_type = req.body.saletype;
+	let search_type = req.body.searchtype;
+	let invoice_no = req.body.invoiceno;
 
-	if (from_date !== "") {
-		from_date = moment(new Date(req.params.fromdate)).format("DD-MM-YYYY") + " 00:00:00";
-	}
+	let sql = "";
+	let query = "";
 
-	if (to_date !== "") {
-		to_date = moment(new Date(req.params.todate)).format("DD-MM-YYYY") + " 23:59:00";
-	}
+	if (search_type === "all") {
+		if (from_date !== "") {
+			from_date = moment(new Date(req.body.fromdate)).format("DD-MM-YYYY") + " 00:00:00";
+		}
 
-	let custsql = `and s.customer_id = '${customer_id}' `;
-	let statussql = `and s.status = '${status}' `;
+		if (to_date !== "") {
+			to_date = moment(new Date(req.body.todate)).format("DD-MM-YYYY") + " 23:59:00";
+		}
 
-	let sql = `select s.*, c.id as customer_id, c.name as customer_name
+		let custsql = `and s.customer_id = '${customer_id}' `;
+		let statussql = `and s.status = '${status}' `;
+
+		sql = `select s.*, c.id as customer_id, c.name as customer_name
         from
         sale s,
         customer c
@@ -117,33 +123,47 @@ stockRouter.get("/search-sales/:centerid/:customerid/:status/:fromdate/:todate/:
 				str_to_date('${from_date}',  '%d-%m-%Y %T') and
 				str_to_date('${to_date}',  '%d-%m-%Y %T') `;
 
-	// str_to_date(sale_datetime, '%d-%m-%YYYY') between
-	// str_to_date('${from_date}', '%d-%m-%YYYY') and
-	// str_to_date('${to_date}', '%d-%m-%YYYY')  `;
-
-	if (customer_id !== "all") {
-		sql = sql + custsql;
-	}
-
-	if (status !== "all") {
-		sql = sql + statussql;
-	}
-
-	if (sale_type !== "all") {
-		if (sale_type === "GI") {
-			sql = sql + " and s.sale_type = 'gstinvoice' ";
-		} else if (sale_type === "SI") {
-			sql = sql + " and s.sale_type = 'stockissue' ";
+		if (customer_id !== "all") {
+			sql = sql + custsql;
 		}
+
+		if (status !== "all") {
+			sql = sql + statussql;
+		}
+
+		if (sale_type !== "all") {
+			if (sale_type === "GI") {
+				sql = sql + " and s.sale_type = 'gstinvoice' ";
+			} else if (sale_type === "SI") {
+				sql = sql + " and s.sale_type = 'stockissue' ";
+			}
+		}
+
+		if (invoice_no.trim().length > 0) {
+			sql = sql + `and invoice_no = '${invoice_no.trim()}' `;
+		}
+
+		sql = sql + " order by invoice_no ";
+
+		logger.debug.debug("sql search sale " + sql);
+	} else if (search_type !== "all") {
+		query = ` 
+		select s.*, c.id as customer_id, c.name as customer_name
+					from
+					sale s,
+					customer c
+					where
+					c.id = s.customer_id and
+					
+					s.center_id = '${center_id}' and
+					invoice_no = '${invoice_no.trim()}'
+					
+		`;
 	}
-
-	sql = sql + " order by invoice_no ";
-
-	logger.debug.debug("sql search sale " + sql);
-
-	pool.query(sql, function (err, data) {
+	console.log("dinesh " + search_type === "all" ? sql : query);
+	pool.query(search_type === "all" ? sql : query, function (err, data) {
 		if (err) {
-			return handleError(new ErrorHandler("500", "Error fetching search purchase"), res);
+			return handleError(new ErrorHandler("500", "Error fetching search sales"), res);
 		} else {
 			return res.json(data);
 		}
@@ -232,11 +252,14 @@ pd.cgst as cgst,
 pd.sgst as sgst,
 pd.taxable_value as tax_value,
 pd.total_value as total_value,
+ps.revision as revision,
 p.product_code, p.description, p.packetsize, p.taxrate, s.id as stock_pk from  
 purchase_detail pd,
 product p,
-stock s
+stock s,
+purchase ps
 where
+ps.id = pd.purchase_id and
 s.product_id = p.id and
 p.id = pd.product_id and
 s.id = pd.stock_id and

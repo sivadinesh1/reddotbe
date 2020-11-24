@@ -13,10 +13,10 @@ const { getProductSummaryReport } = require("../modules/reports/productsummaryre
 var pool = require("./../helpers/db");
 
 reportsRouter.post("/inventory-report", (req, res) => {
-	const [center_id, product_id] = Object.values(req.body);
-	logger.debug.debug("object..> inventory-report >" + center_id, product_id);
+	const [center_id, product_code] = Object.values(req.body);
+	logger.debug.debug("object..> inventory-report >" + center_id, product_code);
 
-	getProductInventoryReport(center_id, product_id, (err, data) => {
+	getProductInventoryReport(center_id, product_code, (err, data) => {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error fetching getProductInventoryReport."), res);
 		} else {

@@ -203,7 +203,8 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 
 			pool.query(upQuery3, function (err, data) {
 				if (err) {
-					logger.debug.debug("query >> enquiry details >> " + JSON.stringify(err));
+					console.log("query >> enquiry details >> " + JSON.stringify(err));
+
 					return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
 				}
 			});

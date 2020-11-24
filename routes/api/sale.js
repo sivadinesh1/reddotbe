@@ -169,7 +169,8 @@ saleRouter.post("/insert-sale-details", async (req, res) => {
 						}
 					});
 				} else if (cloneReq.status === "C" && cloneReq.salesid !== "") {
-					// reverse the old ledger entry and then add a new sale entry
+					// reverse the old ledger entry and then add a new sale entry. scenario: sale completed, but after sale, if any changes done,
+					// we reverse old entries and create new entries.
 
 					addReverseSaleLedgerRecord(cloneReq, newPK, (err, data) => {
 						if (err) {
@@ -255,7 +256,11 @@ function getSequenceNo(cloneReq) {
 // format and send sequence #
 function saleMasterEntry(cloneReq, invNo) {
 	let revisionCnt = 0;
-	if (cloneReq.status === "C") {
+
+	// always very first insert will increment revision to 1, on consicutive inserts, it will be +1
+	if (cloneReq.status === "C" && cloneReq.revision === 0) {
+		revisionCnt = 1;
+	} else if (cloneReq.status === "C" && cloneReq.revision !== 0) {
 		revisionCnt = cloneReq.revision + 1;
 	}
 
@@ -266,7 +271,7 @@ function saleMasterEntry(cloneReq, invNo) {
 	let insQry = `
 			INSERT INTO sale (center_id, customer_id, invoice_no, invoice_date, order_no, order_date, 
 			lr_no, lr_date, sale_type,  total_qty, no_of_items, taxable_value, cgst, sgst, igst, 
-			total_value, net_total, transport_charges, unloading_charges, misc_charges, status, sale_datetime, roundoff)
+			total_value, net_total, transport_charges, unloading_charges, misc_charges, status, sale_datetime, roundoff, revision)
 			VALUES
 			('${cloneReq.center_id}', '${cloneReq.customerctrl.id}', 
 			'${invNo}',
@@ -274,7 +279,7 @@ function saleMasterEntry(cloneReq, invNo) {
 	 '${cloneReq.invoicetype}','${cloneReq.totalqty}', 
 			'${cloneReq.noofitems}', '${cloneReq.taxable_value}', '${cloneReq.cgst}', '${cloneReq.sgst}', '${cloneReq.igst}', '${cloneReq.totalvalue}', 
 			'${cloneReq.net_total}', '${cloneReq.transport_charges}', '${cloneReq.unloading_charges}', '${cloneReq.misc_charges}', '${cloneReq.status}',
-			'${moment().format("DD-MM-YYYY")}', '${cloneReq.roundoff}'
+			'${moment().format("DD-MM-YYYY")}', '${cloneReq.roundoff}', '${revisionCnt}'
 			)`;
 
 	let upQry = `
@@ -368,7 +373,9 @@ async function processItems(cloneReq, newPK) {
 
 				// its a hack to avoid data.insertid fix it
 				if (data != null || data != undefined) {
-					insertItemHistory(k, newPK, data.insertId, cloneReq);
+					if (cloneReq.status === "C") {
+						insertItemHistory(k, newPK, data.insertId, cloneReq);
+					}
 				}
 
 				resolve(data);
@@ -533,6 +540,10 @@ function insertItemHistory(k, vSale_id, vSale_det_id, cloneReq) {
 	let actn_type = "SUB";
 	let sale_id = vSale_id === "" ? k.sale_id : vSale_id;
 
+	if (cloneReq.revision === 0 && txn_qty === 0) {
+		txn_qty = k.qty;
+	}
+
 	//txn -ve means subtract from qty
 	if (txn_qty < 0) {
 		actn_type = "ADD";
@@ -542,19 +553,21 @@ function insertItemHistory(k, vSale_id, vSale_det_id, cloneReq) {
 	//~ bitwise operator. Bitwise does not negate a number exactly. eg:  ~1000 is -1001, not -1000 (a = ~a + 1)
 	txn_qty = ~txn_qty + 1;
 
-	let query2 = `
+	if (txn_qty !== 0) {
+		let query2 = `
 			insert into item_history (center_id, module, product_ref_id, sale_id, sale_det_id, actn, actn_type, txn_qty, stock_level, txn_date)
 			values ('${cloneReq.center_id}', 'Sale', '${k.product_id}', '${sale_id}', '${sale_det_id}', 'SAL', '${actn_type}', '${txn_qty}', 
-							(select (available_stock)  from stock where product_id = '${k.product_id}' and mrp = '${k.product_id}' ), '${today}' ) `;
-	logger.debug.debug("sql for insertItemHistory" + query2);
+							(select (available_stock)  from stock where product_id = '${k.product_id}' and mrp = '${k.mrp}' ), '${today}' ) `;
+		logger.debug.debug("sql for insertItemHistory" + query2);
 
-	pool.query(query2, function (err, data) {
-		if (err) {
-			logger.debug.debug("object insertItemHistory >>" + err);
-		} else {
-			logger.debug.debug("object..stock update .");
-		}
-	});
+		pool.query(query2, function (err, data) {
+			if (err) {
+				logger.debug.debug("object insertItemHistory >>" + err);
+			} else {
+				logger.debug.debug("object..stock update .");
+			}
+		});
+	}
 }
 
 // get sale master to display in sale invoice component

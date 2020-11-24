@@ -11,8 +11,6 @@ var pool = require("../helpers/db");
 purchaseRouter.post("/insert-purchase-details", async (req, res) => {
 	const cloneReq = { ...req.body };
 
-	logger.debug.debug("din " + JSON.stringify(cloneReq));
-
 	var today = new Date();
 	today = moment(today).format("DD-MM-YYYY");
 
@@ -30,6 +28,18 @@ purchaseRouter.post("/insert-purchase-details", async (req, res) => {
 });
 
 function purchaseMasterEntry(cloneReq) {
+	let revisionCnt = 0;
+	console.log("object " + cloneReq.status);
+	console.log("object " + cloneReq.revision);
+
+	// always very first insert will increment revision to 1, on consicutive inserts, it will be +1
+	if (cloneReq.status === "C" && cloneReq.revision === 0) {
+		revisionCnt = 1;
+	} else if (cloneReq.status === "C" && cloneReq.revision !== 0) {
+		revisionCnt = cloneReq.revision + 1;
+	}
+	console.log("object " + revisionCnt);
+
 	var today = new Date();
 	// today = moment(today).format("YYYY-MM-DD HH:mm:ss");
 
@@ -49,14 +59,14 @@ function purchaseMasterEntry(cloneReq) {
 	let insQry = `
 			INSERT INTO purchase ( center_id, vendor_id, invoice_no, invoice_date, lr_no, lr_date, received_date, 
 			purchase_type, order_no, order_date, total_qty, no_of_items, taxable_value, cgst, sgst, igst, 
-			total_value, transport_charges, unloading_charges, misc_charges, net_total, no_of_boxes, status, stock_inwards_datetime, roundoff)
+			total_value, transport_charges, unloading_charges, misc_charges, net_total, no_of_boxes, status, stock_inwards_datetime, roundoff, revision)
 			VALUES
 			( '${cloneReq.centerid}', '${cloneReq.vendorctrl.id}', '${cloneReq.invoiceno}', '${invoicedate}', '${cloneReq.lrno}', '${lrdate}', 
 			'${orderrcvddt}', 'GST Inovoice', '${cloneReq.orderno}', '${orderdate}', 
 			'${cloneReq.totalqty}', '${cloneReq.noofitems}', '${cloneReq.taxable_value}', '${cloneReq.cgst}', 
 			'${cloneReq.sgst}', '${cloneReq.igst}', '${cloneReq.totalvalue}', '${cloneReq.transport_charges}', 
 			'${cloneReq.unloading_charges}', '${cloneReq.misc_charges}', '${cloneReq.net_total}', 
-			'${cloneReq.noofboxes}', '${cloneReq.status}' , '${today}', '${cloneReq.roundoff}' )`;
+			'${cloneReq.noofboxes}', '${cloneReq.status}' , '${today}', '${cloneReq.roundoff}', '${revisionCnt}' )`;
 
 	let updQry = ` update purchase set center_id = '${cloneReq.centerid}', vendor_id = '${cloneReq.vendorctrl.id}',
 			invoice_no = '${cloneReq.invoiceno}', invoice_date = '${moment(cloneReq.invoicedate).format("DD-MM-YYYY")}', lr_no = '${cloneReq.lrno}',
@@ -66,7 +76,9 @@ function purchaseMasterEntry(cloneReq) {
 			sgst = '${cloneReq.sgst}', igst = '${cloneReq.igst}', total_value = '${cloneReq.totalvalue}', 
 			transport_charges = '${cloneReq.transport_charges}', unloading_charges = '${cloneReq.unloading_charges}', 
 			misc_charges = '${cloneReq.misc_charges}', net_total = '${cloneReq.net_total}', no_of_boxes = '${cloneReq.noofboxes}',
-			status =  '${cloneReq.status}', stock_inwards_datetime =  '${today}', roundoff = '${cloneReq.roundoff}' where id = '${cloneReq.purchaseid}' `;
+			status =  '${cloneReq.status}', stock_inwards_datetime =  '${today}', roundoff = '${cloneReq.roundoff}',
+			revision = '${revisionCnt}'
+			where id = '${cloneReq.purchaseid}' `;
 
 	logger.debug.debug("dinesh " + updQry);
 
@@ -128,7 +140,13 @@ async function processItems(cloneReq, newPK) {
 						//		}
 					}
 					logger.debug.debug("delete this " + JSON.stringify(data));
-					insertItemHistory(k, newPK, data.insertId, cloneReq);
+					console.log("newPK " + newPK);
+					console.log("data.insertId " + data.insertId);
+					console.log("data status " + cloneReq.status);
+
+					if (cloneReq.status === "C") {
+						insertItemHistory(k, newPK, data.insertId, cloneReq);
+					}
 
 					resolve(true);
 				}
@@ -203,36 +221,55 @@ where id = '${k.product_id}'  `;
 	});
 }
 
+//vPurchase_id - purchase_id && vPurchase_det_id - new purchase_detail id
+// k - looped purchase details array
 function insertItemHistory(k, vPurchase_id, vPurchase_det_id, cloneReq) {
 	var today = new Date();
 	today = moment(today).format("DD-MM-YYYY");
 
-	logger.debug.debug("inside insert item history " + JSON.stringify(cloneReq));
-	logger.debug.debug("delete ME 2 " + vPurchase_det_id);
+	// logger.debug.debug("inside insert item history " + JSON.stringify(cloneReq));
+	// logger.debug.debug("delete ME 2 " + vPurchase_det_id);
+
+	// console.log("object OLD " + k.old_val);
+	// console.log("object K " + k.qty);
+	// console.log("object REVISION " + cloneReq.revision);
 
 	// if purchase details id is missing its new else update
 	let purchase_det_id = k.pur_det_id === "" ? vPurchase_det_id : k.pur_det_id;
 	let txn_qty = k.pur_det_id === "" ? k.qty : k.qty - k.old_val;
-	let actn_type = "ADD";
+	// let actn_type = "ADD";
 	let purchase_id = vPurchase_id === "" ? k.purchase_id : vPurchase_id;
+
+	// scenario: purhcase added > draft status > now create purchase entry. txn_qty will be zero, because old_val & current_val will be same
+	// this is a fix for above scenario
+	if (cloneReq.revision === 0 && txn_qty === 0) {
+		txn_qty = k.qty;
+	}
+
+	//let purchase_det_id = k.pur_det_id;
+	//let txn_qty = k.qty;
+	let actn_type = "ADD";
+	//	let purchase_id = k.purchase_id;
 
 	//txn -ve means subtract from qty
 	if (txn_qty < 0) {
 		actn_type = "SUB";
 	}
 
-	let query2 = `
+	if (txn_qty !== 0) {
+		let query2 = `
 			insert into item_history (center_id, module, product_ref_id, purchase_id, purchase_det_id, actn, actn_type, txn_qty, stock_level, txn_date)
 			values ('${cloneReq.centerid}', 'Purchase', '${k.product_id}', '${purchase_id}', '${purchase_det_id}', 'PUR', '${actn_type}', '${txn_qty}', 
-							(select (available_stock)  from stock where product_id = '${k.product_id}' ), '${today}' ) `;
+							(select (available_stock)  from stock where product_id = '${k.product_id}' and mrp = '${k.mrp}' ), '${today}' ) `;
 
-	pool.query(query2, function (err, data) {
-		if (err) {
-			logger.debug.debug("object" + err);
-		} else {
-			logger.debug.debug("object..stock update .");
-		}
-	});
+		pool.query(query2, function (err, data) {
+			if (err) {
+				logger.debug.debug("object" + err);
+			} else {
+				logger.debug.debug("object..stock update .");
+			}
+		});
+	}
 }
 
 module.exports = purchaseRouter;
