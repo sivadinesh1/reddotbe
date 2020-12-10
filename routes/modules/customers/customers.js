@@ -210,7 +210,8 @@ FROM
 	customer c,
     discount d,
     brand b
-    where 
+		where 
+		c.id = d.customer_id and
     d.brand_id <> 0 and
 		d.brand_id = b.id and
 		d.center_id = ? and
