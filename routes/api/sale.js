@@ -11,6 +11,7 @@ const { getSalesMaster, getSalesDetails } = require("../modules/sales/sales.js")
 const { addSaleLedgerRecord, addReverseSaleLedgerRecord, addSaleLedgerAfterReversalRecord } = require("../modules/accounts/accounts.js");
 
 var pool = require("../helpers/db");
+const { toTimeZone, currentTimeInTimeZone } = require("./../helpers/utils");
 
 // Get Possible Next Sale Invoice # (ReadOnly)
 saleRouter.get("/get-next-sale-invoice-no/:centerid/:invoicetype", (req, res) => {
@@ -140,8 +141,33 @@ saleRouter.post("/insert-sale-details", async (req, res) => {
 	logger.debug.debug("object..insert-sale-details >> " + JSON.stringify(cloneReq));
 
 	// (1) Updates invseq in tbl financialyear, then {returns} formated sequence {YY/MM/INVSEQ}
-	await updateSequenceGenerator(cloneReq);
-	let invNo = await getSequenceNo(cloneReq);
+	if (cloneReq.status === "C" && cloneReq.revision === 0) {
+		await updateSequenceGenerator(cloneReq);
+	} else if (cloneReq.status === "D") {
+		if (cloneReq.invoiceno !== undefined && cloneReq.invoiceno !== null) {
+			if (cloneReq.invoiceno.startsWith("D")) {
+				// do nothing
+			} else {
+				await updateDraftSequenceGenerator(cloneReq);
+			}
+		}
+	}
+
+	let invNo = "";
+	// always very first insert will increment revision to 1, on consicutive inserts, it will be +1
+	if (cloneReq.status === "C" && cloneReq.revision === 0) {
+		invNo = await getSequenceNo(cloneReq);
+	} else if (cloneReq.status === "D") {
+		if (cloneReq.invoiceno !== undefined && cloneReq.invoiceno !== null) {
+			if (cloneReq.invoiceno.startsWith("D")) {
+				invNo = cloneReq.invoiceno;
+			} else {
+				invNo = await getSequenceNo(cloneReq);
+			}
+		}
+	} else if (cloneReq.status === "C" && cloneReq.revision !== 0) {
+		invNo = cloneReq.invoiceno;
+	}
 
 	// (2)
 	saleMasterEntry(cloneReq, invNo)
@@ -224,16 +250,49 @@ function updateSequenceGenerator(cloneReq) {
 	});
 }
 
+// Update Sequence in financial Year tbl DRAFT
+function updateDraftSequenceGenerator(cloneReq) {
+	let qryUpdateSqnc = "";
+
+	if (cloneReq.invoicetype === "gstinvoice") {
+		qryUpdateSqnc = `
+		update financialyear set draft_inv_seq = draft_inv_seq + 1 where 
+		center_id = '${cloneReq.center_id}' and  
+		CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
+	} else if (cloneReq.invoicetype === "stockissue") {
+		qryUpdateSqnc = `
+	update financialyear set stock_issue_seq = stock_issue_seq + 1 where 
+	center_id = '${cloneReq.center_id}' and  
+	CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
+	}
+
+	return new Promise(function (resolve, reject) {
+		pool.query(qryUpdateSqnc, function (err, data) {
+			if (err) {
+				reject(err);
+			}
+			resolve(data);
+		});
+	});
+}
+
 // format and send sequence #
 function getSequenceNo(cloneReq) {
 	let invNoQry = "";
-	if (cloneReq.invoicetype === "gstinvoice") {
+	if (cloneReq.invoicetype === "gstinvoice" && cloneReq.status !== "D") {
 		invNoQry = ` select concat('${moment(cloneReq.invoicedate).format("YY")}', "/", '${moment(cloneReq.invoicedate).format(
 			"MM",
 		)}', "/", lpad(invseq, 5, "0")) as invNo from financialyear 
 				where 
 				center_id = '${cloneReq.center_id}' and  
 				CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
+	} else if (cloneReq.invoicetype === "gstinvoice" && cloneReq.status === "D") {
+		invNoQry = ` select concat("D/", '${moment(cloneReq.invoicedate).format("YY")}', "/", '${moment(cloneReq.invoicedate).format(
+			"MM",
+		)}', "/", lpad(draft_inv_seq, 5, "0")) as invNo from financialyear 
+							where 
+							center_id = '${cloneReq.center_id}' and  
+							CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
 	} else if (cloneReq.invoicetype === "stockissue") {
 		invNoQry = ` select concat('SI',"-",'${moment(cloneReq.invoicedate).format("YY")}', "/", '${moment(cloneReq.invoicedate).format(
 			"MM",
@@ -275,22 +334,27 @@ function saleMasterEntry(cloneReq, invNo) {
 			VALUES
 			('${cloneReq.center_id}', '${cloneReq.customerctrl.id}', 
 			'${invNo}',
-			'${moment(cloneReq.invoicedate).format("DD-MM-YYYY")}', '${cloneReq.orderno}', '${cloneReq.orderdate}', '${cloneReq.lrno}', '${cloneReq.lrdate}',
+			'${toTimeZone(cloneReq.invoicedate, "Asia/Kolkata")}', '${cloneReq.orderno}', '${cloneReq.orderdate}', '${cloneReq.lrno}', '${cloneReq.lrdate}',
 	 '${cloneReq.invoicetype}','${cloneReq.totalqty}', 
 			'${cloneReq.noofitems}', '${cloneReq.taxable_value}', '${cloneReq.cgst}', '${cloneReq.sgst}', '${cloneReq.igst}', '${cloneReq.totalvalue}', 
 			'${cloneReq.net_total}', '${cloneReq.transport_charges}', '${cloneReq.unloading_charges}', '${cloneReq.misc_charges}', '${cloneReq.status}',
-			'${moment().format("DD-MM-YYYY")}', '${cloneReq.roundoff}', '${revisionCnt}'
+			'${currentTimeInTimeZone("Asia/Kolkata", "DD-MM-YYYY")}', '${cloneReq.roundoff}', '${revisionCnt}'
 			)`;
+
+	console.log("dinesh >> " + insQry);
 
 	let upQry = `
 			UPDATE sale set center_id = '${cloneReq.center_id}', customer_id = '${cloneReq.customerctrl.id}', 
+			invoice_no = '${invNo}',
+			invoice_date = 	'${toTimeZone(cloneReq.invoicedate, "Asia/Kolkata")}', 
 			order_date = '${cloneReq.orderdate}', lr_no = '${cloneReq.lrno}', sale_type = '${cloneReq.invoicetype}',
 			lr_date = '${cloneReq.lrdate}', total_qty = '${cloneReq.totalqty}', no_of_items = '${cloneReq.noofitems}',
 			taxable_value = '${cloneReq.taxable_value}', cgst = '${cloneReq.cgst}', sgst = '${cloneReq.sgst}', igst = '${cloneReq.igst}',
 			total_value = '${cloneReq.totalvalue}', net_total = '${cloneReq.net_total}', transport_charges = '${cloneReq.transport_charges}', 
 			unloading_charges = '${cloneReq.unloading_charges}', misc_charges = '${cloneReq.misc_charges}', status = '${cloneReq.status}',
-			sale_datetime = '${moment().format("DD-MM-YYYY")}', revision = '${revisionCnt}', roundoff = '${cloneReq.roundoff}'
+			sale_datetime = '${currentTimeInTimeZone("Asia/Kolkata", "DD-MM-YYYY")}', revision = '${revisionCnt}', roundoff = '${cloneReq.roundoff}'
 			where id= '${cloneReq.salesid}' `;
+	console.log("dinesh >> " + upQry);
 
 	return new Promise(function (resolve, reject) {
 		pool.query(cloneReq.salesid === "" ? insQry : upQry, function (err, data) {

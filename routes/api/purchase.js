@@ -7,6 +7,7 @@ const moment = require("moment");
 const { handleError, ErrorHandler } = require("../helpers/error");
 
 var pool = require("../helpers/db");
+const { toTimeZone, currentTimeInTimeZone } = require("./../helpers/utils");
 
 purchaseRouter.post("/insert-purchase-details", async (req, res) => {
 	const cloneReq = { ...req.body };
@@ -47,10 +48,6 @@ function purchaseMasterEntry(cloneReq) {
 	// var today = new Date();
 	// today = moment(today).format("DD-MM-YYYY");
 
-	// str_to_date(stock_inwards_datetime, '%Y-%m-%d %T') between
-	// str_to_date('2020-05-01 00:00:00', '%Y-%m-%d %T') and
-	// str_to_date('2020-05-08 23:59:00', '%Y-%m-%d %T')
-
 	let invoicedate = cloneReq.invoicedate !== "" ? moment(cloneReq.invoicedate).format("DD-MM-YYYY") : "";
 	let orderdate = cloneReq.orderdate !== "" ? moment(cloneReq.orderdate).format("DD-MM-YYYY") : "";
 	let lrdate = cloneReq.lrdate !== "" ? moment(cloneReq.lrdate).format("DD-MM-YYYY") : "";
@@ -61,15 +58,22 @@ function purchaseMasterEntry(cloneReq) {
 			purchase_type, order_no, order_date, total_qty, no_of_items, taxable_value, cgst, sgst, igst, 
 			total_value, transport_charges, unloading_charges, misc_charges, net_total, no_of_boxes, status, stock_inwards_datetime, roundoff, revision)
 			VALUES
-			( '${cloneReq.centerid}', '${cloneReq.vendorctrl.id}', '${cloneReq.invoiceno}', '${invoicedate}', '${cloneReq.lrno}', '${lrdate}', 
+			( '${cloneReq.centerid}', '${cloneReq.vendorctrl.id}', '${cloneReq.invoiceno}', 
+			
+			'${toTimeZone(cloneReq.invoicedate, "Asia/Kolkata")}', 
+			'${cloneReq.lrno}', '${lrdate}', 
 			'${orderrcvddt}', 'GST Inovoice', '${cloneReq.orderno}', '${orderdate}', 
 			'${cloneReq.totalqty}', '${cloneReq.noofitems}', '${cloneReq.taxable_value}', '${cloneReq.cgst}', 
 			'${cloneReq.sgst}', '${cloneReq.igst}', '${cloneReq.totalvalue}', '${cloneReq.transport_charges}', 
 			'${cloneReq.unloading_charges}', '${cloneReq.misc_charges}', '${cloneReq.net_total}', 
-			'${cloneReq.noofboxes}', '${cloneReq.status}' , '${today}', '${cloneReq.roundoff}', '${revisionCnt}' )`;
+			'${cloneReq.noofboxes}', '${cloneReq.status}' , 
+			'${currentTimeInTimeZone("Asia/Kolkata", "DD-MM-YYYY HH:mm:ss")}',
+			'${cloneReq.roundoff}', '${revisionCnt}' )`;
 
 	let updQry = ` update purchase set center_id = '${cloneReq.centerid}', vendor_id = '${cloneReq.vendorctrl.id}',
-			invoice_no = '${cloneReq.invoiceno}', invoice_date = '${moment(cloneReq.invoicedate).format("DD-MM-YYYY")}', lr_no = '${cloneReq.lrno}',
+			invoice_no = '${cloneReq.invoiceno}', 
+			invoice_date = '${toTimeZone(cloneReq.invoicedate, "Asia/Kolkata")}', 
+			lr_no = '${cloneReq.lrno}',
 			lr_date = '${lrdate}', received_date = '${orderrcvddt}', purchase_type = 'GST Inovoice',
 			order_no = '${cloneReq.orderno}', order_date = '${orderdate}', total_qty = '${cloneReq.totalqty}', 
 			no_of_items = '${cloneReq.noofitems}', taxable_value = '${cloneReq.taxable_value}', cgst = '${cloneReq.cgst}', 

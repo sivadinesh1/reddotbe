@@ -1,3 +1,6 @@
+// const moment = require("moment");
+const moment = require("moment-timezone");
+
 const number2text = (value) => {
 	// function number2text(value) {
 	var fraction = Math.round(frac(value) * 100);
@@ -88,6 +91,17 @@ function convert_number(number) {
 	return res;
 }
 
+function toTimeZone(time, zone) {
+	var format = "YYYY-MM-DDTHH:mm:ssZ";
+	return moment(time, format).tz(zone).format("DD-MM-YYYY");
+}
+
+function currentTimeInTimeZone(zone, format) {
+	return moment(moment(), format).tz(zone).format(format);
+}
+
 module.exports = {
 	number2text,
+	toTimeZone,
+	currentTimeInTimeZone,
 };

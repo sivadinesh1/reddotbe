@@ -214,9 +214,8 @@ FROM
     d.brand_id <> 0 and
 		d.brand_id = b.id and
 		d.center_id = ? and
-		c.id = ? and
+		b.center_id = d.center_id and
 		d.customer_id = ?
-    
     group by 
     c.name, d.type, d.brand_id, b.name, c.id, d.startdate      
     order by
@@ -229,7 +228,7 @@ FROM
 	logger.debug.debug("cener id object" + centerid);
 	logger.debug.debug(" customerid object" + customerid);
 
-	let values = [centerid, customerid, customerid];
+	let values = [centerid, customerid];
 
 	pool.query(query, values, function (err, data) {
 		if (err) return callback(err);
@@ -385,7 +384,7 @@ const getCustomerDetails = (centerid, customerid) => {
 // fetch rows from customer tbl & customer shipping addres tbl
 const getSearchCustomers = (centerid, searchstr, callback) => {
 	let query = `
-	select c.id, c.center_id, c.name, c.address1, c.address2, c.district, s.code, s.description,
+	select c.id, c.center_id, c.name, c.address1, c.address2, c.address3, c.district, s.code, s.description,
 	c.pin, c.gst, c.phone, c.mobile, c.mobile2, c.whatsapp,  c.email, c.isactive,
 		csa.state_id as csa_state,
 csa.address1 as csa_address1,
@@ -404,7 +403,9 @@ s1.code as csa_code
 	s1.id = csa.state_id and
 	csa.customer_id = c.id and
 	csa.def_address = 'Y' and
-	c.state_id = s.id and isactive = 'A' and center_id = '${centerid}' and ( c.name like '%${searchstr}%') limit 50 `;
+	c.state_id = s.id and isactive = 'A' and center_id = '${centerid}'  and
+	( LOWER(c.name) like LOWER('${searchstr}%')) 
+	limit 50 `;
 
 	logger.debug.debug("get-customer-details > " + query);
 

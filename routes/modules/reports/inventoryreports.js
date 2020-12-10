@@ -10,7 +10,11 @@ const getProductInventoryReport = (center_id, product_code, callback) => {
   
   ih.actn as actn, ih.actn_type as action_type, ih.txn_qty as txn_qty, ih.stock_level as stock_level,
   txn_date as txn_date,
-  ih.sale_id as sale_id,  s.customer_id as customer_id, ih.purchase_id as purchase_id, pr.vendor_id
+  ih.sale_id as sale_id,  
+  s.customer_id as customer_id, 
+  (select c1.name as customer_name from customer c1 where c1.id =   s.customer_id ) as customer_name,
+  ih.purchase_id as purchase_id, pr.vendor_id,
+  (select v1.name as vendor_name from vendor v1 where v1.id =   pr.vendor_id ) as vendor_name
   from 
   item_history ih
   LEFT outer JOIN purchase pr 
@@ -24,8 +28,9 @@ const getProductInventoryReport = (center_id, product_code, callback) => {
   p.id = ih.product_ref_id and
   p.product_code like '%${product_code}%' and
   ih.center_id = '${center_id}'
+  order by 
+  STR_TO_DATE(txn_date, '%d-%m-%YYYY') desc
   
-  order by txn_date, id desc
   `;
 	// product_ref_id = '${product_id}'
 	// lateer include this to the search, as of now, fetch all
