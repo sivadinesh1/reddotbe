@@ -11,7 +11,7 @@ const { getSalesMaster, getSalesDetails } = require("../modules/sales/sales.js")
 const { addSaleLedgerRecord, addReverseSaleLedgerRecord, addSaleLedgerAfterReversalRecord } = require("../modules/accounts/accounts.js");
 
 var pool = require("../helpers/db");
-const { toTimeZone, currentTimeInTimeZone } = require("./../helpers/utils");
+const { toTimeZone, currentTimeInTimeZone, toTimeZoneFrmt } = require("./../helpers/utils");
 
 // Get Possible Next Sale Invoice # (ReadOnly)
 saleRouter.get("/get-next-sale-invoice-no/:centerid/:invoicetype", (req, res) => {
@@ -347,7 +347,9 @@ function saleMasterEntry(cloneReq, invNo) {
 			UPDATE sale set center_id = '${cloneReq.center_id}', customer_id = '${cloneReq.customerctrl.id}', 
 			invoice_no = '${invNo}',
 			invoice_date = 	'${toTimeZone(cloneReq.invoicedate, "Asia/Kolkata")}', 
-			order_date = '${cloneReq.orderdate}', lr_no = '${cloneReq.lrno}', sale_type = '${cloneReq.invoicetype}',
+			order_date = '${toTimeZoneFrmt(cloneReq.orderdate, "Asia/Kolkata", "YYYY-MM-DDTHH:mm:ssZ")}', lr_no = '${cloneReq.lrno}', sale_type = '${
+		cloneReq.invoicetype
+	}',
 			lr_date = '${cloneReq.lrdate}', total_qty = '${cloneReq.totalqty}', no_of_items = '${cloneReq.noofitems}',
 			taxable_value = '${cloneReq.taxable_value}', cgst = '${cloneReq.cgst}', sgst = '${cloneReq.sgst}', igst = '${cloneReq.igst}',
 			total_value = '${cloneReq.totalvalue}', net_total = '${cloneReq.net_total}', transport_charges = '${cloneReq.transport_charges}', 

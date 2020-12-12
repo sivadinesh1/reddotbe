@@ -11,7 +11,15 @@ const { handleError, ErrorHandler } = require("./../helpers/error");
 
 const { getReturns } = require("../modules/sales/returns.js");
 
-const { insertSaleReturns, insertSaleReturnDetail } = require("../modules/returns/returns.js");
+const {
+	insertSaleReturns,
+	insertSaleReturnDetail,
+	createCreditNote,
+	updateCRAmntToCustomer,
+	updateCRSequenceGenerator,
+	getSequenceCrNote,
+	updateCrNoteIdInSaleReturnTable,
+} = require("../modules/returns/returns.js");
 
 const moment = require("moment");
 var pool = require("../helpers/db");
@@ -32,7 +40,8 @@ returnsRouter.post("/search-sale-return", (req, res) => {
 	let to_date = req.body.todate;
 
 	let search_type = req.body.searchtype;
-	let invoice_no = req.body.invoiceno;
+	let search_by = req.body.searchby;
+	//let credit_note_no = req.body.credit_note_no;
 
 	let sql = "";
 	let query = "";
@@ -50,7 +59,7 @@ returnsRouter.post("/search-sale-return", (req, res) => {
 
 		sql = `select c.name, sr.id as sale_return_id, sr.sale_id as sale_id,  s.invoice_no as invoice_no, s.invoice_date as invoice_date,
 		sr.return_date as return_date,
-		sr.cr_note_id as cr_note_id, sr.center_id as center_id, sr.to_return_amount as to_return_amount, sr.amount_returned as amount_returned, 
+		sr.cr_note_id as cr_note_id, cn.credit_note_no, sr.center_id as center_id, sr.to_return_amount as to_return_amount, sr.amount_returned as amount_returned, 
 		sr.refund_status as refund_status, 
 		(CASE
 			WHEN sr.refund_status = 'P' THEN 'Pending'
@@ -74,7 +83,9 @@ returnsRouter.post("/search-sale-return", (req, res) => {
 			) AS return_status_x
 		
 		from 
-		sale_return sr,
+		sale_return sr
+		LEFT outer JOIN credit_note cn
+					ON cn.id = sr.cr_note_id, 
 		sale s,
 		customer c
 		where
@@ -93,10 +104,6 @@ returnsRouter.post("/search-sale-return", (req, res) => {
 			sql = sql + custsql;
 		}
 
-		if (invoice_no.trim().length > 0) {
-			sql = sql + `and s.invoice_no = '${invoice_no.trim()}' `;
-		}
-
 		sql = sql + " order by sr.return_date desc ";
 
 		logger.debug.debug("sql search sale " + sql);
@@ -104,7 +111,7 @@ returnsRouter.post("/search-sale-return", (req, res) => {
 		query = ` 
 		select c.name, sr.id as sale_return_id, sr.sale_id as sale_id, s.invoice_no as invoice_no, s.invoice_date as invoice_date,
 		sr.return_date as return_date,
-		sr.cr_note_id as cr_note_id, sr.center_id as center_id, sr.to_return_amount as to_return_amount, sr.amount_returned as amount_returned, 
+		sr.cr_note_id as cr_note_id, cn.credit_note_no, sr.center_id as center_id, sr.to_return_amount as to_return_amount, sr.amount_returned as amount_returned, 
 		sr.refund_status as refund_status, 
 		(CASE
 			WHEN sr.refund_status = 'P' THEN 'Pending'
@@ -127,16 +134,23 @@ returnsRouter.post("/search-sale-return", (req, res) => {
 			) AS return_status_x
 		
 		from 
-		sale_return sr,
+		sale_return sr
+		LEFT outer JOIN credit_note cn
+					ON cn.id = sr.cr_note_id, 
 		sale s,
 		customer c
 		where
 		c.id = s.customer_id and
 		sr.sale_id = s.id and
-		sr.center_id = '${center_id}' and
-		s.invoice_no = '${invoice_no.trim()} order by sr.return_date desc  '
-		`;
+		sr.center_id = '${center_id}' and `;
+
+		if (search_type === "byinvoice") {
+			query = query + ` s.invoice_no = '${search_by.trim()}' order by sr.return_date desc `;
+		} else if (search_type === "bycreditnote") {
+			query = query + ` cn.credit_note_no = '${search_by.trim()}' order by sr.return_date desc `;
+		}
 	}
+
 	console.log("dinesh " + search_type === "all" ? sql : query);
 	pool.query(search_type === "all" ? sql : query, function (err, data) {
 		if (err) {
@@ -241,7 +255,8 @@ returnsRouter.post("/update-sale-returns-received", (req, res) => {
 					set 
 					T1.received_qty = T1.received_qty + ${k.received_now},
 					T2.received_items = T2.received_items + ${k.received_now},
-					T2.receive_status = IF(T2.to_receive_items = (T2.received_items + ${k.received_now}), 'R', T2.receive_status)
+					T2.receive_status = IF(T2.to_receive_items = (T2.received_items + ${k.received_now}), 'R', T2.receive_status),
+					T2.return_status = IF(T2.to_receive_items = (T2.received_items + ${k.received_now}), 'C', T2.return_status)
 					where 
 					T1.sale_return_id = T2.id and
 					T1.id = '${k.id}'				
@@ -291,6 +306,7 @@ returnsRouter.get("/show-receive-button/:center_id/:sale_return_id", async (req,
 // });
 
 /*
+Sale return & Create Credit Note + update credit_amt in customer table
 Steps: 
 1. insert sale_return
 2. update sale_details on how many returned 
@@ -308,7 +324,14 @@ returnsRouter.post("/add-sale-return", async (req, res) => {
 
 	const job_completed = await insertSaleReturnDetail(srd, sale_return_id, smd);
 
-	Promise.all([sale_return_id, job_completed]).then((result) => {
+	updateCRSequenceGenerator(smd.center_id);
+	let fetchCRNoteNo = await getSequenceCrNote(smd.center_id);
+
+	let cr_note_id_created = await createCreditNote(fetchCRNoteNo, smd.to_return_amount, "R");
+	updateCrNoteIdInSaleReturnTable(cr_note_id_created, sale_return_id);
+	let cr_note_updated = await updateCRAmntToCustomer(smd.sale_id, smd.to_return_amount);
+
+	Promise.all([sale_return_id, job_completed, fetchCRNoteNo, cr_note_id_created, cr_note_updated]).then((result) => {
 		return res.json("success");
 	});
 });

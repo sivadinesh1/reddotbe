@@ -96,6 +96,10 @@ function toTimeZone(time, zone) {
 	return moment(time, format).tz(zone).format("DD-MM-YYYY");
 }
 
+function toTimeZoneFrmt(time, zone, format) {
+	return moment(time, format).tz(zone).format("DD-MM-YYYY");
+}
+
 function currentTimeInTimeZone(zone, format) {
 	return moment(moment(), format).tz(zone).format(format);
 }
@@ -104,4 +108,5 @@ module.exports = {
 	number2text,
 	toTimeZone,
 	currentTimeInTimeZone,
+	toTimeZoneFrmt,
 };

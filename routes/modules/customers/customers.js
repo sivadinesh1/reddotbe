@@ -2,6 +2,7 @@ var pool = require("../../helpers/db");
 const moment = require("moment");
 
 const logger = require("./../../helpers/log4js");
+const { toTimeZone, currentTimeInTimeZone } = require("../../helpers/utils");
 
 // insert row in customer tbl
 const insertCustomer = (insertValues, callback) => {
@@ -38,7 +39,7 @@ const insertCustomer = (insertValues, callback) => {
 		insertValues.whatsapp,
 		insertValues.email,
 	];
-
+	effDiscStDate;
 	pool.query(query, values, function (err, data) {
 		if (err) {
 			return callback(err);
@@ -50,7 +51,7 @@ const insertCustomer = (insertValues, callback) => {
 					type: insertValues.disctype,
 					value: e.gstvalue,
 					gst_slab: e.gstslab,
-					startdate: moment(today).format("DD-MM-YYYY"),
+					startdate: currentTimeInTimeZone("Asia/Kolkata", "DD-MM-YYYY"),
 					enddate: "01-04-9999",
 					brand_id: 0,
 				};
@@ -322,7 +323,7 @@ const updateDefaultCustomerDiscount = (updateValues, callback) => {
 	when gst_slab = 28 then '${updateValues.gsttwentyeight}'
 
 									end),
-									startdate = '${moment(updateValues.effDiscStDate).format("DD-MM-YYYY")}',
+									startdate = '${toTimeZone(updateValues.effDiscStDate, "Asia/Kolkata")}',
 			type= '${updateValues.disctype}'
 	WHERE 
 	brand_id = '${updateValues.brand_id}' and
@@ -441,7 +442,7 @@ const insertDiscountsByBrands = (insertValues, callback) => {
 			type: insertValues.disctype,
 			value: e.gstvalue,
 			gst_slab: e.gstslab,
-			startdate: moment(today).format("DD-MM-YYYY"),
+			startdate: toTimeZone(insertValues.effDiscStDate, "Asia/Kolkata"),
 			enddate: "01-04-9999",
 		};
 
