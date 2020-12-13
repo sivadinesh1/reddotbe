@@ -67,7 +67,7 @@ const getSearchVendors = (centerid, searchstr, callback) => {
 	state s
 	where 
 	v.state_id = s.id and isactive = 'A' and center_id = '${centerid}' and 
-	( LOWER(v.name) like LOWER('${searchstr}%')) 
+	( LOWER(v.name) like LOWER('%${searchstr}%')) 
 	limit 50  `;
 
 	logger.debug.debug("get-vendor-details > " + query);

@@ -406,7 +406,7 @@ s1.code as csa_code
 	csa.customer_id = c.id and
 	csa.def_address = 'Y' and
 	c.state_id = s.id and isactive = 'A' and center_id = '${centerid}'  and
-	( LOWER(c.name) like LOWER('${searchstr}%')) 
+	( LOWER(c.name) like LOWER('%${searchstr}%')) 
 	limit 50 `;
 
 	logger.debug.debug("get-customer-details > " + query);
