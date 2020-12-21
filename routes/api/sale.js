@@ -406,17 +406,16 @@ async function processItems(cloneReq, newPK) {
 												id = '${k.sale_det_id}' `;
 
 		let saleTblPromise = await new Promise(function (resolve, reject) {
-			pool.query(k.sale_det_id === "" ? insQuery100 : upQuery100, function (err, data) {
+			pool.query(k.sale_det_id === "" ? insQuery100 : upQuery100, async function (err, data) {
 				if (err) {
 					reject(err);
 				}
 				// after sale details is updated, then update stock (as this is sale, reduce available stock) tbl & product tbl
 				let qty_to_update = k.qty - k.old_val;
 
-				let query2 = `update stock set available_stock =  available_stock - '${qty_to_update}'
-			 where product_id = '${k.product_id}' and id = '${k.stock_pk}'  `;
+				let query2 = `update stock set available_stock =  available_stock - '${qty_to_update}' where product_id = '${k.product_id}' and id = '${k.stock_pk}'  `;
 
-				let stockTblPromise = new Promise(function (resolve, reject) {
+				let stockTblPromise = await new Promise(function (resolve, reject) {
 					pool.query(query2, function (err, stockupdatedata) {
 						if (err) {
 							reject(err);

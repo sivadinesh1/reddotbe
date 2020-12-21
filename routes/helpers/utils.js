@@ -10,7 +10,7 @@ const number2text = (value) => {
 		f_text = "and " + convert_number(fraction) + " paise";
 	}
 
-	return convert_number(value) + " Rupee " + f_text + " only";
+	return convert_number(value) + " Rupees " + f_text + " only";
 };
 
 function frac(f) {

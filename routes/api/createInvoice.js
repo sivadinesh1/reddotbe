@@ -35,7 +35,7 @@ function createInvoice(saleMaster, saleDetails, customerDetails, centerDetails, 
 			doc.font("Helvetica");
 			generateHeader(doc, centerdata, e);
 			generateCustomerInformation(doc, customerdata, salemasterdata);
-			generateInvoiceTable(doc, salemasterdata, saledetailsdata);
+			generateInvoiceTable(doc, salemasterdata, saledetailsdata, centerdata, e, customerdata);
 			generateFooterSummary(doc, centerdata);
 
 			//		doc[counter].pipe(fs.createWriteStream(path));
@@ -113,13 +113,13 @@ function generateCustomerInformation(doc, customerdata, salemasterdata) {
 		.text("BILL No.           :    " + salemasterdata.invoice_no, 410, 145);
 
 	doc
-		.fillColor("#444444")
+		.fillColor("#000000")
 		.fontSize(10)
 		.text("BILL Date         :    " + salemasterdata.invoice_date, 410, 160);
 
 	const customerInformationTop = 136;
 
-	doc.fontSize(10).text(customerdata.name, 40, customerInformationTop).text(customerdata.address1, 40, 151);
+	doc.fillColor("#000000").fontSize(10).text(customerdata.name, 40, customerInformationTop).text(customerdata.address1, 40, 151);
 
 	if (customerdata.district !== "") {
 		doc.text(customerdata.address2 + ", District: " + customerdata.district, 40, 166);
@@ -128,15 +128,16 @@ function generateCustomerInformation(doc, customerdata, salemasterdata) {
 	}
 
 	doc
+		.fillColor("#000000")
 		.text("State: " + customerdata.code + "-" + customerdata.description, 40, 181)
-		.text("Phone: " + customerdata.mobile + " " + customerdata.gst, 40, 196)
+		.text("Phone: " + customerdata.mobile + " GSTIN: " + customerdata.gst, 40, 196)
 		.moveDown();
 
 	// line end of customer section
 	generateHr(doc, line_x_start, line_x_end, 210);
 }
 
-function generateInvoiceTable(doc, salemasterdata, saledetailsdata) {
+function generateInvoiceTable(doc, salemasterdata, saledetailsdata, centerdata, print_type, customerdata) {
 	let i;
 	let invoiceTableTop = 216;
 	let x_start = 24;
@@ -361,10 +362,35 @@ function generateInvoiceTable(doc, salemasterdata, saledetailsdata) {
 			doc.fontSize(14);
 			doc.text("continue in next page", 50, invoiceTableTop + 50);
 			doc.fontSize(8);
-			invoiceTableTop = 60;
+			invoiceTableTop = 216;
 			doc.addPage({
 				margin: 24,
 			});
+			// for each new page this adds the center and customer data
+			generateHeader(doc, centerdata, print_type);
+			generateCustomerInformation(doc, customerdata, salemasterdata);
+
+			generateTableRow(
+				doc,
+				invoiceTableTop,
+				"SNo",
+				"PRODUCT NAME",
+				"PCODE",
+				" HSN ",
+				" QTY ",
+				" UOM ",
+				" MRP ",
+				"DIS%",
+				" AMOUNT ",
+				"SGST",
+				"CGST",
+				"NET AMNT",
+				x_start,
+				isIGST,
+				"IGST",
+			);
+
+			generateHr(doc, line_x_start, line_x_end, invoiceTableTop + 10);
 		}
 
 		// RUNNING VERTICAL lines SALE DETAILS
@@ -723,8 +749,8 @@ function generateSummaryLeft(doc, saledetailsdata, isIGST, salemasterdata) {
 		start + 10,
 		totalAllTax,
 		discountAllTax,
-		SGSTAllTax,
-		CGSTAllTax,
+		SGSTAllTax * 2,
+		CGSTAllTax * 2,
 		finalTotalAllTax,
 		isIGST,
 		IGSTAllTax,
@@ -848,7 +874,7 @@ function generateTableRow(
 
 	if (product_description !== "PRODUCT NAME") {
 		doc.text(
-			product_description.length > 33 ? product_description.substr(0, 30) + "..." : product_description,
+			product_description.length > 33 ? product_description.substr(0, 29) + "..." : product_description,
 			x_start + (snow + 2) + (pcodew + 3),
 			y,
 			{
@@ -865,7 +891,7 @@ function generateTableRow(
 	if (hsn === " HSN ") {
 		doc.text(hsn, x_start + (snow + 2) + (pcodew + 2) + (pdescw + 2), y, { width: hsnw, align: "center" });
 	} else {
-		doc.text(hsn, x_start + (snow + 2) + (pcodew + 2) + (pdescw + 3), y, { width: hsnw, align: "center" });
+		doc.text(hsn, x_start + (snow + 2) + (pcodew + 2) + (pdescw + 3), y, { width: hsnw, align: "left" });
 	}
 
 	if (qty === " QTY ") {
@@ -1065,6 +1091,7 @@ function generateTableRow(
 	// }
 }
 
+// FINAL SUMMARY TOTAL LEFT
 function generateSummaryLeftTableRow(doc, y, classhead, subtotal, disc, amount, sgst, cgst, gst, total, isIGST, igst) {
 	doc.fillColor("#000000");
 	doc.fontSize(9).text(classhead, 24, y, { width: 40, align: "left" });
@@ -1128,40 +1155,40 @@ function generateSummaryLeftTableRow(doc, y, classhead, subtotal, disc, amount, 
 		}
 	}
 }
-
+//Final SUMMARY TOTAL RIGHT BOX
 function generateSummaryRightTableRow(doc, y, subtotal, discount, sgst, cgst, finalTotalAllTax, isIGST, igst, salemasterdata) {
 	doc.fillColor("#000000");
 	doc
 		.fontSize(9)
 		.font("Helvetica-Bold")
-		.text("SUB TOTAL", 460, y, { width: 70, align: "left" })
+		.text("SUB TOTAL", 450, y, { width: 70, align: "left" })
 		.font("Helvetica")
-		.text((+subtotal + +discount).toFixed(2), 510, y, { width: 70, align: "right" })
+		.text((+subtotal + +discount).toFixed(2), 500, y, { width: 70, align: "right" })
 
-		.text("DISCOUNT", 460, y + 15, { width: 70, align: "left" })
+		.text("DISCOUNT", 450, y + 15, { width: 70, align: "left" })
 
-		.text((+discount).toFixed(2), 510, y + 15, { width: 70, align: "right" });
+		.text((+discount).toFixed(2), 500, y + 15, { width: 70, align: "right" });
 
 	if (!isIGST) {
 		doc
-			.text("SGST", 460, y + 30, { width: 70, align: "left" })
+			.text("SGST", 450, y + 30, { width: 70, align: "left" })
 
-			.text((+sgst / 2).toFixed(2), 510, y + 30, { width: 70, align: "right" })
+			.text((+sgst / 2).toFixed(2), 500, y + 30, { width: 70, align: "right" })
 
-			.text("CGST", 460, y + 45, { width: 70, align: "left" })
+			.text("CGST", 450, y + 45, { width: 70, align: "left" })
 
-			.text((+cgst / 2).toFixed(2), 510, y + 45, { width: 70, align: "right" });
+			.text((+cgst / 2).toFixed(2), 500, y + 45, { width: 70, align: "right" });
 	} else if (isIGST) {
 		doc
-			.text("IGST", 460, y + 30, { width: 70, align: "left" })
+			.text("IGST", 450, y + 30, { width: 70, align: "left" })
 
-			.text((+igst).toFixed(2), 510, y + 30, { width: 70, align: "right" });
+			.text((+igst).toFixed(2), 500, y + 30, { width: 70, align: "right" });
 	}
 
 	doc
-		.text("Misc.", 460, y + 60, { width: 70, align: "left" })
+		.text("Misc.", 450, y + 60, { width: 70, align: "left" })
 
-		.text((+(+salemasterdata.transport_charges + +salemasterdata.unloading_charges + +salemasterdata.misc_charges)).toFixed(2), 510, y + 60, {
+		.text((+(+salemasterdata.transport_charges + +salemasterdata.unloading_charges + +salemasterdata.misc_charges)).toFixed(2), 500, y + 60, {
 			width: 70,
 			align: "right",
 		});
@@ -1169,18 +1196,18 @@ function generateSummaryRightTableRow(doc, y, subtotal, discount, sgst, cgst, fi
 	let finalSumTotal = +(+finalTotalAllTax + +salemasterdata.transport_charges + +salemasterdata.unloading_charges + +salemasterdata.misc_charges);
 
 	doc
-		.text("ROUNDED OFF", 460, y + 75, { width: 70, align: "left" })
+		.text("ROUNDED OFF", 450, y + 75, { width: 70, align: "left" })
 
-		.text((roundOffFn(finalSumTotal, "rounding") - roundOffFn(finalSumTotal, "withoutrounding")).toFixed(2), 510, y + 75, {
+		.text((roundOffFn(finalSumTotal, "rounding") - roundOffFn(finalSumTotal, "withoutrounding")).toFixed(2), 500, y + 75, {
 			width: 70,
 			align: "right",
 		});
 
 	doc.font("Helvetica-Bold");
 	doc
-		.text("TOTAL", 460, y + 95, { width: 70, align: "left" })
+		.text("TOTAL", 450, y + 95, { width: 70, align: "left" })
 
-		.text(roundOffFn(finalSumTotal, "rounding"), 510, y + 95, {
+		.text(roundOffFn(finalSumTotal, "rounding").toLocaleString("en-IN"), 500, y + 95, {
 			width: 70,
 			align: "right",
 		})

@@ -341,7 +341,7 @@ router.get("/all-active-customers/:centerid", (req, res) => {
 	customer c,
 	state s
 	where 
-	c.state_id = s.id and isactive = 'A' and center_id = ${centerid}`;
+	c.state_id = s.id and isactive = 'A' and center_id = ${centerid} 	order by name `;
 
 	pool.query(sql, function (err, data) {
 		if (err) {

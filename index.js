@@ -15,11 +15,11 @@ const http = require("http");
 const cors = require("cors");
 const fs = require("fs");
 
-var options = {
-	key: fs.readFileSync("etc/letsencrypt/live/demo.squapl.com/privkey.pem"),
-	cert: fs.readFileSync("etc/letsencrypt/live/demo.squapl.com/cert.pem"),
-	ca: fs.readFileSync("etc/letsencrypt/live/demo.squapl.com/chain.pem"),
-};
+// var options = {
+// 	key: fs.readFileSync("/etc/letsencrypt/live/demo.squapl.com/privkey.pem"),
+// 	cert: fs.readFileSync("/etc/letsencrypt/live/demo.squapl.com/cert.pem"),
+// 	ca: fs.readFileSync("/etc/letsencrypt/live/demo.squapl.com/chain.pem"),
+// };
 
 const app = express();
 
@@ -34,8 +34,6 @@ var corsOptions = {
 
 // logger is actual logging
 app.use(logger.express);
-
-//logger.access.info("hello dinesh sir info ** ");
 
 // app.use(function (req, res, next) {
 //     res.header("Access-Control-Allow-Origin", "*");
@@ -96,5 +94,5 @@ app.use((err, req, res) => {
 const PORT = process.env.PORT || 5050;
 
 // app.listen(PORT);
-// http.createServer(app).listen(5050);
-https.createServer(options, app).listen(8440);
+http.createServer(app).listen(5050);
+//https.createServer(options, app).listen(8440);

@@ -28,7 +28,7 @@ const insertCustomer = (insertValues, callback) => {
 		insertValues.name,
 		insertValues.address1,
 		insertValues.address2,
-		insertValues.address3,
+		insertValues.district,
 		insertValues.district,
 		insertValues.state_id,
 		insertValues.pin,
@@ -39,7 +39,7 @@ const insertCustomer = (insertValues, callback) => {
 		insertValues.whatsapp,
 		insertValues.email,
 	];
-	effDiscStDate;
+
 	pool.query(query, values, function (err, data) {
 		if (err) {
 			return callback(err);
