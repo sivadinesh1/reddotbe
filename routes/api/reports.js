@@ -14,7 +14,6 @@ var pool = require("./../helpers/db");
 
 reportsRouter.post("/inventory-report", (req, res) => {
 	const [center_id, product_code] = Object.values(req.body);
-	logger.debug.debug("object..> inventory-report >" + center_id, product_code);
 
 	getProductInventoryReport(center_id, product_code, (err, data) => {
 		if (err) {
@@ -27,11 +26,9 @@ reportsRouter.post("/inventory-report", (req, res) => {
 
 reportsRouter.post("/product-summary-report", (req, res) => {
 	const [center_id, start, end] = Object.values(req.body);
-	logger.debug.debug("product-summary-report >" + center_id);
 
 	getProductSummaryReport(center_id, start, end, (err, data) => {
 		if (err) {
-			console.log("error " + JSON.stringify(err));
 			return handleError(new ErrorHandler("500", "Error fetching product-summary-report."), res);
 		} else {
 			return res.status(200).json(data);

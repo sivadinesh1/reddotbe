@@ -51,7 +51,7 @@ const getBrandsMissingDiscountsByCustomer = (center_id, status, customer_id, cal
 						b.center_id = '${center_id}' and isactive = '${status}' and
 						d.customer_id = '${customer_id}'
 						) order by b.name`;
-	console.log("test.. " + query);
+
 	pool.query(query, function (err, data) {
 		if (err) return callback(err);
 		return callback(null, data);

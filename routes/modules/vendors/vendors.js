@@ -37,7 +37,6 @@ const insertVendor = (insertValues, callback) => {
 };
 
 const updateVendor = (updateValues, id, callback) => {
-	logger.debug.debug("object >> " + JSON.stringify(updateValues));
 	var today = new Date();
 	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
 
@@ -69,8 +68,6 @@ const getSearchVendors = (centerid, searchstr, callback) => {
 	v.state_id = s.id and isactive = 'A' and center_id = '${centerid}' and 
 	( LOWER(v.name) like LOWER('%${searchstr}%')) 
 	limit 50  `;
-
-	logger.debug.debug("get-vendor-details > " + query);
 
 	let values = [centerid, searchstr];
 

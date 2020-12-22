@@ -83,7 +83,7 @@ function printSaleInvoice(path, res) {
 	doc.moveDown().table(table1, 100, 350, { width: 300 });
 
 	doc.end();
-	logger.debug.debug("inside print sale invoice ..");
+
 	doc.pipe(fs.createWriteStream(path));
 
 	var stream = doc.pipe(blobStream());

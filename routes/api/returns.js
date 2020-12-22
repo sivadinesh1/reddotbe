@@ -27,7 +27,7 @@ var pool = require("../helpers/db");
 returnsRouter.get("/get-sale-returns/:center_id", async (req, res) => {
 	let center_id = req.params.center_id;
 	let saleReturns = await getReturns(center_id);
-	console.log("object..." + saleReturns);
+
 	return res.json(saleReturns);
 });
 
@@ -104,8 +104,6 @@ returnsRouter.post("/search-sale-return", (req, res) => {
 		}
 
 		sql = sql + " order by sr.return_date desc ";
-
-		logger.debug.debug("sql search sale " + sql);
 	} else if (search_type !== "all") {
 		query = ` 
 		select c.name, sr.id as sale_return_id, sr.sale_id as sale_id, s.invoice_no as invoice_no, s.invoice_date as invoice_date,
@@ -150,7 +148,6 @@ returnsRouter.post("/search-sale-return", (req, res) => {
 		}
 	}
 
-	console.log("dinesh " + search_type === "all" ? sql : query);
 	pool.query(search_type === "all" ? sql : query, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error fetching search-sale-return"), res);
@@ -173,8 +170,6 @@ returnsRouter.get("/get-sale-return-details/:center_id/:salre_return_id", (req, 
 	sd.id = srd.sale_detail_id and
 	srd.sale_return_id = ${sale_return_id}
 		`;
-
-	logger.debug.debug("sql get-sale-return-details " + sql);
 
 	pool.query(sql, function (err, data) {
 		if (err) {
@@ -248,7 +243,6 @@ Steps:
 4. Increase the stock
 */
 returnsRouter.post("/add-sale-return", async (req, res) => {
-	console.log(" inside add sale return ..." + JSON.stringify(req.body));
 	let reqObject = req.body;
 
 	let smd = reqObject[1]; // sale master data

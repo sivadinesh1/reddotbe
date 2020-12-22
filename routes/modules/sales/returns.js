@@ -18,7 +18,6 @@ const getReturns = (center_id, callback) => {
   customer_name,
   invoice_no, returned_date `;
 
-	console.log("object" + sql);
 	return new Promise(function (resolve, reject) {
 		pool.query(sql, function (err, data) {
 			if (err) {

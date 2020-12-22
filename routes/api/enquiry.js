@@ -13,7 +13,6 @@ const { insertEnquiryDetail, fetchEnquiryDetailByEnqId, fetchCustomerDetailsByEn
 enquiryRoute.post("/draft-enquiry", (req, res) => {
 	let jsonObj = req.body;
 
-	logger.debug.debug("object>>> draft enquiry...");
 	let today = new Date();
 
 	let now = new Date();
@@ -25,7 +24,6 @@ enquiryRoute.post("/draft-enquiry", (req, res) => {
 	var objectKeysArray = Object.keys(jsonObj);
 	objectKeysArray.forEach(function (objKey) {
 		var objValue = jsonObj[objKey];
-		logger.debug.debug("object..MAIN VAL draft enquiry.." + JSON.stringify(objValue));
 
 		// first update enquiry table with STATUS = 'D'
 		let upQry1 = `update enquiry set estatus = 'D' where id = '${objValue.enquiry_id}' `;
@@ -57,10 +55,8 @@ enquiryRoute.post("/draft-enquiry", (req, res) => {
 
 		let uQrys = objValue.product_id === null ? upQuery2 : upQuery1;
 
-		logger.debug.debug("object upQuery1 a> g " + uQrys);
 		pool.query(uQrys, function (err, data) {
 			if (err) {
-				logger.debug.debug("dinesh " + JSON.stringify(err));
 				return handleError(new ErrorHandler("500", "Error Updating draft-enquiry."), res);
 			}
 		});
@@ -83,9 +79,6 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 	var objectKeysArray = Object.keys(jsonObj);
 	objectKeysArray.forEach(function (objKey) {
 		var objValue = jsonObj[objKey];
-		logger.debug.debug("object..MAIN VAL." + JSON.stringify(objValue));
-
-		logger.debug.debug("(objValue.product_id " + objValue.product_id);
 
 		/** No Product Id, obviously its a backorder */
 		if (objValue.product_id === "" || objValue.product_id === null) {
@@ -110,7 +103,6 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 
 			pool.query(insQry, function (err, data) {
 				if (err) {
-					logger.debug.debug("error insert into backorder " + JSON.stringify(err));
 					return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
 				}
 			});
@@ -128,11 +120,8 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 			status = 'B'
 			where id = '${objValue.id}' `;
 
-			logger.debug.debug("object upQuery1 a> g " + upQuery1);
-
 			pool.query(upQuery1, function (err, data) {
 				if (err) {
-					console.log("error update enquiry detai.... partial fullfilment..." + JSON.stringify(err));
 					return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
 				}
 			});
@@ -140,11 +129,8 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 			let insQry2 = `INSERT INTO backorder (center_id, customer_id, enquiry_detail_id, qty, reason, status, order_date)
 			VALUES ('${objValue.center_id}', '${objValue.customer_id}', '${objValue.id}', '${bqty}', 'Zero Quantity Alloted', 'O', '${today}') `;
 
-			logger.debug.debug("object insQry2 a>g " + insQry2);
-
 			pool.query(insQry2, function (err, data) {
 				if (err) {
-					logger.debug.debug("object insQry2 a>g >>>>>>>> " + +JSON.stringify(err));
 					return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
 				}
 			});
@@ -164,11 +150,8 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 			status = 'P'
 			where id = '${objValue.id}' `;
 
-			logger.debug.debug("object upQuery1 a> g " + upQuery1);
-
 			pool.query(upQuery1, function (err, data) {
 				if (err) {
-					console.log("error update enquiry detai.... partial fullfilment..." + JSON.stringify(err));
 					return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
 				}
 			});
@@ -176,19 +159,14 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 			let insQry2 = `INSERT INTO backorder (center_id, customer_id, enquiry_detail_id, qty, reason, status, order_date)
 			VALUES ('${objValue.center_id}', '${objValue.customer_id}', '${objValue.id}', '${bqty}', 'Partial fullfillmeent', 'O', '${today}') `;
 
-			logger.debug.debug("object insQry2 a>g " + insQry2);
-
 			pool.query(insQry2, function (err, data) {
 				if (err) {
-					logger.debug.debug("object insQry2 a>g >>>>>>>> " + +JSON.stringify(err));
 					return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
 				}
 			});
 		} else if (objValue.giveqty >= objValue.askqty && objValue.product_id !== "" && objValue.product_id !== null) {
 			// F- fullfilled
 			// updt enq_det_tbl status as F, give qty = actual given
-
-			logger.debug.debug("objValue >>>> " + JSON.stringify(objValue));
 
 			let upQuery3 = `update enquiry_detail
 			set
@@ -199,12 +177,8 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 			status = 'F'
 			where id = '${objValue.id}' `;
 
-			logger.debug.debug("SQL upQuery3 >> " + upQuery3);
-
 			pool.query(upQuery3, function (err, data) {
 				if (err) {
-					console.log("query >> enquiry details >> " + JSON.stringify(err));
-
 					return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
 				}
 			});
@@ -276,8 +250,6 @@ enquiryRoute.post("/update-status-enquiry-details", (req, res) => {
 		status = '${status}'
 		where id = '${id}' `;
 
-		logger.debug.debug("object>><<" + query);
-
 		pool.query(query, function (err, data) {
 			if (err) {
 				return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
@@ -298,7 +270,7 @@ enquiryRoute.post("/update-enquiry-details", (req, res) => {
 
 enquiryRoute.post("/insert-enquiry-details", (req, res) => {
 	let jsonObj = req.body;
-	logger.debug.debug("insert enq " + JSON.stringify(jsonObj));
+
 	var today = new Date();
 	let count = 0;
 	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
@@ -307,26 +279,17 @@ enquiryRoute.post("/insert-enquiry-details", (req, res) => {
 
 	pool.query(query, async function (err, data) {
 		if (err) {
-			logger.debug.debug("error insert enquiry details..step1...", JSON.stringify(err));
-			console.log("error insert enquiry details.CL.step1..", JSON.stringify(err));
 			return handleError(new ErrorHandler("500", "error insert enquiry details..step1.."), res);
 		} else {
 			let tmpid = data.insertId;
 
 			const prodArr = jsonObj["productarr"];
-			// prodArr.reverse();
-			logger.debug.debug("PRINT ENQUIRY ARRAY LIST >> ", prodArr);
-
-			// for (const file of files) {
-			// 	const contents = await fs.readFile(file, 'utf8');
-			// 	console.log(contents);
-			// }
 
 			for (const k of prodArr) {
 				await insertEnquiryDetail(k, jsonObj, tmpid, (err, data) => {
 					if (err) {
 						let errTxt = err.message;
-						logger.debug.debug("error in enquiry details insert >> ", errTxt);
+
 						return handleError(new ErrorHandler("500", "error in enquiry details insert."), res);
 					} else {
 						let newPK = data.insertId;
@@ -347,23 +310,20 @@ enquiryRoute.post("/insert-enquiry-details", (req, res) => {
 
 enquiryRoute.post("/add-more-enquiry-details", (req, res) => {
 	let jsonObj = req.body;
-	// console.log("dinesh >> " + JSON.stringify(jsonObj));
+
 	var today = new Date();
 	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
 
 	const prodArr = jsonObj["productarr"];
-	logger.debug.debug("TCL: prodArr", prodArr.length);
 
 	let newProdArr = [];
 
 	prodArr.forEach(function (k) {
-		logger.debug.debug(".........xx..." + k.notes);
 		let query1 = `INSERT INTO enquiry_detail ( enquiry_id, product_id, askqty, product_code, notes, status)
 							values ( '${req.body.enquiry_id}', (select id from product where product_code='${k.product_code}' and center_id = '${jsonObj.centerid}'), '${k.quantity}', '${k.product_code}', '${k.notes}', 'O')`;
-		console.log("enquiry dinesh test >> " + query1);
+
 		pool.query(query1, function (err, data) {
 			if (err) {
-				console.log("error : enquiry dinesh test >> " + JSON.stringify(err));
 				return handleError(new ErrorHandler("500", "Error add-more-enquiry-details."), res);
 			} else {
 				let tmpid = data.insertId;
@@ -397,9 +357,7 @@ enquiryRoute.post("/add-more-enquiry-details", (req, res) => {
 						if (err) {
 							return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
 						} else {
-							logger.debug.debug("dinesh >> " + JSON.stringify(data));
 							newProdArr.push(data[0]);
-							logger.debug.debug("pring the new prod arr " + JSON.stringify(newProdArr));
 
 							if (newProdArr.length === prodArr.length) {
 								res.json({
@@ -440,28 +398,14 @@ enquiryRoute.get("/open-enquiries/:centerid/:status", (req, res) => {
 
 enquiryRoute.get("/get-enquiry-details/:enqid", async (req, res) => {
 	let enqid = req.params.enqid;
-	logger.debug.debug("TCL: enqid", enqid);
+
 	let enquiryDetails;
 	let customerDetails;
-	// let sql = `
-
-	// `;
-	//	logger.debug.debug("get enq details " + sql);
-
-	// console.log("get enq details " + sql);
-
-	// pool.query(sql, function (err, data) {
-	// 	if (err) {
-	// 		return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
-	// 	} else {
-	// 		return res.json(data);
-	// 	}
-	// });
 
 	await fetchEnquiryDetailByEnqId(enqid, (err, data) => {
 		if (err) {
 			let errTxt = err.message;
-			logger.debug.debug("error in enquiry details insert >> ", errTxt);
+
 			return handleError(new ErrorHandler("500", "error in fetch enquiry details ."), res);
 		} else {
 			enquiryDetails = data;
@@ -472,7 +416,7 @@ enquiryRoute.get("/get-enquiry-details/:enqid", async (req, res) => {
 	await fetchCustomerDetailsByEnqId(enqid, (err, data) => {
 		if (err) {
 			let errTxt = err.message;
-			logger.debug.debug("error in enquiry details insert >> ", errTxt);
+
 			return handleError(new ErrorHandler("500", "error in fetch enquiry details ."), res);
 		} else {
 			customerDetails = data;
@@ -485,7 +429,6 @@ enquiryRoute.get("/get-enquiry-details/:enqid", async (req, res) => {
 
 enquiryRoute.get("/get-enquiry-master/:enqid", (req, res) => {
 	let enqid = req.params.enqid;
-	logger.debug.debug("enqid >> ", enqid);
 
 	let sql = `
 	select 
@@ -513,7 +456,6 @@ enquiryRoute.get("/get-enquiry-master/:enqid", (req, res) => {
 	e.id = ${enqid}	
 
 	`;
-	//	logger.debug.debug("get enq details " + sql);
 
 	pool.query(sql, function (err, data) {
 		if (err) {
@@ -593,7 +535,7 @@ discount.brand_id = 0 )
 	ed.giveqty != 0 and
 	e.id = ${enqid}
 	`;
-	logger.debug.debug("object # get-enquired-product-data " + sql);
+
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
@@ -629,8 +571,6 @@ enquiryRoute.get("/back-order/:centerid", (req, res) => {
 	ed.product_id is null and
 	str_to_date(order_date, '%d-%m-%YYYY') BETWEEN DATE_SUB(NOW(), INTERVAL 30 DAY) AND NOW();
 	`;
-
-	logger.debug.debug("SHOW THE QRY " + sql);
 
 	pool.query(sql, function (err, data) {
 		if (err) {
@@ -688,8 +628,6 @@ enquiryRoute.get("/search-enquiries/:centerid/:customerid/:status/:fromdate/:tod
 		sql = sql + ` and e.estatus =  '${status}' `;
 	}
 
-	logger.debug.debug("search enquiry >> " + sql);
-
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error fetching search enquiry"), res);
@@ -704,8 +642,6 @@ enquiryRoute.get("/search-enquiries/:centerid/:customerid/:status/:fromdate/:tod
 enquiryRoute.post("/delete-enquiry-details", async (req, res) => {
 	let id = req.body.id;
 	let enq_id = req.body.enquiry_id;
-
-	console.log("dinesh " + id + "   " + enq_id);
 
 	var today = new Date();
 	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
@@ -730,7 +666,6 @@ enquiryRoute.post("/delete-enquiry-details", async (req, res) => {
 	let auditPromise = await new Promise(function (resolve, reject) {
 		pool.query(auditQuery, function (err, data) {
 			if (err) {
-				logger.debug.debug("error: " + err);
 				return reject(handleError(new ErrorHandler("500", "Error adding sale audit."), res));
 			}
 			resolve(data);

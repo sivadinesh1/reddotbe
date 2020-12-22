@@ -16,17 +16,8 @@ const { createInvoice } = require("./createInvoice.js");
 const { printSaleInvoice } = require("./../modules/sales/printSaleInvoice.js");
 
 printRouter.post("/invoice-pdf", async (req, res) => {
-	// let sale_id = req.params.saleid;
-	// let print_type = req.params.printtype;
-
-	logger.debug.debug("object >>>" + JSON.stringify(req.body));
-
 	let sale_id = req.body.sale_id;
 	let print_type = req.body.print_type;
-
-	//const [sale_id, print_type] = Object.values(req.body);
-
-	// createInvoice("", "", invoice, "invoice.pdf", res);
 
 	// using saleid get SALE MASTER & SALE DETAILS
 	let saleMaster = await getSalesMaster(sale_id);

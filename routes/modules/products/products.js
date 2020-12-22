@@ -52,10 +52,7 @@ const insertProduct = (insertValues, callback) => {
 
 			pool.query(query2, function (err, data1) {
 				if (err) {
-					logger.debug.debug("object" + err);
-					console.log("insertProduct + insert stock " + JSON.stringify(err));
 				} else {
-					logger.debug.debug("object..stock update .");
 					return callback(null, data1);
 				}
 			});
@@ -64,7 +61,6 @@ const insertProduct = (insertValues, callback) => {
 };
 
 const updateProduct = (updateValues, callback) => {
-	logger.debug.debug("updateProduct >> " + JSON.stringify(updateValues));
 	var today = new Date();
 	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
 

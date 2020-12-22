@@ -18,8 +18,6 @@ str_to_date(DATE_FORMAT(enquiry_date,'%d-%m-%YYYY') , '%d-%m-%YYYY') between
 str_to_date('${from_date}', '%d-%m-%YYYY') and
 str_to_date('${to_date}', '%d-%m-%YYYY')  `;
 
-	logger.debug.debug("printing getInquirySummary " + query);
-
 	pool.query(query, function (err, data) {
 		if (err) return callback(err);
 		return callback(null, data);
@@ -39,8 +37,6 @@ str_to_date('${from_date}', '%d-%m-%YYYY') and
 str_to_date('${to_date}', '%d-%m-%YYYY')      
  `;
 
-	logger.debug.debug("printing getSalesSummary " + query);
-
 	pool.query(query, function (err, data) {
 		if (err) return callback(err);
 		return callback(null, data);
@@ -59,8 +55,6 @@ STR_TO_DATE(p.invoice_date,'%d-%m-%Y') between
 str_to_date('${from_date}', '%d-%m-%YYYY') and
 str_to_date('${to_date}', '%d-%m-%YYYY')          
  `;
-
-	logger.debug.debug("printing getPurchaseSummary " + query);
 
 	pool.query(query, function (err, data) {
 		if (err) return callback(err);
@@ -83,8 +77,6 @@ str_to_date('${to_date}', '%d-%m-%YYYY')
           
  `;
 
-	logger.debug.debug("printing getSaleTotal " + query);
-
 	pool.query(query, function (err, data) {
 		if (err) return callback(err);
 		return callback(null, data);
@@ -97,8 +89,6 @@ const getCenterSummary = (center_id, from_date, to_date, callback) => {
     (
     select count(*) as 'active_vendors' from vendor where isactive = 'A' and center_id = '${center_id}'
     ) as tbl2 `;
-
-	logger.debug.debug("printing getCenterSummary " + query);
 
 	pool.query(query, function (err, data) {
 		if (err) return callback(err);
@@ -114,8 +104,6 @@ const getReceivablesOutstanding = (center_id, from_date, to_date, callback) => {
   group by
   customer_id
    `;
-
-	logger.debug.debug("printing getCenterSummary " + query);
 
 	pool.query(query, function (err, data) {
 		if (err) return callback(err);
@@ -135,8 +123,6 @@ const getPaymentsByCustomers = (center_id, from_date, to_date, callback) => {
   str_to_date('${from_date}', '%d-%m-%YYYY') and
   str_to_date('${to_date}', '%d-%m-%YYYY')    
    `;
-
-	logger.debug.debug("printing getPaymentsByCustomers " + query);
 
 	pool.query(query, function (err, data) {
 		if (err) return callback(err);

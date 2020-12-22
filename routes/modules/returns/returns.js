@@ -30,7 +30,6 @@ const insertSaleReturns = (smd) => {
 const insertSaleReturnDetail = async (srd, sale_return_id, smd) => {
 	return new Promise(async (resolve, reject) => {
 		for (const k of srd) {
-			console.log("received now " + k.received_now);
 			let insertSaleDetailReturnFlag = await insertSaleDetailReturn(k, sale_return_id, smd);
 			let updateSaleDetailFlag = await updateSaleDetail(k);
 			let updateStockAfterReturnFlag = await updateStockAfterReturn(k.product_id, k.mrp, k.received_now);
@@ -66,7 +65,6 @@ const updateSaleDetail = (smd) => {
 	return new Promise((resolve, reject) => {
 		pool.query(sql, function (err, data) {
 			if (err) {
-				console.log("dinesh " + JSON.stringify(err));
 				reject("Error while updating sale details with returns");
 			} else {
 				resolve("success");
@@ -79,12 +77,9 @@ const updateStockAfterReturn = (product_id, mrp, received_now) => {
 	let sql = ` update stock set available_stock = available_stock + '${received_now}' where
   product_id = '${product_id}' and mrp = '${mrp}'  `;
 
-	console.log("pring sql " + sql);
-
 	return new Promise((resolve, reject) => {
 		pool.query(sql, function (err, data) {
 			if (err) {
-				console.log("dinesh " + JSON.stringify(err));
 				reject("Error while updating sale details with returns");
 			} else {
 				resolve("success");
@@ -97,8 +92,6 @@ const createCreditNote = (credit_note_no, credit_note_total_amount, refund_statu
 	let sql = ` INSERT INTO credit_note(credit_note_no, credit_note_total_amount, refund_status)
               VALUES
 							( '${credit_note_no}', '${credit_note_total_amount}', '${refund_status}' ) `;
-
-	console.log("object..createCreditNote.." + sql);
 
 	return new Promise((resolve, reject) => {
 		pool.query(sql, function (err, data) {

@@ -11,8 +11,6 @@ const getCenterDetails = (center_id) => {
   c.state_id = s.id and
   c.id = '${center_id}'  `;
 
-	logger.debug.debug("getCenterDetails > " + query);
-
 	return new Promise(function (resolve, reject) {
 		pool.query(query, function (err, data) {
 			if (err) {

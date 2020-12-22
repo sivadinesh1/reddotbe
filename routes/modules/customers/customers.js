@@ -89,8 +89,6 @@ const insertCustomer = (insertValues, callback) => {
 };
 
 const updateCustomer = (updateValues, id, callback) => {
-	logger.debug.debug("object >> " + JSON.stringify(updateValues));
-	logger.debug.debug("object >> " + id);
 	var today = new Date();
 	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
 
@@ -103,7 +101,6 @@ const updateCustomer = (updateValues, id, callback) => {
 	where
 	id = '${id}'
 	`;
-	logger.debug.debug("object.." + query);
 
 	pool.query(query, function (err, data) {
 		if (err) return callback(err);
@@ -187,7 +184,7 @@ FROM
     order by
     c.name
 	`;
-	logger.debug.debug("latest > " + query);
+
 	let values = [centerid, customerid, customerid, customerid];
 
 	pool.query(query, values, function (err, data) {
@@ -224,11 +221,6 @@ FROM
     c.name, b.name
 
 	`;
-
-	logger.debug.debug("object" + query);
-
-	logger.debug.debug("cener id object" + centerid);
-	logger.debug.debug(" customerid object" + customerid);
 
 	let values = [centerid, customerid];
 
@@ -330,7 +322,7 @@ const updateDefaultCustomerDiscount = (updateValues, callback) => {
 	center_id = '${updateValues.center_id}' and
 	customer_id = '${updateValues.customer_id}'
 	`;
-	logger.debug.debug("object >>>>> " + query);
+
 	pool.query(query, function (err, data) {
 		if (err) return callback(err);
 	});
@@ -363,8 +355,6 @@ const getCustomerDetails = (centerid, customerid) => {
 	
 	c.id = '${customerid}' and
 	c.center_id = '${centerid}' `;
-
-	logger.debug.debug("get-customer-details > " + query);
 
 	let values = [centerid, customerid];
 
@@ -409,8 +399,6 @@ s1.code as csa_code
 	( LOWER(c.name) like LOWER('%${searchstr}%')) 
 	limit 50 `;
 
-	logger.debug.debug("get-customer-details > " + query);
-
 	let values = [centerid, searchstr];
 
 	pool.query(query, values, function (err, data) {
@@ -432,8 +420,6 @@ const insertDiscountsByBrands = (insertValues, callback) => {
 		{ gstslab: 28, gstvalue: insertValues.gsttwentyeight },
 	];
 
-	logger.debug.debug("dinesh KL " + taxSlabArr);
-
 	taxSlabArr.forEach((e) => {
 		let formObj = {
 			center_id: insertValues.center_id,
@@ -445,8 +431,6 @@ const insertDiscountsByBrands = (insertValues, callback) => {
 			startdate: toTimeZone(insertValues.effDiscStDate, "Asia/Kolkata"),
 			enddate: "01-04-9999",
 		};
-
-		logger.debug.debug("object..." + JSON.stringify(formObj));
 
 		insertCustomerDiscount(formObj, (err, rows) => {
 			if (err) return handleError(new ErrorHandler("500", "Error fetching sales master"), res);
@@ -475,8 +459,6 @@ customer_id = ? order by id desc `;
 };
 
 const insertCustomerShippingAddress = (insertValues, callback) => {
-	logger.debug.debug("dinesh " + JSON.stringify(insertValues));
-
 	let def_address = insertValues.def_address === true ? "Y" : "N";
 
 	if (def_address === "Y") {
@@ -502,8 +484,6 @@ const insertCustomerShippingAddress = (insertValues, callback) => {
 		def_address,
 	];
 
-	logger.debug.debug("dinesh insertCustomerShippingAddress " + JSON.stringify(values1));
-
 	pool.query(query1, values1, function (err, data) {
 		if (err) {
 			return callback(err);
@@ -514,8 +494,6 @@ const insertCustomerShippingAddress = (insertValues, callback) => {
 };
 
 const updateCustomerShippingAddress = (updateValues, id, callback) => {
-	logger.debug.debug("object >> " + JSON.stringify(updateValues));
-	logger.debug.debug("object >> " + id);
 	var today = new Date();
 	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
 
@@ -533,7 +511,6 @@ const updateCustomerShippingAddress = (updateValues, id, callback) => {
 			where
 			id = '${id}'
 			`;
-			logger.debug.debug("object.." + query);
 
 			pool.query(query, function (err, data) {
 				if (err) return callback(err);
@@ -550,7 +527,6 @@ const updateCustomerShippingAddress = (updateValues, id, callback) => {
 		where
 		id = '${id}'
 		`;
-		logger.debug.debug("object.." + query);
 
 		pool.query(query, function (err, data) {
 			if (err) return callback(err);

@@ -47,7 +47,6 @@ router.get("/sample-pdf", (req, res) => {
 });
 
 router.post("/search-product-information", (req, res) => {
-	logger.debug.debug("object >>>" + JSON.stringify(req.body));
 	const [centerid, customerid, orderdate, searchstr] = Object.values(req.body);
 
 	// initially checks if product has custom discount for the selected customer. if yes, takes that discount
@@ -88,8 +87,6 @@ a.center_id = '${centerid}' and
 a.description like '%${searchstr}%' ) limit 50 
 `;
 
-	logger.debug.debug("search-product-information > " + sql);
-
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error fetching search products."), res);
@@ -118,8 +115,6 @@ router.post("/search-product", (req, res) => {
   a.description like '%${searchstr}%' ) limit 50 
  `;
 
-	logger.debug.debug("query > " + sql);
-
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error fetching search products."), res);
@@ -131,7 +126,6 @@ router.post("/search-product", (req, res) => {
 
 router.post("/search-customer", (req, res) => {
 	const [centerid, searchstr] = Object.values(req.body);
-	logger.debug.debug("object..>" + centerid, searchstr);
 
 	getSearchCustomers(centerid, searchstr, (err, data) => {
 		if (err) {
@@ -144,7 +138,6 @@ router.post("/search-customer", (req, res) => {
 
 router.post("/search-vendor", (req, res) => {
 	const [centerid, searchstr] = Object.values(req.body);
-	logger.debug.debug("object..> search vendor >" + centerid, searchstr);
 
 	getSearchVendors(centerid, searchstr, (err, data) => {
 		if (err) {
@@ -195,8 +188,6 @@ router.get("/all-active-vendors/:centerid", (req, res) => {
 	where 
 	v.state_id = s.id and isactive = 'A' and center_id = ${centerid} order by v.name`;
 
-	logger.debug.debug("all-active-vendors" + sql);
-
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error fetching active vendors."), res);
@@ -225,7 +216,6 @@ router.get("/vendor-exists/:name", (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			logger.debug.debug("dinesh  " + JSON.stringify(err));
 			return handleError(new ErrorHandler("500", "Error vendor exists."), res);
 		} else {
 			return res.status(200).json({
@@ -244,7 +234,6 @@ router.get("/brand-exists/:name/:center_id", (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			logger.debug.debug("dinesh  " + JSON.stringify(err));
 			return handleError(new ErrorHandler("500", "Error brand exists."), res);
 		} else {
 			return res.status(200).json({
@@ -278,7 +267,6 @@ router.get("/brand-delete/:id", (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			logger.debug.debug("dinesh  " + JSON.stringify(err));
 			return handleError(new ErrorHandler("500", "Error delete brand"), res);
 		} else {
 			return res.status(200).json({
@@ -295,7 +283,6 @@ router.get("/enquiry-delete/:id", (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			logger.debug.debug("dinesh  " + JSON.stringify(err));
 			return handleError(new ErrorHandler("500", "Error delete vendor"), res);
 		} else {
 			return res.status(200).json({
@@ -312,7 +299,6 @@ router.get("/vendor-delete/:id", (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			logger.debug.debug("dinesh  " + JSON.stringify(err));
 			return handleError(new ErrorHandler("500", "Error delete vendor"), res);
 		} else {
 			return res.status(200).json({
@@ -353,14 +339,11 @@ router.get("/all-active-customers/:centerid", (req, res) => {
 });
 
 router.post("/add-parts-details-enquiry", (req, res) => {
-	logger.debug.debug(" inside apply jobs ...");
 	let yourJsonObj = req.body;
 
 	var objectKeysArray = Object.keys(yourJsonObj);
 	objectKeysArray.forEach(function (objKey) {
-		logger.debug.debug("object..KEY..." + JSON.stringify(objKey));
 		var objValue = yourJsonObj[objKey];
-		logger.debug.debug("object..VAL." + JSON.stringify(objValue));
 
 		var today = new Date();
 		today = moment(today).format("YYYY-MM-DD HH:mm:ss");
@@ -377,7 +360,6 @@ router.post("/add-parts-details-enquiry", (req, res) => {
 module.exports = router;
 
 router.get("/get-enquiry/:enquiryid", (req, res) => {
-	logger.debug.debug("object error......... ");
 	let enquiryid = req.params.enquiryid;
 
 	let sql = `select * 
@@ -393,7 +375,6 @@ router.get("/get-enquiry/:enquiryid", (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			logger.debug.debug("object error " + err);
 			return handleError(new ErrorHandler("500", "Error fetching get enquiry"), res);
 		} else {
 			return res.json(data);
@@ -424,8 +405,6 @@ em.id = ${enquiryid}`;
 router.post("/update-taxrate", (req, res) => {
 	let taxrate = req.body.taxrate;
 	let id = req.body.productid;
-
-	logger.debug.debug("object>>> update-giveqty-enquiry-details");
 
 	let query = `update product 
 	set 
@@ -466,7 +445,7 @@ router.get("/purchase/:purchaseid/:status", (req, res) => {
 //mgt
 router.get("/all-pymt-modes/:center_id/:status", (req, res) => {
 	let sql = `select * from payment_mode where center_id = '${req.params.center_id}' and is_active = '${req.params.status}'`;
-	logger.debug.debug("dinesh  " + sql);
+
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error fetching all all-pymt-modes."), res);

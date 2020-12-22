@@ -30,8 +30,6 @@ purchaseRouter.post("/insert-purchase-details", async (req, res) => {
 
 function purchaseMasterEntry(cloneReq) {
 	let revisionCnt = 0;
-	console.log("object " + cloneReq.status);
-	console.log("object " + cloneReq.revision);
 
 	// always very first insert will increment revision to 1, on consicutive inserts, it will be +1
 	if (cloneReq.status === "C" && cloneReq.revision === 0) {
@@ -39,7 +37,6 @@ function purchaseMasterEntry(cloneReq) {
 	} else if (cloneReq.status === "C" && cloneReq.revision !== 0) {
 		revisionCnt = cloneReq.revision + 1;
 	}
-	console.log("object " + revisionCnt);
 
 	var today = new Date();
 	// today = moment(today).format("YYYY-MM-DD HH:mm:ss");
@@ -84,12 +81,9 @@ function purchaseMasterEntry(cloneReq) {
 			revision = '${revisionCnt}'
 			where id = '${cloneReq.purchaseid}' `;
 
-	logger.debug.debug("dinesh " + updQry);
-
 	return new Promise(function (resolve, reject) {
 		pool.query(cloneReq.purchaseid === "" ? insQry : updQry, function (err, data) {
 			if (err) {
-				logger.debug.debug("Error Purchase master entry. " + JSON.stringify(err));
 				return reject(new ErrorHandler("500", "Error Purchase master entry."), res);
 			}
 			if (cloneReq.purchaseid === "") {
@@ -119,8 +113,6 @@ async function processItems(cloneReq, newPK) {
 		await new Promise(function (resolve, reject) {
 			pool.query(k.pur_det_id === "" ? insQuery1 : updQuery1, function (err, data) {
 				if (err) {
-					logger.debug.debug("Error Purchase Details entry... processItems " + JSON.stringify(err));
-					console.log("Error Purchase Details entry... processItems " + JSON.stringify(err));
 					return reject(new ErrorHandler("500", "Error Purchase master entry."), res);
 				} else {
 					updateLatestPurchasePrice(k);
@@ -132,7 +124,6 @@ async function processItems(cloneReq, newPK) {
 
 						let pdetailid = k.pur_det_id === "" ? data.insertId : k.pur_det_id;
 
-						logger.debug.debug("print the purchase detail id for both insert and upadte  " + JSON.stringify(data));
 						// if mrp flag is true the insert new record to stocks
 						insertStock(k, pdetailid);
 					} else {
@@ -143,10 +134,6 @@ async function processItems(cloneReq, newPK) {
 						updateStock(k);
 						//		}
 					}
-					logger.debug.debug("delete this " + JSON.stringify(data));
-					console.log("newPK " + newPK);
-					console.log("data.insertId " + data.insertId);
-					console.log("data status " + cloneReq.status);
 
 					if (cloneReq.status === "C") {
 						insertItemHistory(k, newPK, data.insertId, cloneReq);
@@ -168,10 +155,7 @@ function insertStock(k, pdetailid) {
 
 	pool.query(query2, function (err, data) {
 		if (err) {
-			logger.debug.debug("object" + err);
 		} else {
-			logger.debug.debug("object..stock update .");
-
 			let query3 = `
 
 			update purchase_detail set stock_id =  '${data.insertId}'
@@ -179,9 +163,7 @@ function insertStock(k, pdetailid) {
 
 			pool.query(query3, function (err, data) {
 				if (err) {
-					logger.debug.debug("object" + err);
 				} else {
-					logger.debug.debug("New Stock id due to MRP change is updated back in  purchase details table.");
 				}
 			});
 		}
@@ -190,9 +172,6 @@ function insertStock(k, pdetailid) {
 
 function updateStock(k) {
 	let qty_to_update = k.qty - k.old_val;
-	logger.debug.debug("old val > " + k.old_val);
-	logger.debug.debug("qty val > " + k.qty);
-	logger.debug.debug("qty_to_update val > " + k.qty);
 
 	let query2 = `
 
@@ -201,9 +180,7 @@ where product_id = '${k.product_id}' and id = '${k.stock_pk}' `;
 
 	pool.query(query2, function (err, data) {
 		if (err) {
-			logger.debug.debug("object..stock update .");
 		} else {
-			logger.debug.debug("object..stock update .");
 		}
 	});
 }
@@ -214,13 +191,10 @@ function updateLatestPurchasePrice(k) {
 
 update product set purchase_price = '${k.purchase_price}', unit_price = '${k.purchase_price}'
 where id = '${k.product_id}'  `;
-	logger.debug.debug("object.. di.." + query2);
 
 	pool.query(query2, function (err, data) {
 		if (err) {
-			logger.debug.debug("object..purchase price update error .");
 		} else {
-			logger.debug.debug("object..purchase price updated .");
 		}
 	});
 }
@@ -230,13 +204,6 @@ where id = '${k.product_id}'  `;
 function insertItemHistory(k, vPurchase_id, vPurchase_det_id, cloneReq) {
 	var today = new Date();
 	today = moment(today).format("DD-MM-YYYY");
-
-	// logger.debug.debug("inside insert item history " + JSON.stringify(cloneReq));
-	// logger.debug.debug("delete ME 2 " + vPurchase_det_id);
-
-	// console.log("object OLD " + k.old_val);
-	// console.log("object K " + k.qty);
-	// console.log("object REVISION " + cloneReq.revision);
 
 	// if purchase details id is missing its new else update
 	let purchase_det_id = k.pur_det_id === "" ? vPurchase_det_id : k.pur_det_id;
@@ -268,9 +235,7 @@ function insertItemHistory(k, vPurchase_id, vPurchase_det_id, cloneReq) {
 
 		pool.query(query2, function (err, data) {
 			if (err) {
-				logger.debug.debug("object" + err);
 			} else {
-				logger.debug.debug("object..stock update .");
 			}
 		});
 	}

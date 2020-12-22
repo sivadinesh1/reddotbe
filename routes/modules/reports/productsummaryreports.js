@@ -22,10 +22,6 @@ order by p.id
 limit ${start}, ${end}
   `;
 
-	// and p.brand_id = '${brand_id}'
-
-	console.log("pring product summary report " + query);
-
 	pool.query(query, function (err, data) {
 		if (err) return callback(err);
 		return callback(null, data);

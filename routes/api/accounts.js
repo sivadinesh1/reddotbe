@@ -39,8 +39,6 @@ accountsRouter.post("/add-payment-received", async (req, res) => {
 
 		let pymtNo = await getPymtSequenceNo(cloneReq);
 
-		logger.debug.debug("calling pymtNo >>>  " + pymtNo);
-
 		// add payment master
 		addPaymentMaster(cloneReq, pymtNo, k, (err, data) => {
 			let newPK = data.insertId;
@@ -48,7 +46,6 @@ accountsRouter.post("/add-payment-received", async (req, res) => {
 			// (3) - updates pymt details
 			let process = processItems(cloneReq, newPK, k.sale_ref_id, k.receivedamount);
 		}).catch((err) => {
-			logger.debug.debug("error: " + err);
 			return handleError(new ErrorHandler("500", "Error pymtMaster/Details Entry > " + err), res);
 		});
 
@@ -74,7 +71,6 @@ function processItems(cloneReq, newPK, sale_ref_id, receivedamount) {
 				addPaymentLedgerRecord(cloneReq, newPK, receivedamount, sale_ref_id, (err, data) => {
 					if (err) {
 						let errTxt = err.message;
-						logger.debug.debug("error inserting payment ledger records " + errTxt);
 					} else {
 						// todo
 					}
@@ -178,7 +174,6 @@ accountsRouter.post("/add-bulk-payment-received", async (req, res) => {
 			// (3) - updates pymt details
 			let process = processBulkItems(cloneReq, newPK, invoicesplit);
 		}).catch((err) => {
-			logger.debug.debug("error: " + err);
 			return handleError(new ErrorHandler("500", "Error bulk pymtMaster/Details Entry > " + err), res);
 		});
 
@@ -187,7 +182,6 @@ accountsRouter.post("/add-bulk-payment-received", async (req, res) => {
 				updateCustomerCreditMinus(req.body.creditusedamount, cloneReq.centerid, cloneReq.customer.id, (err, data1) => {
 					if (err) {
 						let errTxt = err.message;
-						logger.debug.debug("error updating updateCustomerCreditMinus " + errTxt);
 					} else {
 						// todo nothing
 					}
@@ -200,7 +194,6 @@ accountsRouter.post("/add-bulk-payment-received", async (req, res) => {
 				updateCustomerCredit(balanceamount, cloneReq.centerid, cloneReq.customer.id, (err, data1) => {
 					if (err) {
 						let errTxt = err.message;
-						logger.debug.debug("error updating customer credit " + errTxt);
 					} else {
 						// todo nothing
 					}
@@ -227,7 +220,6 @@ function processBulkItems(cloneReq, newPK, invoicesplit) {
 					addPaymentLedgerRecord(cloneReq, newPK, e.applied_amount, e.id, (err, data2) => {
 						if (err) {
 							let errTxt = err.message;
-							logger.debug.debug("error inserting payment ledger records " + errTxt);
 						} else {
 							// do nothing
 						}

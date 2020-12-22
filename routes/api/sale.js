@@ -6,7 +6,18 @@ const mysql = require("mysql");
 const moment = require("moment");
 const { handleError, ErrorHandler } = require("./../helpers/error");
 
-const { getSalesMaster, getSalesDetails } = require("../modules/sales/sales.js");
+const {
+	getSalesMaster,
+	getSalesDetails,
+	updateStockAsync,
+	updateProductAsync,
+	IUSaleDetailsAsync,
+	insertItemHistoryAsync,
+	getNextSaleInvoiceNoAsync,
+	insertAuditTblforDeleteSaleDetailsRecAsync,
+	deleteSaleDetailsRecAsync,
+	updateStockWhileDeleteAsync,
+} = require("../modules/sales/sales.js");
 
 const { addSaleLedgerRecord, addReverseSaleLedgerRecord, addSaleLedgerAfterReversalRecord } = require("../modules/accounts/accounts.js");
 
@@ -18,26 +29,8 @@ saleRouter.get("/get-next-sale-invoice-no/:centerid/:invoicetype", (req, res) =>
 	let center_id = req.params.centerid;
 	let invoicetype = req.params.invoicetype;
 
-	let invoiceyear = moment().format("YY");
-
-	let sql = "";
-
-	if (invoicetype === "stockissue") {
-		sql = `select concat('SI',"-",'20', "/", "1", "/", lpad(stock_issue_seq + 1, 5, "0")) as NxtInvNo from financialyear  where 
-					center_id = '${center_id}' and  
-					CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
-	} else if (invoicetype === "gstinvoice") {
-		sql = `select concat('${invoiceyear}', "/", "1", "/", lpad(invseq + 1, 5, "0")) as NxtInvNo from financialyear  where 
-					center_id = '${center_id}' and  
-					CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
-	}
-	logger.debug.debug("invoice type l30" + invoicetype);
-	pool.query(sql, function (err, data) {
-		if (err) {
-			return handleError(new ErrorHandler("500", "Error get Nxt Sale Invoice No"), res);
-		} else {
-			return res.json(data);
-		}
+	getNextSaleInvoiceNoAsync(center_id, invoicetype).then((result) => {
+		return res.json(result);
 	});
 });
 
@@ -51,12 +44,6 @@ saleRouter.post("/delete-sales-details", async (req, res) => {
 	let product_id = req.body.product_id;
 	let stock_id = req.body.stock_id;
 	let autidneeded = req.body.autidneeded;
-
-	logger.debug.debug("delete sale details id > " + JSON.stringify(req.body));
-	logger.debug.debug("delete sale details sales_id > " + sales_id);
-	logger.debug.debug("delete sale details autidneeded > " + autidneeded);
-	logger.debug.debug("delete sale details product_id > " + product_id);
-	logger.debug.debug("delete sale details stock_id > " + stock_id);
 
 	if (autidneeded) {
 		var today = new Date();
@@ -81,7 +68,6 @@ saleRouter.post("/delete-sales-details", async (req, res) => {
 		let auditPromise = await new Promise(function (resolve, reject) {
 			pool.query(auditQuery, function (err, data) {
 				if (err) {
-					logger.debug.debug("error: " + err);
 					return reject(handleError(new ErrorHandler("500", "Error adding sale audit."), res));
 				}
 				resolve(data);
@@ -117,8 +103,6 @@ where product_id = '${product_id}' and id = '${stock_id}'  `;
 		});
 	});
 
-	logger.debug.debug("select promise " + JSON.stringify(stockUpdatePromise));
-
 	if (stockUpdatePromise.affectedRows === 1) {
 		return res.json({
 			result: "success",
@@ -137,8 +121,6 @@ where product_id = '${product_id}' and id = '${stock_id}'  `;
 // 4. update Stock table & then update product table with current stock details
 saleRouter.post("/insert-sale-details", async (req, res) => {
 	const cloneReq = { ...req.body };
-
-	logger.debug.debug("object..insert-sale-details >> " + JSON.stringify(cloneReq));
 
 	// (1) Updates invseq in tbl financialyear, then {returns} formated sequence {YY/MM/INVSEQ}
 	if (cloneReq.status === "C" && cloneReq.revision === 0) {
@@ -173,7 +155,6 @@ saleRouter.post("/insert-sale-details", async (req, res) => {
 	saleMasterEntry(cloneReq, invNo)
 		.then(async (data) => {
 			newPK = cloneReq.salesid === "" ? data.insertId : cloneReq.salesid;
-			logger.debug.debug("New PK" + newPK);
 
 			// if sale came from enquiry, then update the enq table with the said id {status = E (executed)}
 			if (cloneReq.enqref !== 0 && cloneReq.enqref !== null) {
@@ -189,7 +170,6 @@ saleRouter.post("/insert-sale-details", async (req, res) => {
 					addSaleLedgerRecord(cloneReq, newPK, (err, data) => {
 						if (err) {
 							let errTxt = err.message;
-							logger.debug.debug("error inserting ledger records " + errTxt);
 						} else {
 							res.json({ result: "success", id: newPK, invoiceno: invNo });
 						}
@@ -201,12 +181,10 @@ saleRouter.post("/insert-sale-details", async (req, res) => {
 					addReverseSaleLedgerRecord(cloneReq, newPK, (err, data) => {
 						if (err) {
 							let errTxt = err.message;
-							logger.debug.debug("error inserting reversal ledger records " + errTxt);
 						} else {
 							addSaleLedgerAfterReversalRecord(cloneReq, newPK, (err, data) => {
 								if (err) {
 									let errTxt = err.message;
-									logger.debug.debug("error inserting ledger records " + errTxt);
 								} else {
 									res.json({ result: "success", id: newPK, invoiceno: invNo });
 								}
@@ -219,7 +197,6 @@ saleRouter.post("/insert-sale-details", async (req, res) => {
 			});
 		})
 		.catch((err) => {
-			logger.debug.debug("error: " + err);
 			return handleError(new ErrorHandler("500", "Error saleMasterEntry > " + err), res);
 		});
 });
@@ -341,8 +318,6 @@ function saleMasterEntry(cloneReq, invNo) {
 			'${currentTimeInTimeZone("Asia/Kolkata", "DD-MM-YYYY")}', '${cloneReq.roundoff}', '${revisionCnt}'
 			)`;
 
-	console.log("dinesh >> " + insQry);
-
 	let upQry = `
 			UPDATE sale set center_id = '${cloneReq.center_id}', customer_id = '${cloneReq.customerctrl.id}', 
 			invoice_no = '${invNo}',
@@ -356,7 +331,6 @@ function saleMasterEntry(cloneReq, invNo) {
 			unloading_charges = '${cloneReq.unloading_charges}', misc_charges = '${cloneReq.misc_charges}', status = '${cloneReq.status}',
 			sale_datetime = '${currentTimeInTimeZone("Asia/Kolkata", "DD-MM-YYYY")}', revision = '${revisionCnt}', roundoff = '${cloneReq.roundoff}'
 			where id= '${cloneReq.salesid}' `;
-	console.log("dinesh >> " + upQry);
 
 	return new Promise(function (resolve, reject) {
 		pool.query(cloneReq.salesid === "" ? insQry : upQry, function (err, data) {
@@ -374,7 +348,7 @@ function updateEnquiry(newPK, enqref) {
 	sale_id = '${newPK}'
 	where 
 	id =  '${enqref}' `;
-	logger.debug.debug("dinesh >> " + uenqsaleidqry);
+
 	return new Promise(function (resolve, reject) {
 		pool.query(uenqsaleidqry, function (err, data) {
 			if (err) {
@@ -389,69 +363,24 @@ async function processItems(cloneReq, newPK) {
 	// if sale master insert success, then insert in sale details.
 
 	for (const k of cloneReq.productarr) {
-		let insQuery100 = `INSERT INTO sale_detail(sale_id, product_id, qty, disc_percent, disc_value, disc_type, unit_price, mrp, batchdate, tax,
-												igst, cgst, sgst, taxable_value, total_value, stock_id) VALUES
-												( '${newPK}', '${k.product_id}', '${k.qty}', '${k.disc_percent}', '${k.disc_value}', '${k.disc_type}', '${
-			(k.total_value - k.disc_value) / k.qty
-		}', '${k.mrp}', 
-												'${moment().format("DD-MM-YYYY")}', '${k.taxrate}', '${k.igst}', 
-												'${k.cgst}', '${k.sgst}', '${k.taxable_value}', '${k.total_value}', '${k.stock_pk}')`;
+		let p_data = await IUSaleDetailsAsync(k); //returns promise
+		let p_data1 = await updateStockAsync(k); // returns promise
+		let p_data2 = await updateProductAsync(k); // returns promise
+		let p_data3;
 
-		let upQuery100 = `update sale_detail set product_id = '${k.product_id}', qty = '${k.qty}', disc_percent = '${k.disc_percent}', 
-		disc_value = '${k.disc_value}',	disc_type= '${k.disc_type}', unit_price = '${(k.total_value - k.disc_value) / k.qty}', mrp = '${k.mrp}', 
-												batchdate = '${moment().format("DD-MM-YYYY")}', tax = '${k.taxrate}',
-												igst = '${k.igst}', cgst = '${k.cgst}', sgst = '${k.sgst}', 
-												taxable_value = '${k.taxable_value}', total_value = '${k.total_value}', stock_id = '${k.stock_pk}'
-												where
-												id = '${k.sale_det_id}' `;
+		// its a hack to avoid data.insertid fix it
+		if (p_data != null || p_data != undefined) {
+			if (cloneReq.status === "C") {
+				p_data3 = insertItemHistoryAsync(k, newPK, p_data.insertId, cloneReq); // returns promise
+			}
+		}
 
-		let saleTblPromise = await new Promise(function (resolve, reject) {
-			pool.query(k.sale_det_id === "" ? insQuery100 : upQuery100, async function (err, data) {
-				if (err) {
-					reject(err);
-				}
-				// after sale details is updated, then update stock (as this is sale, reduce available stock) tbl & product tbl
-				let qty_to_update = k.qty - k.old_val;
-
-				let query2 = `update stock set available_stock =  available_stock - '${qty_to_update}' where product_id = '${k.product_id}' and id = '${k.stock_pk}'  `;
-
-				let stockTblPromise = await new Promise(function (resolve, reject) {
-					pool.query(query2, function (err, stockupdatedata) {
-						if (err) {
-							reject(err);
-						}
-						resolve(stockupdatedata);
-					});
-				});
-
-				let productTblPromise = new Promise(function (resolve, reject) {
-					// update current stock in product tables
-					let query300 = ` update product set currentstock = (select sum(available_stock) from stock where product_id = '${k.product_id}' and id = '${k.stock_pk}')`;
-					//	console.log("print dinesh" + query300);
-					pool.query(query300, function (err, productupdatedata) {
-						if (err) {
-							reject(err);
-						}
-						resolve(productupdatedata);
-					});
-				});
-
-				// its a hack to avoid data.insertid fix it
-				if (data != null || data != undefined) {
-					if (cloneReq.status === "C") {
-						insertItemHistory(k, newPK, data.insertId, cloneReq);
-					}
-				}
-
-				resolve(data);
-			});
-		});
+		Promise.all([p_data, p_data1, p_data2, p_data3]);
 	}
 }
 
 // saleRouter.post("/convert-sale/:center_id/:sales_id/:oldinvoiceno", async (req, res) => {
 saleRouter.post("/convert-sale", async (req, res) => {
-	logger.debug.debug(" sivadinesh " + JSON.stringify(req.body));
 	let center_id = req.body.center_id;
 	let sales_id = req.body.sales_id;
 	let old_invoice_no = req.body.old_invoice_no;
@@ -466,7 +395,7 @@ saleRouter.post("/convert-sale", async (req, res) => {
 
 	let sql = ` update sale set invoice_no = '${invNo}', sale_type = "gstinvoice", status = "C", stock_issue_ref = '${old_invoice_no}',
 	invoice_date = '${today}', stock_issue_date_ref = '${moment(old_stock_issued_date).format("DD-MM-YYYY")}' where id = ${sales_id} `;
-	logger.debug.debug("dinesh @@ " + sql);
+
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error coverting to sale invoice."), res);
@@ -482,7 +411,6 @@ saleRouter.post("/convert-sale", async (req, res) => {
 // called from sale details list delete
 saleRouter.get("/delete-sale/:id", async (req, res) => {
 	let sale_id = req.params.id;
-	logger.debug.debug("sale _id ^^" + sale_id);
 
 	let saleDetails = await getSalesDetails(sale_id);
 
@@ -499,15 +427,13 @@ saleRouter.get("/delete-sale/:id", async (req, res) => {
 
 saleRouter.get("/delete-sale-master/:id", async (req, res) => {
 	let sale_id = req.params.id;
-	logger.debug.debug("sale _id ^^" + sale_id);
 
 	let sql = `
 		delete from sale where 
 	id = '${sale_id}' `;
-	logger.debug.debug("llllll222222 SQL " + sql);
+
 	pool.query(sql, function (err, data) {
 		if (err) {
-			logger.debug.debug("what error " + JSON.stringify(err));
 			return handleError(new ErrorHandler("500", "Error deleting sale detail / master"), res);
 		} else {
 			return res.json({
@@ -523,67 +449,14 @@ function deleteSaleDetailsRecs(saleDetails, sale_id) {
 	saleDetails.forEach(async (element, index) => {
 		idx = index + 1;
 
-		logger.debug.debug("object >>>>>> " + JSON.stringify(element));
-		logger.debug.debug("object >>>>>><<<<<< " + idx);
-
-		var today = new Date();
-		today = moment(today).format("YYYY-MM-DD HH:mm:ss");
-
-		let auditQuery = `
-		INSERT INTO audit_tbl (module, module_ref_id, module_ref_det_id, actn, old_value, new_value, audit_date)
-		VALUES
-			('Sales', '${sale_id}', '${element.id}', 'delete', 
-			(SELECT CONCAT('[{', result, '}]') as final
-			FROM (
-				SELECT GROUP_CONCAT(CONCAT_WS(',', CONCAT('"saleId": ', sale_id), CONCAT('"productId": "', product_id, '"'), CONCAT('"qty": "', qty, '"')) SEPARATOR '},{') as result
-				FROM (
-					SELECT sale_id, product_id, qty
-					FROM sale_detail where id = '${element.id}'
-				) t1
-			) t2)
-			, '', '${today}'
-			) `;
-
 		// step 1
-		let auditPromise = await new Promise(function (resolve, reject) {
-			pool.query(auditQuery, function (err, data) {
-				if (err) {
-					logger.debug.debug("error: " + err);
-					return reject(handleError(new ErrorHandler("500", "Error adding sale audit."), res));
-				}
-				resolve(data);
-			});
-		});
+		let p_audit = await insertAuditTblforDeleteSaleDetailsRecAsync(element, sale_id);
 
 		// step 2
-		let deletePromise = await new Promise(function (resolve, reject) {
-			let query = `
-				delete from sale_detail where id = '${element.id}' `;
-
-			pool.query(query, function (err, data) {
-				if (err) {
-					return reject(handleError(new ErrorHandler("500", "Error deleting sale details"), res));
-				}
-				resolve(data);
-			});
-		});
-
-		//
+		let p_delete = await deleteSaleDetailsRecAsync(element);
 
 		// step 3
-		let stockUpdatePromise = await new Promise(function (resolve, reject) {
-			let stockUpdateQuery = `update stock set available_stock =  available_stock + '${element.qty}'
-where product_id = '${element.product_id}' and id = '${element.stock_id}'  `;
-
-			pool.query(stockUpdateQuery, function (err, data) {
-				if (err) {
-					return reject(handleError(new ErrorHandler("500", "Error deleting sale details"), res));
-				}
-				resolve(data);
-			});
-		});
-
-		//	logger.debug.debug("select promise " + JSON.stringify(stockUpdatePromise));
+		let p_stock_update = await updateStockWhileDeleteAsync(element);
 	});
 
 	if (saleDetails.length === idx) {
@@ -591,46 +464,6 @@ where product_id = '${element.product_id}' and id = '${element.stock_id}'  `;
 			resolve("done");
 		}).catch(() => {
 			/* do whatever you want here */
-		});
-	}
-}
-
-function insertItemHistory(k, vSale_id, vSale_det_id, cloneReq) {
-	var today = new Date();
-	today = moment(today).format("DD-MM-YYYY");
-
-	// if purchase details id is missing its new else update
-	let sale_det_id = k.sale_det_id === "" ? vSale_det_id : k.sale_det_id;
-	let txn_qty = k.sale_det_id === "" ? k.qty : k.qty - k.old_val;
-	let actn_type = "SUB";
-	let sale_id = vSale_id === "" ? k.sale_id : vSale_id;
-
-	if (cloneReq.revision === 0 && txn_qty === 0) {
-		txn_qty = k.qty;
-	}
-
-	//txn -ve means subtract from qty
-	if (txn_qty < 0) {
-		actn_type = "ADD";
-	}
-
-	// convert -ve to positive number
-	//~ bitwise operator. Bitwise does not negate a number exactly. eg:  ~1000 is -1001, not -1000 (a = ~a + 1)
-	txn_qty = ~txn_qty + 1;
-
-	if (txn_qty !== 0) {
-		let query2 = `
-			insert into item_history (center_id, module, product_ref_id, sale_id, sale_det_id, actn, actn_type, txn_qty, stock_level, txn_date)
-			values ('${cloneReq.center_id}', 'Sale', '${k.product_id}', '${sale_id}', '${sale_det_id}', 'SAL', '${actn_type}', '${txn_qty}', 
-							(select (available_stock)  from stock where product_id = '${k.product_id}' and mrp = '${k.mrp}' ), '${today}' ) `;
-		logger.debug.debug("sql for insertItemHistory" + query2);
-
-		pool.query(query2, function (err, data) {
-			if (err) {
-				logger.debug.debug("object insertItemHistory >>" + err);
-			} else {
-				logger.debug.debug("object..stock update .");
-			}
 		});
 	}
 }
