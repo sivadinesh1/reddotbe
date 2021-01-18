@@ -807,13 +807,13 @@ function generateFooterSummary(doc, centerdata) {
 	doc
 		.fontSize(8)
 		.font("Helvetica-Bold")
-		.text("OUR BANK        : KARUR VYSYA BANK", 320, start, { lineGap: 1.8 })
-		.text("A/C NAME          : 1121135000015560", 320, start + 10, { lineGap: 1.8 })
-		.text("A/C NO               : IFSC -KVBL0001121,", 320, start + 20, { lineGap: 1.8 });
+		.text("OUR BANK        : " + centerdata.bankname, 320, start, { lineGap: 1.8 })
+		.text("A/C NAME          : " + centerdata.accountname, 320, start + 10, { lineGap: 1.8 })
+		.text("A/C NO               : " + centerdata.accountno, 320, start + 20, { lineGap: 1.8 });
 	doc.font("Times-BoldItalic");
 	doc.fontSize(6).text("Plz pay Cash/Cheque/DD in favour of 'THE THIRUMURUGAN TRACTOR SPARES'.", 320, start + 30, { lineGap: 1.4 });
 
-	doc.fontSize(7).text("For    " + centerdata.name, 400, start + 40);
+	doc.fontSize(7).text("For    " + centerdata.accountname, 400, start + 40);
 	doc.fontSize(7).text("Authorised signatory", 400, start + 75);
 
 	//  doc.fontSize(8).text("Checked By    " + centerdata.name, 350, 680);

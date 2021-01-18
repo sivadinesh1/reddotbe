@@ -12,7 +12,7 @@ const { getSearchVendors } = require("../modules/vendors/vendors.js");
 
 const { createInvoice } = require("./createInvoice.js");
 var pool = require("./../helpers/db");
-const { getAllBrands, getBrandsMissingDiscountsByCustomer } = require("../modules/brands/brands");
+const { getAllBrands, getBrandsMissingDiscountsByCustomer, getSearchBrands } = require("../modules/brands/brands");
 
 const invoice = {
 	shipping: {
@@ -97,29 +97,31 @@ a.description like '%${searchstr}%' ) limit 50
 });
 
 router.post("/search-product", (req, res) => {
-	const [centerid, searchstr] = Object.values(req.body);
+	const [centerid, searchstr, searchby] = Object.values(req.body);
 
-	let sql = `select a.product_code as product_code, a.description, b.mrp, a.taxrate, b.available_stock,
-	a.packetsize, a.unit_price, a.purchase_price as purchase_price, a.id as product_id, b.id as stock_pk, a.packetsize as qty, a.rackno, bd.name,
-	bd.id as brand_id, a.unit as uom, a.hsncode as hsncode, a.minqty as minqty, a.avgpurprice as avgpurprice,
-	a.unit_price as unit_price, a.salesprice as salesprice,  a.maxdiscount as maxdiscount
-	from 
-	brand bd,
-	product a
-	LEFT outer JOIN   stock b
-	ON b.product_id = a.id
-  where 
-	a.center_id = '${centerid}' and
-	a.brand_id = bd.id and
-  ( a.product_code like '%${searchstr}%' or
-  a.description like '%${searchstr}%' ) limit 50 
- `;
+	let sql = "";
+
+	sql = `select a.product_code as product_code, a.description, b.mrp, a.taxrate, b.available_stock,
+		a.packetsize, a.unit_price, a.purchase_price as purchase_price, a.id as product_id, b.id as stock_pk, a.packetsize as qty, a.rackno, bd.name,
+		bd.id as brand_id, a.unit as uom, a.hsncode as hsncode, a.minqty as minqty, a.avgpurprice as avgpurprice,
+		a.unit_price as unit_price, a.salesprice as salesprice,  a.maxdiscount as maxdiscount
+		from 
+		brand bd,
+		product a
+		LEFT outer JOIN   stock b
+		ON b.product_id = a.id
+		where 
+		a.center_id = '${centerid}' and
+		a.brand_id = bd.id and
+		( a.product_code like '%${searchstr}%' or
+		a.description like '%${searchstr}%' ) limit 50 
+	 `;
 
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error fetching search products."), res);
 		} else {
-			return res.json(data);
+			return res.status(200).json(data);
 		}
 	});
 });
@@ -146,6 +148,12 @@ router.post("/search-vendor", (req, res) => {
 			return res.status(200).json(data);
 		}
 	});
+});
+
+router.post("/search-brand", async (req, res) => {
+	const [centerid, searchstr] = Object.values(req.body);
+	let rows = await getSearchBrands(centerid, searchstr);
+	return res.status(200).json(rows);
 });
 
 //mgt

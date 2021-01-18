@@ -58,9 +58,33 @@ const getBrandsMissingDiscountsByCustomer = (center_id, status, customer_id, cal
 	});
 };
 
+// fetch rows from customer tbl & customer shipping addres tbl
+const getSearchBrands = (centerid, searchstr) => {
+	let query = `
+	select b.*
+	from
+	brand b
+	where 
+	b.center_id = '${centerid}' and 
+	( LOWER(b.name) like LOWER('%${searchstr}%')) 
+	limit 50  `;
+
+	let values = [centerid, searchstr];
+
+	return new Promise(function (resolve, reject) {
+		pool.query(query, function (err, data) {
+			if (err) {
+				reject(err);
+			}
+			resolve(data);
+		});
+	});
+};
+
 module.exports = {
 	insertBrand,
 	updateBrand,
 	getAllBrands,
+	getSearchBrands,
 	getBrandsMissingDiscountsByCustomer,
 };

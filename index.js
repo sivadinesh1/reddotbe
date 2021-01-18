@@ -89,5 +89,5 @@ app.use((err, req, res) => {
 const PORT = process.env.PORT || 5050;
 
 // app.listen(PORT);
-http.createServer(app).listen(5050);
+//http.createServer(app).listen(5050);
 https.createServer(options, app).listen(8440);
