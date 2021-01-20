@@ -20,18 +20,27 @@ VALUES
 
 	let values = [insertValues.center_id, insertValues.customerctrl.id, invoice_ref_id, insertValues.net_total];
 
-	pool.query(query, values, function (err, data) {
-		if (err) {
-			return callback(err);
-		}
-		return callback(null, data);
+	// pool.query(query, values, function (err, data) {
+	// 	if (err) {
+	// 		return callback(err);
+	// 	}
+	// 	return callback(null, data);
+	// });
+
+	return new Promise(function (resolve, reject) {
+		pool.query(query, values, function (err, data) {
+			if (err) {
+				reject(err);
+			}
+			resolve(data);
+		});
 	});
 };
 
 // reverse sale ledger entry if it is update of completed sale
 // if multiple invoices are there the balance amount has to be taken from the last record, so consiously we ignore invoice ref id
 
-const addReverseSaleLedgerRecord = (insertValues, invoice_ref_id, callback) => {
+const addReverseSaleLedgerRecord = (insertValues, invoice_ref_id) => {
 	var today = new Date();
 	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
 
@@ -70,15 +79,17 @@ VALUES
 
 	let values = [insertValues.center_id, insertValues.customerctrl.id, invoice_ref_id];
 
-	pool.query(query, values, function (err, data) {
-		if (err) {
-			return callback(err);
-		}
-		return callback(null, data);
+	return new Promise(function (resolve, reject) {
+		pool.query(query, values, function (err, data) {
+			if (err) {
+				return reject(err);
+			}
+			return resolve(data);
+		});
 	});
 };
 
-const addSaleLedgerAfterReversalRecord = (insertValues, invoice_ref_id, callback) => {
+const addSaleLedgerAfterReversalRecord = (insertValues, invoice_ref_id) => {
 	var today = new Date();
 	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
 	// balance amount is taken from querying ledger table, with Limit 1, check the subquery.
@@ -94,11 +105,13 @@ VALUES
 
 	let values = [insertValues.center_id, insertValues.customerctrl.id, invoice_ref_id, insertValues.net_total];
 
-	pool.query(query, values, function (err, data) {
-		if (err) {
-			return callback(err);
-		}
-		return callback(null, data);
+	return new Promise(function (resolve, reject) {
+		pool.query(query, values, function (err, data) {
+			if (err) {
+				return reject(err);
+			}
+			return resolve(data);
+		});
 	});
 };
 

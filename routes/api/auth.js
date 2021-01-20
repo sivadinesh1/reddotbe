@@ -5,10 +5,12 @@ const logger = require("../../routes/helpers/log4js");
 var pool = require("./../helpers/db");
 const { handleError, ErrorHandler } = require("./../helpers/error");
 
+const { getPermissions } = require("../modules/auth/auth.js");
+
 authRoute.post("/login", (req, res) => {
 	const [username, password] = Object.values(req.body);
 
-	let query = `select u.id as userid, u.username, u.firstname, r.name as role, c.id as center_id, c.name as center_name, cm.id as company_id,
+	let query = `select u.id as userid, u.username, u.firstname, r.name as role, r.id as role_id, c.id as center_id, c.name as center_name, cm.id as company_id,
 	cm.name as company_name, s.code, p.name as plan_name
 	from
 	users u,
@@ -46,6 +48,14 @@ authRoute.post("/login", (req, res) => {
 			return handleError(new ErrorHandler("600", "Invalid Credentials."), res);
 		}
 	});
+});
+
+authRoute.get("/fetch-permissions/:centerid/:roleid", async (req, res) => {
+	let center_id = req.params.centerid;
+	let role_id = req.params.roleid;
+
+	let rows = await getPermissions(center_id, role_id);
+	return res.status(200).json(rows);
 });
 
 module.exports = authRoute;

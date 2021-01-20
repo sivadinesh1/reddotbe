@@ -100,7 +100,8 @@ const updateStockAsync = (k) => {
 };
 
 const updateProductAsync = (k) => {
-	let query = ` update product set currentstock = (select sum(available_stock) from stock where product_id = '${k.product_id}' and id = '${k.stock_pk}')`;
+	let query = ` update product set currentstock = (select sum(available_stock) 
+								from stock where product_id = '${k.product_id}' ) where id = '${k.product_id}' `;
 
 	return new Promise(function (resolve, reject) {
 		pool.query(query, function (err, data) {
@@ -144,8 +145,9 @@ const insertItemHistoryAsync = (k, vSale_id, vSale_det_id, cloneReq) => {
 		return new Promise(function (resolve, reject) {
 			pool.query(query2, function (err, data) {
 				if (err) {
-					reject(err);
+					reject(err); // failure
 				}
+				// success
 				resolve(data);
 			});
 		});

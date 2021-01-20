@@ -154,6 +154,8 @@ saleRouter.post("/insert-sale-details", async (req, res) => {
 	// (2)
 	saleMasterEntry(cloneReq, invNo)
 		.then(async (data) => {
+			const start = Date.now();
+
 			newPK = cloneReq.salesid === "" ? data.insertId : cloneReq.salesid;
 
 			// if sale came from enquiry, then update the enq table with the said id {status = E (executed)}
@@ -164,37 +166,23 @@ saleRouter.post("/insert-sale-details", async (req, res) => {
 			// (3) - updates sale details
 			let process = processItems(cloneReq, newPK);
 
-			Promise.all([process]).then(() => {
-				// ledger entry should NOT be done if status is draft ("D")
-				if (cloneReq.status === "C" && cloneReq.salesid === "") {
-					addSaleLedgerRecord(cloneReq, newPK, (err, data) => {
-						if (err) {
-							let errTxt = err.message;
-						} else {
-							res.json({ result: "success", id: newPK, invoiceno: invNo });
-						}
-					});
-				} else if (cloneReq.status === "C" && cloneReq.salesid !== "") {
-					// reverse the old ledger entry and then add a new sale entry. scenario: sale completed, but after sale, if any changes done,
-					// we reverse old entries and create new entries.
+			// Promise.all([process]).then(() => {
+			// ledger entry should NOT be done if status is draft ("D")
+			if (cloneReq.status === "C" && cloneReq.salesid === "") {
+				await addSaleLedgerRecord(cloneReq, newPK);
+				res.json({ result: "success", id: newPK, invoiceno: invNo });
+			} else if (cloneReq.status === "C" && cloneReq.salesid !== "") {
+				// reverse the old ledger entry and then add a new sale entry. scenario: sale completed, but after sale, if any changes done,
+				// we reverse old entries and create new entries.
 
-					addReverseSaleLedgerRecord(cloneReq, newPK, (err, data) => {
-						if (err) {
-							let errTxt = err.message;
-						} else {
-							addSaleLedgerAfterReversalRecord(cloneReq, newPK, (err, data) => {
-								if (err) {
-									let errTxt = err.message;
-								} else {
-									res.json({ result: "success", id: newPK, invoiceno: invNo });
-								}
-							});
-						}
-					});
-				} else {
-					res.json({ result: "success", id: newPK, invoiceno: invNo });
-				}
-			});
+				await addReverseSaleLedgerRecord(cloneReq, newPK);
+				await addSaleLedgerAfterReversalRecord(cloneReq, newPK);
+				res.json({ result: "success", id: newPK, invoiceno: invNo });
+			} else {
+				// draft scenario
+				res.json({ result: "success", id: newPK, invoiceno: invNo });
+			}
+			// });
 		})
 		.catch((err) => {
 			return handleError(new ErrorHandler("500", "Error saleMasterEntry > " + err), res);
