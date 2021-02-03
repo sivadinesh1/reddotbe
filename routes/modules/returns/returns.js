@@ -6,8 +6,9 @@ const { toTimeZone, currentTimeInTimeZone, toTimeZoneFrmt } = require("./../../h
 // param: smd : sale_master_data
 // NR: Not Received, A: Approved
 const insertSaleReturns = (smd) => {
-	var today = new Date();
-	today = moment(today).format("DD-MM-YYYY");
+	
+	let today = currentTimeInTimeZone("Asia/Kolkata", "DD-MM-YYYY");
+
 	return new Promise((resolve, reject) => {
 		let query = ` insert into sale_return (sale_id, return_date, center_id, to_return_amount,
                   to_receive_items, receive_status, refund_status, return_status )

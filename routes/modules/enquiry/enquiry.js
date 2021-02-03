@@ -1,10 +1,11 @@
 var pool = require("../../helpers/db");
 const moment = require("moment");
 const logger = require("./../../helpers/log4js");
+const { toTimeZone, currentTimeInTimeZone } = require("./../../helpers/utils");
 
 const insertEnquiryDetail = (k, jsonObj, tmpid, callback) => {
-	var today = new Date();
-	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+	
+	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
 
 	let query = `INSERT INTO enquiry_detail ( enquiry_id, product_id, askqty, product_code, notes, status)
         values ( '${tmpid}', (select id from product where product_code='${k.product_code}' and center_id = '${jsonObj.center_id}'), '${k.quantity}', '${k.product_code}', '${k.notes}', 'O')`;
@@ -20,8 +21,8 @@ const insertEnquiryDetail = (k, jsonObj, tmpid, callback) => {
 };
 
 const fetchEnquiryDetailByEnqId = (enqid, callback) => {
-	var today = new Date();
-	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+	
+	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
 
 	let query = `
 	select orig.*, s.available_stock, s.id as stock_pk
@@ -56,8 +57,8 @@ from
 };
 
 const fetchCustomerDetailsByEnqId = (enqid, callback) => {
-	var today = new Date();
-	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+	
+	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
 
 	let query = `
 	select c.*, e.* from 

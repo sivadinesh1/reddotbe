@@ -3,7 +3,7 @@ const saleRouter = express.Router();
 const logger = require("../../routes/helpers/log4js");
 
 const mysql = require("mysql");
-const moment = require("moment");
+// const moment = require("moment");
 const { handleError, ErrorHandler } = require("./../helpers/error");
 
 const {
@@ -16,7 +16,7 @@ const {
 	getNextSaleInvoiceNoAsync,
 	insertAuditTblforDeleteSaleDetailsRecAsync,
 	deleteSaleDetailsRecAsync,
-	updateStockWhileDeleteAsync,
+	updateStockWhileDeleteAsync, updateItemHistoryTable
 } = require("../modules/sales/sales.js");
 
 const { addSaleLedgerRecord, addReverseSaleLedgerRecord, addSaleLedgerAfterReversalRecord } = require("../modules/accounts/accounts.js");
@@ -38,16 +38,19 @@ saleRouter.get("/get-next-sale-invoice-no/:centerid/:invoicetype", (req, res) =>
 // if audit is true, form a json string data and store in audit table
 // first entry to audit table & then call the delete query
 saleRouter.post("/delete-sales-details", async (req, res) => {
+	let center_id = req.body.center_id;
 	let id = req.body.id;
 	let sales_id = req.body.salesid;
 	let qty = req.body.qty;
 	let product_id = req.body.product_id;
 	let stock_id = req.body.stock_id;
+	let mrp = req.body.mrp;
 	let autidneeded = req.body.autidneeded;
 
 	if (autidneeded) {
-		var today = new Date();
-		today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+		
+		let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
+		
 
 		let auditQuery = `
 		INSERT INTO audit_tbl (module, module_ref_id, module_ref_det_id, actn, old_value, new_value, audit_date)
@@ -103,7 +106,12 @@ where product_id = '${product_id}' and id = '${stock_id}'  `;
 		});
 	});
 
+	
 	if (stockUpdatePromise.affectedRows === 1) {
+		// step 4 - update item history table. as items are deleted, items has to be reversed
+
+		let updateitemhistorytbl = await updateItemHistoryTable(center_id, "Sale", product_id, sales_id, id, "SAL", "Mod/Del", qty, mrp)
+		
 		return res.json({
 			result: "success",
 		});
@@ -245,23 +253,22 @@ function updateDraftSequenceGenerator(cloneReq) {
 function getSequenceNo(cloneReq) {
 	let invNoQry = "";
 	if (cloneReq.invoicetype === "gstinvoice" && cloneReq.status !== "D") {
-		invNoQry = ` select concat('${moment(cloneReq.invoicedate).format("YY")}', "/", '${moment(cloneReq.invoicedate).format(
-			"MM",
-		)}', "/", lpad(invseq, 5, "0")) as invNo from financialyear 
+		invNoQry = ` select 
+		concat('${toTimeZoneFrmt(cloneReq.invoicedate, "Asia/Kolkata", "YY")}', "/", 
+		'${toTimeZoneFrmt(cloneReq.invoicedate, "Asia/Kolkata", "MM")}', "/", lpad(invseq, 5, "0")) as invNo from financialyear 
 				where 
 				center_id = '${cloneReq.center_id}' and  
 				CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
 	} else if (cloneReq.invoicetype === "gstinvoice" && cloneReq.status === "D") {
-		invNoQry = ` select concat("D/", '${moment(cloneReq.invoicedate).format("YY")}', "/", '${moment(cloneReq.invoicedate).format(
-			"MM",
-		)}', "/", lpad(draft_inv_seq, 5, "0")) as invNo from financialyear 
+		invNoQry = ` select concat("D/", 
+		'${toTimeZoneFrmt(cloneReq.invoicedate, "Asia/Kolkata", "YY")}', "/", 
+		'${toTimeZoneFrmt(cloneReq.invoicedate, "Asia/Kolkata", "MM")}', "/", lpad(draft_inv_seq, 5, "0")) as invNo from financialyear 
 							where 
 							center_id = '${cloneReq.center_id}' and  
 							CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
 	} else if (cloneReq.invoicetype === "stockissue") {
-		invNoQry = ` select concat('SI',"-",'${moment(cloneReq.invoicedate).format("YY")}', "/", '${moment(cloneReq.invoicedate).format(
-			"MM",
-		)}', "/", lpad(stock_issue_seq, 5, "0")) as invNo from financialyear 
+		invNoQry = ` select concat('SI',"-",'${toTimeZoneFrmt(cloneReq.invoicedate, "Asia/Kolkata", "YY")}', "/", 
+		'${toTimeZoneFrmt(cloneReq.invoicedate, "Asia/Kolkata", "MM")}', "/", lpad(stock_issue_seq, 5, "0")) as invNo from financialyear 
 				where 
 				center_id = '${cloneReq.center_id}' and  
 				CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
@@ -288,8 +295,8 @@ function saleMasterEntry(cloneReq, invNo) {
 		revisionCnt = cloneReq.revision + 1;
 	}
 
-	orderdate = cloneReq.orderdate !== "" ? moment(cloneReq.orderdate).format("DD-MM-YYYY") : "";
-	lrdate = cloneReq.lrdate !== "" ? moment(cloneReq.lrdate).format("DD-MM-YYYY") : "";
+	let orderdate = (cloneReq.orderdate !== "" && cloneReq.orderdate !== null) ? toTimeZone(cloneReq.orderdate, "Asia/Kolkata") : "";
+	let lrdate = (cloneReq.lrdate !== "" && cloneReq.lrdate !== null) ? toTimeZone(cloneReq.lrdate, "Asia/Kolkata") : "";
 
 	// create a invoice number and save in sale master
 	let insQry = `
@@ -299,18 +306,18 @@ function saleMasterEntry(cloneReq, invNo) {
 			VALUES
 			('${cloneReq.center_id}', '${cloneReq.customerctrl.id}', 
 			'${invNo}',
-			'${toTimeZone(cloneReq.invoicedate, "Asia/Kolkata")}', '${cloneReq.orderno}', '${cloneReq.orderdate}', '${cloneReq.lrno}', '${cloneReq.lrdate}',
+			'${toTimeZone(cloneReq.invoicedate, "Asia/Kolkata")}', '${cloneReq.orderno}', '${orderdate}', '${cloneReq.lrno}', '${cloneReq.lrdate}',
 	 '${cloneReq.invoicetype}','${cloneReq.totalqty}', 
 			'${cloneReq.noofitems}', '${cloneReq.taxable_value}', '${cloneReq.cgst}', '${cloneReq.sgst}', '${cloneReq.igst}', '${cloneReq.totalvalue}', 
 			'${cloneReq.net_total}', '${cloneReq.transport_charges}', '${cloneReq.unloading_charges}', '${cloneReq.misc_charges}', '${cloneReq.status}',
-			'${currentTimeInTimeZone("Asia/Kolkata", "DD-MM-YYYY")}', '${cloneReq.roundoff}', '${revisionCnt}'
+			'${currentTimeInTimeZone("Asia/Kolkata", "DD-MM-YYYY HH:mm:ss")}', '${cloneReq.roundoff}', '${revisionCnt}'
 			)`;
 
 	let upQry = `
 			UPDATE sale set center_id = '${cloneReq.center_id}', customer_id = '${cloneReq.customerctrl.id}', 
 			invoice_no = '${invNo}',
 			invoice_date = 	'${toTimeZone(cloneReq.invoicedate, "Asia/Kolkata")}', 
-			order_date = '${toTimeZoneFrmt(cloneReq.orderdate, "Asia/Kolkata", "YYYY-MM-DDTHH:mm:ssZ")}', lr_no = '${cloneReq.lrno}', sale_type = '${
+			order_date = '${orderdate}', lr_no = '${cloneReq.lrno}', sale_type = '${
 		cloneReq.invoicetype
 	}',
 			lr_date = '${cloneReq.lrdate}', total_qty = '${cloneReq.totalqty}', no_of_items = '${cloneReq.noofitems}',
@@ -353,17 +360,17 @@ async function processItems(cloneReq, newPK) {
 	for (const k of cloneReq.productarr) {
 		let p_data = await IUSaleDetailsAsync(k); //returns promise
 		let p_data1 = await updateStockAsync(k); // returns promise
-		let p_data2 = await updateProductAsync(k); // returns promise
+	//	let p_data2 = await updateProductAsync(k); // updating product master is not necessary, check if needed
 		let p_data3;
 
 		// its a hack to avoid data.insertid fix it
 		if (p_data != null || p_data != undefined) {
-			if (cloneReq.status === "C") {
+			if ((cloneReq.status === "C") || (cloneReq.status === "D" && cloneReq.invoicetype === "stockissue")) {
 				p_data3 = insertItemHistoryAsync(k, newPK, p_data.insertId, cloneReq); // returns promise
 			}
 		}
 
-		Promise.all([p_data, p_data1, p_data2, p_data3]);
+		Promise.all([p_data, p_data1, p_data3]);
 	}
 }
 
@@ -374,16 +381,21 @@ saleRouter.post("/convert-sale", async (req, res) => {
 	let old_invoice_no = req.body.old_invoice_no;
 	let old_stock_issued_date = req.body.old_stock_issued_date;
 
-	var today = new Date();
-	today = moment(today).format("DD-MM-YYYY");
+	console.log('old dt ' + old_stock_issued_date);
+
+	let today = currentTimeInTimeZone("Asia/Kolkata", "DD-MM-YYYY");
 
 	// (1) Updates invseq in tbl financialyear, then {returns} formated sequence {YY/MM/INVSEQ}
-	await updateSequenceGenerator({ invoicetype: "gstinvoice", center_id: center_id, invoicedate: moment() });
-	let invNo = await getSequenceNo({ invoicetype: "gstinvoice", center_id: center_id, invoicedate: moment() });
+	await updateSequenceGenerator({ invoicetype: "gstinvoice", center_id: center_id, invoicedate: today });
+	let invNo = await getSequenceNo({ invoicetype: "gstinvoice", center_id: center_id, invoicedate: today });
 
 	let sql = ` update sale set invoice_no = '${invNo}', sale_type = "gstinvoice", status = "C", stock_issue_ref = '${old_invoice_no}',
-	invoice_date = '${today}', stock_issue_date_ref = '${moment(old_stock_issued_date).format("DD-MM-YYYY")}' where id = ${sales_id} `;
-
+	invoice_date = '${today}', 
+	stock_issue_date_ref =
+	'${toTimeZone(old_stock_issued_date, "Asia/Kolkata")}'
+	
+	where id = ${sales_id} `;
+	console.log('query >>>>  ' + sql);
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler("500", "Error coverting to sale invoice."), res);

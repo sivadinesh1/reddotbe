@@ -97,8 +97,11 @@ function toTimeZone(time, zone) {
 }
 
 function toTimeZoneFrmt(time, zone, format) {
-	return moment(time, format).tz(zone).format("DD-MM-YYYY");
+	var defaul_format = "YYYY-MM-DDTHH:mm:ssZ";
+	return moment(time, defaul_format).tz(zone).format(format);
 }
+
+
 
 function currentTimeInTimeZone(zone, format) {
 	return moment(moment(), format).tz(zone).format(format);

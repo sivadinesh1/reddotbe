@@ -1,12 +1,16 @@
 var pool = require("../../helpers/db");
 // const logger = require("../../helpers/log4js");
 const logger = require("./../../helpers/log4js");
+const { toTimeZone, currentTimeInTimeZone } = require("./../../helpers/utils");
 
 const moment = require("moment");
 
 const addSaleLedgerRecord = (insertValues, invoice_ref_id, callback) => {
-	var today = new Date();
-	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+	
+
+	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
+
+
 	// balance amount is taken from querying ledger table, with Limit 1, check the subquery.
 	let query = `
 INSERT INTO ledger ( center_id, customer_id, invoice_ref_id, ledger_detail, credit_amt, balance_amt, ledger_date)
@@ -41,8 +45,9 @@ VALUES
 // if multiple invoices are there the balance amount has to be taken from the last record, so consiously we ignore invoice ref id
 
 const addReverseSaleLedgerRecord = (insertValues, invoice_ref_id) => {
-	var today = new Date();
-	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+	
+
+	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
 
 	// balance amount is taken from querying ledger table, with Limit 1, check the subquery.
 	let query = `
@@ -90,8 +95,9 @@ VALUES
 };
 
 const addSaleLedgerAfterReversalRecord = (insertValues, invoice_ref_id) => {
-	var today = new Date();
-	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+	
+	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
+
 	// balance amount is taken from querying ledger table, with Limit 1, check the subquery.
 	let query = `
 INSERT INTO ledger ( center_id, customer_id, invoice_ref_id, ledger_detail, credit_amt, balance_amt, ledger_date)
@@ -116,8 +122,8 @@ VALUES
 };
 
 const addPaymentLedgerRecord = (insertValues, payment_ref_id, receivedamount, sale_ref_id, callback) => {
-	var today = new Date();
-	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+	
+	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
 
 	let query = `
 	INSERT INTO ledger ( center_id, customer_id, invoice_ref_id, payment_ref_id, ledger_detail, debit_amt, balance_amt, ledger_date)
@@ -142,8 +148,7 @@ const addPaymentLedgerRecord = (insertValues, payment_ref_id, receivedamount, sa
 const addPaymentMaster = async (cloneReq, pymtNo, insertValues, callback) => {
 	// (1) Updates payment seq in tbl financialyear, then {returns} formated sequence {YY/MM/PYMTSEQ}
 
-	var today = new Date();
-	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
 
 	let values = [
 		cloneReq.centerid,

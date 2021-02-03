@@ -6,6 +6,7 @@ const moment = require("moment");
 const logger = require("../../routes/helpers/log4js");
 var pool = require("../helpers/db");
 const { handleError, ErrorHandler } = require("./../helpers/error");
+const { toTimeZone, currentTimeInTimeZone } = require("./../helpers/utils");
 
 const {
 	addPaymentMaster,
@@ -25,7 +26,7 @@ const {
 
 accountsRouter.post("/add-payment-received", async (req, res) => {
 	var today = new Date();
-	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+	today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
 
 	const cloneReq = { ...req.body };
 
@@ -153,9 +154,7 @@ accountsRouter.get("/get-pymt-transactions-center/:centerid", (req, res) => {
 });
 
 accountsRouter.post("/add-bulk-payment-received", async (req, res) => {
-	var today = new Date();
-	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
-
+	
 	const cloneReq = { ...req.body };
 
 	const [customer, center_id, accountarr, invoicesplit, balanceamount] = Object.values(req.body);

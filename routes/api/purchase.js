@@ -3,7 +3,7 @@ const purchaseRouter = express.Router();
 const logger = require("../../routes/helpers/log4js");
 
 const mysql = require("mysql");
-const moment = require("moment");
+
 const { handleError, ErrorHandler } = require("../helpers/error");
 
 var pool = require("../helpers/db");
@@ -12,8 +12,7 @@ const { toTimeZone, currentTimeInTimeZone } = require("./../helpers/utils");
 purchaseRouter.post("/insert-purchase-details", async (req, res) => {
 	const cloneReq = { ...req.body };
 
-	var today = new Date();
-	today = moment(today).format("DD-MM-YYYY");
+	let today = currentTimeInTimeZone("Asia/Kolkata", "DD-MM-YYYY");
 
 	let newPK = await purchaseMasterEntry(cloneReq);
 
@@ -38,17 +37,11 @@ function purchaseMasterEntry(cloneReq) {
 		revisionCnt = cloneReq.revision + 1;
 	}
 
-	var today = new Date();
-	// today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+	let today = currentTimeInTimeZone("Asia/Kolkata", "DD-MM-YYYY HH:mm:ss");
 
-	today = moment(today).format("DD-MM-YYYY HH:mm:ss");
-	// var today = new Date();
-	// today = moment(today).format("DD-MM-YYYY");
-
-	let invoicedate = cloneReq.invoicedate !== "" ? moment(cloneReq.invoicedate).format("DD-MM-YYYY") : "";
-	let orderdate = cloneReq.orderdate !== "" ? moment(cloneReq.orderdate).format("DD-MM-YYYY") : "";
-	let lrdate = cloneReq.lrdate !== "" ? moment(cloneReq.lrdate).format("DD-MM-YYYY") : "";
-	let orderrcvddt = cloneReq.orderrcvddt !== "" ? moment(cloneReq.orderrcvddt).format("DD-MM-YYYY") : "";
+	let orderdate = cloneReq.orderdate !== "" ? toTimeZone(cloneReq.orderdate, "Asia/Kolkata") : "";
+	let lrdate = cloneReq.lrdate !== "" ? toTimeZone(cloneReq.lrdate, "Asia/Kolkata") : "";
+	let orderrcvddt = cloneReq.orderrcvddt !== "" ? toTimeZone(cloneReq.orderrcvddt, "Asia/Kolkata") : "";
 
 	let insQry = `
 			INSERT INTO purchase ( center_id, vendor_id, invoice_no, invoice_date, lr_no, lr_date, received_date, 
@@ -101,11 +94,14 @@ async function processItems(cloneReq, newPK) {
 	for (const k of cloneReq.productarr) {
 		let insQuery1 = ` INSERT INTO purchase_detail(purchase_id, product_id, qty, purchase_price, mrp, batchdate, tax,
 			igst, cgst, sgst, taxable_value, total_value, stock_id) VALUES
-			( '${newPK}', '${k.product_id}', '${k.qty}', '${k.purchase_price}', '${k.mrp}', '${moment().format("DD-MM-YYYY")}', '${k.taxrate}', '${k.igst}', 
+			( '${newPK}', '${k.product_id}', '${k.qty}', '${k.purchase_price}', '${k.mrp}', 
+			'${currentTimeInTimeZone("Asia/Kolkata", "DD-MM-YYYY")}',
+			'${k.taxrate}', '${k.igst}', 
 			'${k.cgst}', '${k.sgst}', '${k.taxable_value}', '${k.total_value}', '${k.stock_pk}') `;
 
 		let updQuery1 = ` update purchase_detail set purchase_id = '${k.purchase_id}', product_id = '${k.product_id}', 
-			qty = '${k.qty}', purchase_price = '${k.purchase_price}', mrp = '${k.mrp}', batchdate = '${moment().format("DD-MM-YYYY")}', 
+			qty = '${k.qty}', purchase_price = '${k.purchase_price}', mrp = '${k.mrp}', 
+			batchdate = '${currentTimeInTimeZone("Asia/Kolkata", "DD-MM-YYYY")}', 
 			tax = '${k.taxrate}', igst = '${k.igst}', cgst = '${k.cgst}', sgst = '${k.sgst}', 
 			taxable_value =  '${k.taxable_value}', total_value = '${k.total_value}', stock_id = '${k.stock_pk}' where
 			id = '${k.pur_det_id}' `;
@@ -147,8 +143,7 @@ async function processItems(cloneReq, newPK) {
 }
 
 function insertStock(k, pdetailid) {
-	let upDate = new Date();
-	todayYYMMDD = moment(upDate).format("YYYY-MM-DD");
+	todayYYMMDD = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD");
 	let query2 = `
 	insert into stock (product_id, mrp, available_stock, open_stock, updateddate)
 	values ('${k.product_id}', '${k.mrp}', '${k.qty}', 0, '${todayYYMMDD}')`;
@@ -202,8 +197,8 @@ where id = '${k.product_id}'  `;
 //vPurchase_id - purchase_id && vPurchase_det_id - new purchase_detail id
 // k - looped purchase details array
 function insertItemHistory(k, vPurchase_id, vPurchase_det_id, cloneReq) {
-	var today = new Date();
-	today = moment(today).format("DD-MM-YYYY");
+	
+	let today = currentTimeInTimeZone("Asia/Kolkata", "DD-MM-YYYY HH:mm:ss");
 
 	// if purchase details id is missing its new else update
 	let purchase_det_id = k.pur_det_id === "" ? vPurchase_det_id : k.pur_det_id;
@@ -219,12 +214,12 @@ function insertItemHistory(k, vPurchase_id, vPurchase_det_id, cloneReq) {
 
 	//let purchase_det_id = k.pur_det_id;
 	//let txn_qty = k.qty;
-	let actn_type = "ADD";
+	let actn_type = "Purchased";
 	//	let purchase_id = k.purchase_id;
 
 	//txn -ve means subtract from qty
 	if (txn_qty < 0) {
-		actn_type = "SUB";
+		actn_type = "Mod/Del";
 	}
 
 	if (txn_qty !== 0) {

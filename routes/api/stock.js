@@ -1,13 +1,15 @@
 const express = require("express");
 const stockRouter = express.Router();
 const logger = require("../../routes/helpers/log4js");
+const { toTimeZone, currentTimeInTimeZone } = require("./../helpers/utils");
 
 const mysql = require("mysql");
 const moment = require("moment");
 
 var pool = require("./../helpers/db");
 
-const { getSalesMaster, getSalesDetails } = require("../modules/sales/sales.js");
+const { getSalesMaster, getSalesDetails, updateItemHistoryTable } = require("../modules/sales/sales.js");
+
 
 stockRouter.get("/search-all-draft-purchase/:centerid", (req, res) => {
 	let center_id = req.params.centerid;
@@ -266,14 +268,15 @@ pd.purchase_id = '${purchase_id}'
 });
 
 stockRouter.post("/delete-purchase-details", async (req, res) => {
+	let center_id = req.body.center_id;
 	let id = req.body.id;
 	let purchase_id = req.body.purchaseid;
 	let qty = req.body.qty;
 	let product_id = req.body.product_id;
 	let stock_id = req.body.stock_id;
+	let mrp = req.body.mrp;
 
-	var today = new Date();
-	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
 
 	let auditQuery = `
 	INSERT INTO audit_tbl (module, module_ref_id, module_ref_det_id, actn, old_value, new_value, audit_date)
@@ -327,6 +330,11 @@ where product_id = '${product_id}' and id = '${stock_id}'  `;
 			resolve(data);
 		});
 	});
+
+	// step 4 , reverse item history table entries.
+
+	let updateitemhistorytbl = await updateItemHistoryTable(center_id, "Purchase", product_id, purchase_id, id, "PUR", "Mod/Del", qty, mrp)
+
 
 	return res.json({
 		result: "success",
@@ -391,9 +399,7 @@ function deletePurchaseDetailsRecs(purchaseDetails, purchase_id) {
 
 	purchaseDetails.forEach(async (element, index) => {
 		idx = index + 1;
-
-		var today = new Date();
-		today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+		let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
 
 		let auditQuery = `
 		INSERT INTO audit_tbl (module, module_ref_id, module_ref_det_id, actn, old_value, new_value, audit_date)

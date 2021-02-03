@@ -134,6 +134,19 @@ adminRoute.get("/get-states", (req, res) => {
 	});
 });
 
+
+adminRoute.get("/get-timezones", (req, res) => {
+	let sql = `select * from timezones `;
+
+	pool.query(sql, function (err, data) {
+		if (err) {
+			return handleError(new ErrorHandler("500", "Error fetching get timezones"), res);
+		} else {
+			return res.status(200).json(data);
+		}
+	});
+});
+
 // vendor
 
 adminRoute.put("/update-vendor/:id", (req, res) => {

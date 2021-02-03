@@ -6,8 +6,8 @@ const { toTimeZone, currentTimeInTimeZone } = require("../../helpers/utils");
 
 // insert row in customer tbl
 const insertCustomer = (insertValues, callback) => {
-	var today = new Date();
-	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+	
+	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
 
 	let taxSlabArr = [
 		{ gstslab: 0, gstvalue: insertValues.gstzero },
@@ -89,8 +89,8 @@ const insertCustomer = (insertValues, callback) => {
 };
 
 const updateCustomer = (updateValues, id, callback) => {
-	var today = new Date();
-	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+	
+	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
 
 	let query = `
 	update customer set center_id = '${updateValues.center_id}',
@@ -409,8 +409,8 @@ s1.code as csa_code
 
 // insert row in customer tbl
 const insertDiscountsByBrands = (insertValues, callback) => {
-	var today = new Date();
-	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+	
+	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
 
 	let taxSlabArr = [
 		{ gstslab: 0, gstvalue: insertValues.gstzero },
@@ -494,8 +494,8 @@ const insertCustomerShippingAddress = (insertValues, callback) => {
 };
 
 const updateCustomerShippingAddress = (updateValues, id, callback) => {
-	var today = new Date();
-	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+	
+	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
 
 	if (updateValues.def_address) {
 		let sql = `update customer_shipping_address set def_address = 'N' where customer_id = '${updateValues.customer_id}' `;

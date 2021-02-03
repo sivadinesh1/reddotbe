@@ -1,10 +1,11 @@
 var pool = require("../../helpers/db");
 const moment = require("moment");
 const logger = require("./../../helpers/log4js");
+const { toTimeZone, currentTimeInTimeZone } = require("./../../helpers/utils");
 
 const insertProduct = (insertValues, callback) => {
-	var today = new Date();
-	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+	
+	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
 
 	let query = `insert into 
 		product 
@@ -61,8 +62,8 @@ const insertProduct = (insertValues, callback) => {
 };
 
 const updateProduct = (updateValues, callback) => {
-	var today = new Date();
-	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+
+	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
 
 	let query = `
 			update product set center_id = '${updateValues.center_id}', brand_id = '${updateValues.brand_id}',

@@ -7,8 +7,9 @@ const getProductInventoryReport = (center_id, product_code, callback) => {
   b.name as brand_name,  ih.module,
 
   IFNULL((select invoice_no from purchase where id = ih.purchase_id), (select invoice_no from sale where id = ih.sale_id)) as invoice_no,
-  
-  ih.actn as actn, ih.actn_type as action_type, ih.txn_qty as txn_qty, ih.stock_level as stock_level,
+  IFNULL((select invoice_date from purchase where id = ih.purchase_id), (select invoice_date from sale where id = ih.sale_id)) as invoice_date,
+
+  ih.actn as actn, ih.actn_type as action_type, abs(ih.txn_qty) as txn_qty, ih.stock_level as stock_level,
   txn_date as txn_date,
   ih.sale_id as sale_id,  
   s.customer_id as customer_id, 
@@ -28,8 +29,8 @@ const getProductInventoryReport = (center_id, product_code, callback) => {
   p.id = ih.product_ref_id and
   p.product_code like '%${product_code}%' and
   ih.center_id = '${center_id}'
-  order by 
-  STR_TO_DATE(txn_date, '%d-%m-%YYYY') desc
+  order by txn_date desc
+  
   
   `;
 	// product_ref_id = '${product_id}'

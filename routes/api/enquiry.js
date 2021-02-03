@@ -3,6 +3,7 @@
 const express = require("express");
 const enquiryRoute = express.Router();
 const { handleError, ErrorHandler } = require("./../helpers/error");
+const { toTimeZone, currentTimeInTimeZone } = require("./../helpers/utils");
 
 var pool = require("./../helpers/db");
 const moment = require("moment");
@@ -17,9 +18,9 @@ enquiryRoute.post("/draft-enquiry", (req, res) => {
 
 	let now = new Date();
 
-	today = moment(today).format("DD-MM-YYYY");
+	
 
-	now = moment(now).format("YYYY-MM-DD HH:mm:ss");
+	now = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
 
 	var objectKeysArray = Object.keys(jsonObj);
 	objectKeysArray.forEach(function (objKey) {
@@ -73,8 +74,7 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 	let today = new Date();
 	let now = new Date();
 
-	today = moment(today).format("DD-MM-YYYY");
-	now = moment(now).format("YYYY-MM-DD HH:mm:ss");
+	now = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
 
 	var objectKeysArray = Object.keys(jsonObj);
 	objectKeysArray.forEach(function (objKey) {
@@ -273,7 +273,9 @@ enquiryRoute.post("/insert-enquiry-details", (req, res) => {
 
 	var today = new Date();
 	let count = 0;
-	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+	
+	today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
+
 	let query = `INSERT INTO enquiry ( center_id, customer_id, enquiry_date, estatus, remarks) 
 							values ( '${jsonObj.center_id}', '${jsonObj.customerctrl.id}', '${today}', 'O','${jsonObj.remarks}')`;
 
@@ -312,7 +314,8 @@ enquiryRoute.post("/add-more-enquiry-details", (req, res) => {
 	let jsonObj = req.body;
 
 	var today = new Date();
-	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+	
+	today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
 
 	const prodArr = jsonObj["productarr"];
 
@@ -643,8 +646,7 @@ enquiryRoute.post("/delete-enquiry-details", async (req, res) => {
 	let id = req.body.id;
 	let enq_id = req.body.enquiry_id;
 
-	var today = new Date();
-	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
 
 	// step 1
 	let auditQuery = `

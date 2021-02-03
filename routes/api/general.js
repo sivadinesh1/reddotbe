@@ -353,8 +353,7 @@ router.post("/add-parts-details-enquiry", (req, res) => {
 	objectKeysArray.forEach(function (objKey) {
 		var objValue = yourJsonObj[objKey];
 
-		var today = new Date();
-		today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+
 		let query = `INSERT INTO enquiry_detail ( enquiry_id, item_code, qty) values ( '${objValue.enquiryid}','${objValue.partno}','${objValue.quantity}')`;
 
 		pool.query(query, function (err, data) {

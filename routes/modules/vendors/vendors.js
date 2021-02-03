@@ -1,10 +1,11 @@
 var pool = require("../../helpers/db");
 const moment = require("moment");
 const logger = require("./../../helpers/log4js");
+const { toTimeZone, currentTimeInTimeZone } = require("./../../helpers/utils");
 
 const insertVendor = (insertValues, callback) => {
-	var today = new Date();
-	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+	
+	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
 
 	let query = `
 		INSERT INTO vendor (center_id, name, address1, address2, address3, district, state_id, pin, 
@@ -37,8 +38,8 @@ const insertVendor = (insertValues, callback) => {
 };
 
 const updateVendor = (updateValues, id, callback) => {
-	var today = new Date();
-	today = moment(today).format("YYYY-MM-DD HH:mm:ss");
+	
+	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
 
 	let query = `
 	update vendor set center_id = '${updateValues.center_id}',
