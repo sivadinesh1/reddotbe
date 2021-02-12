@@ -1,15 +1,12 @@
-var pool = require("../../helpers/db");
+var pool = require('../../helpers/db');
 // const logger = require("../../helpers/log4js");
-const logger = require("./../../helpers/log4js");
-const { toTimeZone, currentTimeInTimeZone } = require("./../../helpers/utils");
+const logger = require('./../../helpers/log4js');
+const { toTimeZone, currentTimeInTimeZone } = require('./../../helpers/utils');
 
-const moment = require("moment");
+const moment = require('moment');
 
 const addSaleLedgerRecord = (insertValues, invoice_ref_id, callback) => {
-	
-
-	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
-
+	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 
 	// balance amount is taken from querying ledger table, with Limit 1, check the subquery.
 	let query = `
@@ -22,7 +19,12 @@ VALUES
     LIMIT 1) a), 0) + '${insertValues.net_total}', '${today}'
   ) `;
 
-	let values = [insertValues.center_id, insertValues.customerctrl.id, invoice_ref_id, insertValues.net_total];
+	let values = [
+		insertValues.center_id,
+		insertValues.customerctrl.id,
+		invoice_ref_id,
+		insertValues.net_total,
+	];
 
 	// pool.query(query, values, function (err, data) {
 	// 	if (err) {
@@ -32,10 +34,13 @@ VALUES
 	// });
 
 	return new Promise(function (resolve, reject) {
-		pool.query(query, values, function (err, data) {
+		pool.query(query, values, async function (err, data) {
 			if (err) {
 				reject(err);
 			}
+			let updateCustomerBalance = await updateCustomerBalanceAmount(
+				insertValues.customerctrl.id
+			);
 			resolve(data);
 		});
 	});
@@ -45,9 +50,7 @@ VALUES
 // if multiple invoices are there the balance amount has to be taken from the last record, so consiously we ignore invoice ref id
 
 const addReverseSaleLedgerRecord = (insertValues, invoice_ref_id) => {
-	
-
-	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
+	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 
 	// balance amount is taken from querying ledger table, with Limit 1, check the subquery.
 	let query = `
@@ -82,21 +85,27 @@ VALUES
 		), '${today}'
   ) `;
 
-	let values = [insertValues.center_id, insertValues.customerctrl.id, invoice_ref_id];
+	let values = [
+		insertValues.center_id,
+		insertValues.customerctrl.id,
+		invoice_ref_id,
+	];
 
 	return new Promise(function (resolve, reject) {
-		pool.query(query, values, function (err, data) {
+		pool.query(query, values, async function (err, data) {
 			if (err) {
 				return reject(err);
 			}
+			let updateCustomerBalance = await updateCustomerBalanceAmount(
+				insertValues.customerctrl.id
+			);
 			return resolve(data);
 		});
 	});
 };
 
 const addSaleLedgerAfterReversalRecord = (insertValues, invoice_ref_id) => {
-	
-	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
+	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 
 	// balance amount is taken from querying ledger table, with Limit 1, check the subquery.
 	let query = `
@@ -109,21 +118,34 @@ VALUES
     LIMIT 1) a), 0)), '${today}'
   ) `;
 
-	let values = [insertValues.center_id, insertValues.customerctrl.id, invoice_ref_id, insertValues.net_total];
+	let values = [
+		insertValues.center_id,
+		insertValues.customerctrl.id,
+		invoice_ref_id,
+		insertValues.net_total,
+	];
 
 	return new Promise(function (resolve, reject) {
-		pool.query(query, values, function (err, data) {
+		pool.query(query, values, async function (err, data) {
 			if (err) {
 				return reject(err);
 			}
+			let updateCustomerBalance = await updateCustomerBalanceAmount(
+				insertValues.customerctrl.id
+			);
 			return resolve(data);
 		});
 	});
 };
 
-const addPaymentLedgerRecord = (insertValues, payment_ref_id, receivedamount, sale_ref_id, callback) => {
-	
-	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
+const addPaymentLedgerRecord = (
+	insertValues,
+	payment_ref_id,
+	receivedamount,
+	sale_ref_id,
+	callback
+) => {
+	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 
 	let query = `
 	INSERT INTO ledger ( center_id, customer_id, invoice_ref_id, payment_ref_id, ledger_detail, debit_amt, balance_amt, ledger_date)
@@ -135,12 +157,20 @@ const addPaymentLedgerRecord = (insertValues, payment_ref_id, receivedamount, sa
 			LIMIT 1) a), 0) - '${receivedamount}', '${today}'
 		) `;
 
-	let values = [insertValues.customer.center_id, insertValues.customer.id, payment_ref_id, receivedamount];
+	let values = [
+		insertValues.customer.center_id,
+		insertValues.customer.id,
+		payment_ref_id,
+		receivedamount,
+	];
 
-	pool.query(query, values, function (err, data) {
+	pool.query(query, values, async function (err, data) {
 		if (err) {
 			return callback(err);
 		}
+		let updateCustomerBalance = await updateCustomerBalanceAmount(
+			insertValues.customer.id
+		);
 		return callback(null, data);
 	});
 };
@@ -148,7 +178,7 @@ const addPaymentLedgerRecord = (insertValues, payment_ref_id, receivedamount, sa
 const addPaymentMaster = async (cloneReq, pymtNo, insertValues, callback) => {
 	// (1) Updates payment seq in tbl financialyear, then {returns} formated sequence {YY/MM/PYMTSEQ}
 
-	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
+	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 
 	let values = [
 		cloneReq.centerid,
@@ -156,7 +186,7 @@ const addPaymentMaster = async (cloneReq, pymtNo, insertValues, callback) => {
 		pymtNo,
 		insertValues.receivedamount,
 		cloneReq.customer.credit_amt,
-		moment(insertValues.receiveddate).format("DD-MM-YYYY"),
+		moment(insertValues.receiveddate).format('DD-MM-YYYY'),
 		insertValues.pymtmode,
 		insertValues.bankref,
 		insertValues.pymtref,
@@ -177,7 +207,7 @@ const addPaymentMaster = async (cloneReq, pymtNo, insertValues, callback) => {
 };
 
 const updatePymtSequenceGenerator = (center_id) => {
-	let qryUpdateSqnc = "";
+	let qryUpdateSqnc = '';
 
 	qryUpdateSqnc = `
 		update financialyear set pymt_seq = pymt_seq + 1 where 
@@ -195,10 +225,12 @@ const updatePymtSequenceGenerator = (center_id) => {
 };
 
 const getPymtSequenceNo = (cloneReq) => {
-	let pymtNoQry = "";
+	let pymtNoQry = '';
 
-	pymtNoQry = ` select concat('${moment(cloneReq.pymt_date).format("YY")}', "/", '${moment(cloneReq.pymt_date).format(
-		"MM",
+	pymtNoQry = ` select concat('${moment(cloneReq.pymt_date).format(
+		'YY'
+	)}', "/", '${moment(cloneReq.pymt_date).format(
+		'MM'
 	)}', "/", lpad(pymt_seq, 5, "0")) as pymtNo from financialyear 
 				where 
 				center_id = '${cloneReq.centerid}' and  
@@ -272,7 +304,10 @@ const getPaymentsByCenter = (center_id, callback) => {
 	let query = `
 	select 
 	c.name as customer_name,
+	c.id as customer_id,
 	pymt_mode_name as pymt_mode_name,
+	p.bank_ref as bank_ref,
+	p.pymt_ref as pymt_ref,
 	p.payment_no as payment_no,
  DATE_FORMAT(STR_TO_DATE(p.pymt_date,'%d-%m-%Y'), '%d-%b-%Y') as pymt_date,
 	p.advance_amt_used as advance_amt_used,
@@ -310,6 +345,7 @@ const getPymtTransactionsByCenter = (center_id, callback) => {
 	let query = `
 	select 
 	c.name as customer_name,
+	c.id as customer_id,
 	pymt_mode_name as pymt_mode_name,
 	p.payment_no as payment_no,
 	 DATE_FORMAT(STR_TO_DATE(p.pymt_date,'%d-%m-%Y'), '%d-%b-%Y') as pymt_date,
@@ -317,6 +353,7 @@ const getPymtTransactionsByCenter = (center_id, callback) => {
 	p.advance_amt_used as advance_amt_used,
 	pymt_mode_ref_id as pymt_mode_ref_id,
 	pymt_ref as pymt_ref,
+	bank_ref as bank_ref,
 	last_updated as last_updated
 from 
 	payment p,
@@ -426,7 +463,7 @@ const getSaleInvoiceByCenter = (center_id, callback) => {
 };
 
 const updateCustomerCredit = (balanceamount, center_id, customer_id) => {
-	let qryUpdateSqnc = "";
+	let qryUpdateSqnc = '';
 
 	//~ bitwise operator. Bitwise does not negate a number exactly. eg:  ~1000 is -1001, not -1000 (a = ~a + 1)
 	balanceamount = ~balanceamount + 1;
@@ -447,8 +484,12 @@ const updateCustomerCredit = (balanceamount, center_id, customer_id) => {
 	});
 };
 
-const updateCustomerCreditMinus = (creditusedamount, center_id, customer_id) => {
-	let qryUpdateSqnc = "";
+const updateCustomerCreditMinus = (
+	creditusedamount,
+	center_id,
+	customer_id
+) => {
+	let qryUpdateSqnc = '';
 
 	qryUpdateSqnc = `
 		update customer set credit_amt = credit_amt - ${creditusedamount} where 
@@ -458,6 +499,28 @@ const updateCustomerCreditMinus = (creditusedamount, center_id, customer_id) => 
 
 	return new Promise(function (resolve, reject) {
 		pool.query(qryUpdateSqnc, function (err, data) {
+			if (err) {
+				reject(err);
+			}
+			resolve(data);
+		});
+	});
+};
+
+const updateCustomerBalanceAmount = (customer_id) => {
+	let qryUpdate = '';
+
+	qryUpdate = `
+	update customer c set c.balance_amt = (
+		select balance_amt from ledger l where l.customer_id = '${customer_id}' 
+		order by id desc
+		limit 1)
+		where 
+		c.id = '${customer_id}'  
+		 `;
+
+	return new Promise(function (resolve, reject) {
+		pool.query(qryUpdate, function (err, data) {
 			if (err) {
 				reject(err);
 			}

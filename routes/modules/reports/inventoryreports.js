@@ -1,6 +1,6 @@
-var pool = require("../../helpers/db");
-const moment = require("moment");
-const logger = require("./../../helpers/log4js");
+var pool = require('../../helpers/db');
+const moment = require('moment');
+const logger = require('./../../helpers/log4js');
 
 const getProductInventoryReport = (center_id, product_code, callback) => {
 	let query = ` select ih.id, module, p.id as product_id, p.product_code as product_code, p.description as product_description,
@@ -29,7 +29,7 @@ const getProductInventoryReport = (center_id, product_code, callback) => {
   p.id = ih.product_ref_id and
   p.product_code like '%${product_code}%' and
   ih.center_id = '${center_id}'
-  order by txn_date desc
+  order by ih.id desc
   
   
   `;

@@ -811,7 +811,7 @@ function generateFooterSummary(doc, centerdata) {
 		.text("A/C NAME          : " + centerdata.accountname, 320, start + 10, { lineGap: 1.8 })
 		.text("A/C NO               : " + centerdata.accountno, 320, start + 20, { lineGap: 1.8 });
 	doc.font("Times-BoldItalic");
-	doc.fontSize(6).text("Plz pay Cash/Cheque/DD in favour of 'THE THIRUMURUGAN TRACTOR SPARES'.", 320, start + 30, { lineGap: 1.4 });
+	doc.fontSize(6).text(`Plz pay Cash/Cheque/DD in favour of '${centerdata.accountname}'.`, 320, start + 30, { lineGap: 1.4 });
 
 	doc.fontSize(7).text("For    " + centerdata.accountname, 400, start + 40);
 	doc.fontSize(7).text("Authorised signatory", 400, start + 75);

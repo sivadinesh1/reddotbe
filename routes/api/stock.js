@@ -1,17 +1,21 @@
-const express = require("express");
+const express = require('express');
 const stockRouter = express.Router();
-const logger = require("../../routes/helpers/log4js");
-const { toTimeZone, currentTimeInTimeZone } = require("./../helpers/utils");
+const logger = require('../../routes/helpers/log4js');
+const { toTimeZone, currentTimeInTimeZone } = require('./../helpers/utils');
 
-const mysql = require("mysql");
-const moment = require("moment");
+const mysql = require('mysql');
+const moment = require('moment');
 
-var pool = require("./../helpers/db");
+var pool = require('./../helpers/db');
 
-const { getSalesMaster, getSalesDetails, updateItemHistoryTable } = require("../modules/sales/sales.js");
+const {
+	getSalesMaster,
+	getSalesDetails,
+} = require('../modules/sales/sales.js');
 
+const { insertItemHistoryTable } = require('../modules/purchase/purchase.js');
 
-stockRouter.get("/search-all-draft-purchase/:centerid", (req, res) => {
+stockRouter.get('/search-all-draft-purchase/:centerid', (req, res) => {
 	let center_id = req.params.centerid;
 
 	let sql = `select p.*, v.id as vendor_id, v.name as vendor_name,
@@ -29,7 +33,10 @@ stockRouter.get("/search-all-draft-purchase/:centerid", (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(new ErrorHandler("500", "Error seacrching draft purchase"), res);
+			return handleError(
+				new ErrorHandler('500', 'Error seacrching draft purchase'),
+				res
+			);
 		} else {
 			return res.json(data);
 		}
@@ -40,19 +47,25 @@ stockRouter.get("/search-all-draft-purchase/:centerid", (req, res) => {
 // str_to_date('2020-05-01 00:00:00', '%Y-%m-%d %T') and
 // str_to_date('2020-05-08 23:59:00', '%Y-%m-%d %T')
 
-stockRouter.get("/search-purchase/:centerid/:vendorid/:status/:fromdate/:todate", (req, res) => {
-	let center_id = req.params.centerid;
-	let status = req.params.status;
-	let vendor_id = req.params.vendorid;
-	let from_date = req.params.fromdate;
-	let to_date = req.params.todate;
+stockRouter.post('/search-purchase', (req, res) => {
+	let center_id = req.body.centerid;
+	let status = req.body.status;
+	let vendor_id = req.body.vendorid;
+	let from_date = req.body.fromdate;
+	let to_date = req.body.todate;
 
-	if (from_date !== "") {
-		from_date = moment(new Date(req.params.fromdate)).format("DD-MM-YYYY") + " 00:00:00";
+	if (from_date !== '') {
+		// from_date =
+		// 	moment(new Date(req.params.fromdate)).format('DD-MM-YYYY') +
+		// 	' 00:00:00';
+		from_date = toTimeZone(req.body.fromdate, 'Asia/Kolkata') + ' 00:00:00';
 	}
 
-	if (to_date !== "") {
-		to_date = moment(new Date(req.params.todate)).format("DD-MM-YYYY") + " 23:59:00";
+	if (to_date !== '') {
+		// to_date =
+		// 	moment(new Date(req.params.todate)).format('DD-MM-YYYY') + ' 23:59:00';
+
+		to_date = toTimeZone(req.body.todate, 'Asia/Kolkata') + ' 23:59:00';
 	}
 
 	let vendsql = `and p.vendor_id = '${vendor_id}' `;
@@ -70,24 +83,27 @@ stockRouter.get("/search-purchase/:centerid/:vendorid/:status/:fromdate/:todate"
 	str_to_date('${from_date}',  '%d-%m-%Y %T') and
 	str_to_date('${to_date}',  '%d-%m-%Y %T') `;
 
-	if (vendor_id !== "all") {
+	if (vendor_id !== 'all') {
 		sql = sql + vendsql;
 	}
 
-	if (status !== "all") {
+	if (status !== 'all') {
 		sql = sql + statussql;
 	}
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(new ErrorHandler("500", "Error fetching search purchase"), res);
+			return handleError(
+				new ErrorHandler('500', 'Error fetching search purchase'),
+				res
+			);
 		} else {
 			return res.json(data);
 		}
 	});
 });
 
-stockRouter.post("/search-sales", (req, res) => {
+stockRouter.post('/search-sales', (req, res) => {
 	let center_id = req.body.centerid;
 	let status = req.body.status;
 	let customer_id = req.body.customerid;
@@ -97,16 +113,22 @@ stockRouter.post("/search-sales", (req, res) => {
 	let search_type = req.body.searchtype;
 	let invoice_no = req.body.invoiceno;
 
-	let sql = "";
-	let query = "";
+	let sql = '';
+	let query = '';
 
-	if (search_type === "all") {
-		if (from_date !== "") {
-			from_date = moment(new Date(req.body.fromdate)).format("DD-MM-YYYY") + " 00:00:00";
+	if (search_type === 'all') {
+		if (from_date !== '') {
+			// from_date =
+			// 	moment(new Date(req.body.fromdate)).format('DD-MM-YYYY') + ' 00:00:00';
+
+			from_date = toTimeZone(req.body.fromdate, 'Asia/Kolkata') + ' 00:00:00';
 		}
 
-		if (to_date !== "") {
-			to_date = moment(new Date(req.body.todate)).format("DD-MM-YYYY") + " 23:59:00";
+		if (to_date !== '') {
+			// to_date =
+			// 	moment(new Date(req.body.todate)).format('DD-MM-YYYY') + ' 23:59:00';
+
+			to_date = toTimeZone(req.body.todate, 'Asia/Kolkata') + ' 23:59:00';
 		}
 
 		let custsql = `and s.customer_id = '${customer_id}' `;
@@ -125,18 +147,18 @@ stockRouter.post("/search-sales", (req, res) => {
 				str_to_date('${from_date}',  '%d-%m-%Y %T') and
 				str_to_date('${to_date}',  '%d-%m-%Y %T') `;
 
-		if (customer_id !== "all") {
+		if (customer_id !== 'all') {
 			sql = sql + custsql;
 		}
 
-		if (status !== "all") {
+		if (status !== 'all') {
 			sql = sql + statussql;
 		}
 
-		if (sale_type !== "all") {
-			if (sale_type === "GI") {
+		if (sale_type !== 'all') {
+			if (sale_type === 'GI') {
 				sql = sql + " and s.sale_type = 'gstinvoice' ";
-			} else if (sale_type === "SI") {
+			} else if (sale_type === 'SI') {
 				sql = sql + " and s.sale_type = 'stockissue' ";
 			}
 		}
@@ -145,8 +167,8 @@ stockRouter.post("/search-sales", (req, res) => {
 			sql = sql + `and invoice_no = '${invoice_no.trim()}' `;
 		}
 
-		sql = sql + " order by invoice_no ";
-	} else if (search_type !== "all") {
+		sql = sql + ' order by invoice_no ';
+	} else if (search_type !== 'all') {
 		query = ` 
 		select s.*, c.id as customer_id, c.name as customer_name
 					from
@@ -161,16 +183,19 @@ stockRouter.post("/search-sales", (req, res) => {
 		`;
 	}
 
-	pool.query(search_type === "all" ? sql : query, function (err, data) {
+	pool.query(search_type === 'all' ? sql : query, function (err, data) {
 		if (err) {
-			return handleError(new ErrorHandler("500", "Error fetching search sales"), res);
+			return handleError(
+				new ErrorHandler('500', 'Error fetching search sales'),
+				res
+			);
 		} else {
 			return res.json(data);
 		}
 	});
 });
 
-stockRouter.get("/purchase-master/:id", (req, res) => {
+stockRouter.get('/purchase-master/:id', (req, res) => {
 	let purchase_id = req.params.id;
 
 	let sql = `
@@ -182,7 +207,10 @@ p.id = '${purchase_id}' `;
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(new ErrorHandler("500", "Error fetching purchase master"), res);
+			return handleError(
+				new ErrorHandler('500', 'Error fetching purchase master'),
+				res
+			);
 		} else {
 			return res.json(data);
 		}
@@ -190,7 +218,7 @@ p.id = '${purchase_id}' `;
 });
 
 // get sale master records
-stockRouter.get("/sales-master/:id", async (req, res) => {
+stockRouter.get('/sales-master/:id', async (req, res) => {
 	// @from Sales file
 
 	let rows = await getSalesMaster(`${req.params.id}`);
@@ -203,13 +231,13 @@ stockRouter.get("/sales-master/:id", async (req, res) => {
 });
 
 // get sale details records
-stockRouter.get("/sale-details/:id", async (req, res) => {
+stockRouter.get('/sale-details/:id', async (req, res) => {
 	let rows = await getSalesDetails(`${req.params.id}`);
 
 	return res.json(rows);
 });
 
-stockRouter.post("/delete-sale-details", (req, res) => {
+stockRouter.post('/delete-sale-details', (req, res) => {
 	let id = req.body.id;
 
 	let query = `
@@ -217,16 +245,19 @@ stockRouter.post("/delete-sale-details", (req, res) => {
 
 	pool.query(query, function (err, data) {
 		if (err) {
-			return handleError(new ErrorHandler("500", "Error deleting sale details"), res);
+			return handleError(
+				new ErrorHandler('500', 'Error deleting sale details'),
+				res
+			);
 		} else {
 			return res.json({
-				result: "success",
+				result: 'success',
 			});
 		}
 	});
 });
 
-stockRouter.get("/purchase-details/:id", (req, res) => {
+stockRouter.get('/purchase-details/:id', (req, res) => {
 	let purchase_id = req.params.id;
 
 	let sql = `
@@ -260,14 +291,17 @@ pd.purchase_id = '${purchase_id}'
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(new ErrorHandler("500", "Error fetching purchase master"), res);
+			return handleError(
+				new ErrorHandler('500', 'Error fetching purchase master'),
+				res
+			);
 		} else {
 			return res.json(data);
 		}
 	});
 });
 
-stockRouter.post("/delete-purchase-details", async (req, res) => {
+stockRouter.post('/delete-purchase-details', async (req, res) => {
 	let center_id = req.body.center_id;
 	let id = req.body.id;
 	let purchase_id = req.body.purchaseid;
@@ -276,7 +310,7 @@ stockRouter.post("/delete-purchase-details", async (req, res) => {
 	let stock_id = req.body.stock_id;
 	let mrp = req.body.mrp;
 
-	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
+	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 
 	let auditQuery = `
 	INSERT INTO audit_tbl (module, module_ref_id, module_ref_det_id, actn, old_value, new_value, audit_date)
@@ -297,7 +331,9 @@ stockRouter.post("/delete-purchase-details", async (req, res) => {
 	let auditPromise = await new Promise(function (resolve, reject) {
 		pool.query(auditQuery, function (err, data) {
 			if (err) {
-				return reject(handleError(new ErrorHandler("500", "Error adding sale audit."), res));
+				return reject(
+					handleError(new ErrorHandler('500', 'Error adding sale audit.'), res)
+				);
 			}
 			resolve(data);
 		});
@@ -310,7 +346,12 @@ stockRouter.post("/delete-purchase-details", async (req, res) => {
 
 		pool.query(query, function (err, data) {
 			if (err) {
-				return reject(handleError(new ErrorHandler("500", "Error deleting sale details"), res));
+				return reject(
+					handleError(
+						new ErrorHandler('500', 'Error deleting sale details'),
+						res
+					)
+				);
 			}
 			resolve(data);
 		});
@@ -325,7 +366,12 @@ where product_id = '${product_id}' and id = '${stock_id}'  `;
 
 		pool.query(stockUpdateQuery, function (err, data) {
 			if (err) {
-				return reject(handleError(new ErrorHandler("500", "Error deleting sale details"), res));
+				return reject(
+					handleError(
+						new ErrorHandler('500', 'Error deleting sale details'),
+						res
+					)
+				);
 			}
 			resolve(data);
 		});
@@ -333,18 +379,27 @@ where product_id = '${product_id}' and id = '${stock_id}'  `;
 
 	// step 4 , reverse item history table entries.
 
-	let updateitemhistorytbl = await updateItemHistoryTable(center_id, "Purchase", product_id, purchase_id, id, "PUR", "Mod/Del", qty, mrp)
-
+	let insertItemHistoryTable = await insertItemHistoryTable(
+		center_id,
+		'Purchase',
+		product_id,
+		purchase_id,
+		id,
+		'PUR',
+		'Mod/Del',
+		qty,
+		mrp
+	);
 
 	return res.json({
-		result: "success",
+		result: 'success',
 	});
 });
 
 module.exports = stockRouter;
 
 // called from sale details list delete
-stockRouter.delete("/delete-purchase/:id", async (req, res) => {
+stockRouter.delete('/delete-purchase/:id', async (req, res) => {
 	let purchase_id = req.params.id;
 
 	let purchaseDetails = await getPurchaseDetails(purchase_id);
@@ -353,9 +408,9 @@ stockRouter.delete("/delete-purchase/:id", async (req, res) => {
 
 	let retValue = await deletePurchaseDetailsRecs(purchaseDetails, purchase_id);
 
-	if (retValue === "done") {
+	if (retValue === 'done') {
 		return res.json({
-			result: "success",
+			result: 'success',
 		});
 	}
 });
@@ -399,7 +454,7 @@ function deletePurchaseDetailsRecs(purchaseDetails, purchase_id) {
 
 	purchaseDetails.forEach(async (element, index) => {
 		idx = index + 1;
-		let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
+		let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 
 		let auditQuery = `
 		INSERT INTO audit_tbl (module, module_ref_id, module_ref_det_id, actn, old_value, new_value, audit_date)
@@ -420,7 +475,12 @@ function deletePurchaseDetailsRecs(purchaseDetails, purchase_id) {
 		let auditPromise = await new Promise(function (resolve, reject) {
 			pool.query(auditQuery, function (err, data) {
 				if (err) {
-					return reject(handleError(new ErrorHandler("500", "Error adding sale audit."), res));
+					return reject(
+						handleError(
+							new ErrorHandler('500', 'Error adding sale audit.'),
+							res
+						)
+					);
 				}
 				resolve(data);
 			});
@@ -433,7 +493,12 @@ function deletePurchaseDetailsRecs(purchaseDetails, purchase_id) {
 
 			pool.query(query, function (err, data) {
 				if (err) {
-					return reject(handleError(new ErrorHandler("500", "Error deleting sale details"), res));
+					return reject(
+						handleError(
+							new ErrorHandler('500', 'Error deleting sale details'),
+							res
+						)
+					);
 				}
 				resolve(data);
 			});
@@ -448,7 +513,12 @@ where product_id = '${element.product_id}' and id = '${element.stock_id}'  `;
 
 			pool.query(stockUpdateQuery, function (err, data) {
 				if (err) {
-					return reject(handleError(new ErrorHandler("500", "Error deleting sale details"), res));
+					return reject(
+						handleError(
+							new ErrorHandler('500', 'Error deleting sale details'),
+							res
+						)
+					);
 				}
 				resolve(data);
 			});
@@ -457,14 +527,14 @@ where product_id = '${element.product_id}' and id = '${element.stock_id}'  `;
 
 	if (purchaseDetails.length === idx) {
 		return new Promise(function (resolve, reject) {
-			resolve("done");
+			resolve('done');
 		}).catch(() => {
 			/* do whatever you want here */
 		});
 	}
 }
 
-stockRouter.get("/delete-purchase-master/:id", async (req, res) => {
+stockRouter.get('/delete-purchase-master/:id', async (req, res) => {
 	let purchase_id = req.params.id;
 
 	let sql = `
@@ -473,10 +543,13 @@ stockRouter.get("/delete-purchase-master/:id", async (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(new ErrorHandler("500", "Error deleting sale detail / master"), res);
+			return handleError(
+				new ErrorHandler('500', 'Error deleting sale detail / master'),
+				res
+			);
 		} else {
 			return res.json({
-				result: "success",
+				result: 'success',
 			});
 		}
 	});

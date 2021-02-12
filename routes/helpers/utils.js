@@ -1,5 +1,6 @@
 // const moment = require("moment");
 const moment = require("moment-timezone");
+const bcrypt = require('bcrypt');
 
 const number2text = (value) => {
 	// function number2text(value) {
@@ -107,9 +108,20 @@ function currentTimeInTimeZone(zone, format) {
 	return moment(moment(), format).tz(zone).format(format);
 }
 
+const encryptPassword = async (password) => {
+	try {
+	 
+			const hashedPassword = await bcrypt.hash(password, 10);
+			return hashedPassword;
+	} catch(errors) {
+			console.log('log errors ' + errors);
+	}
+}
+
 module.exports = {
 	number2text,
 	toTimeZone,
 	currentTimeInTimeZone,
 	toTimeZoneFrmt,
+	encryptPassword
 };

@@ -1,6 +1,6 @@
-var pool = require("../../helpers/db");
-const logger = require("./../../helpers/log4js");
-const { toTimeZone, currentTimeInTimeZone } = require("./../../helpers/utils");
+var pool = require('../../helpers/db');
+const logger = require('./../../helpers/log4js');
+const { toTimeZone, currentTimeInTimeZone } = require('./../../helpers/utils');
 
 const getSalesMaster = (sales_id, callback) => {
 	let sql = `select s.* from sale s where s.id = '${sales_id}' `;
@@ -40,8 +40,7 @@ function getSalesDetails(sales_id) {
 }
 
 const insertSaleDetails = (k, callback) => {
-	
-	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
+	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 
 	let query = `INSERT INTO enquiry_detail ( enquiry_id, product_id, askqty, product_code, notes, status)
         values ( '${tmpid}', (select id from product where product_code='${k.product_code}' and center_id = '${jsonObj.center_id}'), '${k.quantity}', '${k.product_code}', '${k.notes}', 'O')`;
@@ -59,28 +58,43 @@ const insertSaleDetails = (k, callback) => {
 const IUSaleDetailsAsync = (k) => {
 	let insQuery100 = `INSERT INTO sale_detail(sale_id, product_id, qty, disc_percent, disc_value, disc_type, unit_price, mrp, batchdate, tax,
 		igst, cgst, sgst, taxable_value, total_value, stock_id) VALUES
-		( '${newPK}', '${k.product_id}', '${k.qty}', '${k.disc_percent}', '${k.disc_value}', '${k.disc_type}', '${
-		(k.total_value - k.disc_value) / k.qty
-		}', '${k.mrp}', 
-		'${currentTimeInTimeZone("Asia/Kolkata", "DD-MM-YYYY")}',
+		( '${newPK}', '${k.product_id}', '${k.qty}', '${k.disc_percent}', '${
+		k.disc_value
+	}', '${k.disc_type}', '${(k.total_value - k.disc_value) / k.qty}', '${
+		k.mrp
+	}', 
+		'${currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY')}',
 		'${k.taxrate}', '${k.igst}', 
-		'${k.cgst}', '${k.sgst}', '${k.taxable_value}', '${k.total_value}', '${k.stock_pk}')`;
+		'${k.cgst}', '${k.sgst}', '${k.taxable_value}', '${k.total_value}', '${
+		k.stock_pk
+	}')`;
 
-	let upQuery100 = `update sale_detail set product_id = '${k.product_id}', qty = '${k.qty}', disc_percent = '${k.disc_percent}', 
-disc_value = '${k.disc_value}',	disc_type= '${k.disc_type}', unit_price = '${(k.total_value - k.disc_value) / k.qty}', mrp = '${k.mrp}', 
-		batchdate = '${currentTimeInTimeZone("Asia/Kolkata", "DD-MM-YYYY")}', tax = '${k.taxrate}',
+	let upQuery100 = `update sale_detail set product_id = '${
+		k.product_id
+	}', qty = '${k.qty}', disc_percent = '${k.disc_percent}', 
+disc_value = '${k.disc_value}',	disc_type= '${k.disc_type}', unit_price = '${
+		(k.total_value - k.disc_value) / k.qty
+	}', mrp = '${k.mrp}', 
+		batchdate = '${currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY')}', tax = '${
+		k.taxrate
+	}',
 		igst = '${k.igst}', cgst = '${k.cgst}', sgst = '${k.sgst}', 
-		taxable_value = '${k.taxable_value}', total_value = '${k.total_value}', stock_id = '${k.stock_pk}'
+		taxable_value = '${k.taxable_value}', total_value = '${
+		k.total_value
+	}', stock_id = '${k.stock_pk}'
 		where
 		id = '${k.sale_det_id}' `;
 
 	return new Promise(function (resolve, reject) {
-		pool.query(k.sale_det_id === "" ? insQuery100 : upQuery100, function (err, data) {
-			if (err) {
-				reject(err);
+		pool.query(
+			k.sale_det_id === '' ? insQuery100 : upQuery100,
+			function (err, data) {
+				if (err) {
+					reject(err);
+				}
+				resolve(data);
 			}
-			resolve(data);
-		});
+		);
 	});
 };
 
@@ -117,14 +131,14 @@ const updateProductAsync = (k) => {
 
 const insertItemHistoryAsync = (k, vSale_id, vSale_det_id, cloneReq) => {
 	var today = new Date();
-	
-	today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
+
+	today = currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY HH:mm:ss');
 
 	// if purchase details id is missing its new else update
-	let sale_det_id = k.sale_det_id === "" ? vSale_det_id : k.sale_det_id;
-	let txn_qty = k.sale_det_id === "" ? k.qty : k.qty - k.old_val;
-	let actn_type = "Sold";
-	let sale_id = vSale_id === "" ? k.sale_id : vSale_id;
+	let sale_det_id = k.sale_det_id === '' ? vSale_det_id : k.sale_det_id;
+	let txn_qty = k.sale_det_id === '' ? k.qty : k.qty - k.old_val;
+	let actn_type = 'Sold';
+	let sale_id = vSale_id === '' ? k.sale_id : vSale_id;
 
 	if (cloneReq.revision === 0 && txn_qty === 0) {
 		txn_qty = k.qty;
@@ -132,7 +146,7 @@ const insertItemHistoryAsync = (k, vSale_id, vSale_det_id, cloneReq) => {
 
 	//txn -ve means subtract from qty
 	if (txn_qty < 0) {
-		actn_type = "ADD";
+		actn_type = 'ADD';
 	}
 
 	// convert -ve to positive number
@@ -158,16 +172,17 @@ const insertItemHistoryAsync = (k, vSale_id, vSale_det_id, cloneReq) => {
 };
 
 const getNextSaleInvoiceNoAsync = (center_id, invoicetype) => {
-	let query = "";
-	
-	let invoiceyear = currentTimeInTimeZone("Asia/Kolkata", "YY")
-	
-	if (invoicetype === "stockissue") {
-		query = `select concat('SI',"-",'20', "/", "1", "/", lpad(stock_issue_seq + 1, 5, "0")) as NxtInvNo from financialyear  where 
+	let query = '';
+
+	let invoiceyear = currentTimeInTimeZone('Asia/Kolkata', 'YY');
+	let invoicemonth = currentTimeInTimeZone('Asia/Kolkata', 'MM');
+
+	if (invoicetype === 'stockissue') {
+		query = `select concat('SI',"-",'${invoiceyear}', "/", '${invoicemonth}', "/", lpad(stock_issue_seq + 1, 5, "0")) as NxtInvNo from financialyear  where 
 					center_id = '${center_id}' and  
 					CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
-	} else if (invoicetype === "gstinvoice") {
-		query = `select concat('${invoiceyear}', "/", "1", "/", lpad(invseq + 1, 5, "0")) as NxtInvNo from financialyear  where 
+	} else if (invoicetype === 'gstinvoice') {
+		query = `select concat('${invoiceyear}', "/", '${invoicemonth}', "/", lpad(invseq + 1, 5, "0")) as NxtInvNo from financialyear  where 
 					center_id = '${center_id}' and  
 					CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
 	}
@@ -183,8 +198,7 @@ const getNextSaleInvoiceNoAsync = (center_id, invoicetype) => {
 };
 
 const insertAuditTblforDeleteSaleDetailsRecAsync = (element, sale_id) => {
-	
-	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
+	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 
 	let query = `
 	INSERT INTO audit_tbl (module, module_ref_id, module_ref_det_id, actn, old_value, new_value, audit_date)
@@ -239,28 +253,34 @@ const updateStockWhileDeleteAsync = (element) => {
 	});
 };
 
-
-const updateItemHistoryTable = (center_id, module, product_id, sale_id, sale_det_id, actn, actn_type, txn_qty, mrp) => {
-	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
+const updateItemHistoryTable = (
+	center_id,
+	module,
+	product_id,
+	sale_id,
+	sale_det_id,
+	actn,
+	actn_type,
+	txn_qty,
+	mrp
+) => {
+	let today = currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY HH:mm:ss');
 
 	let query2 = `
 insert into item_history (center_id, module, product_ref_id, sale_id, sale_det_id, actn, actn_type, txn_qty, stock_level, txn_date)
 values ('${center_id}', '${module}', '${product_id}', '${sale_id}', '${sale_det_id}', '${actn}', '${actn_type}', '${txn_qty}', 
 				(select (available_stock)  from stock where product_id = '${product_id}' and mrp = '${mrp}' ), '${today}' ) `;
 
-return new Promise(function (resolve, reject) {
-pool.query(query2, function (err, data) {
-	if (err) {
-		reject(err); // failure
-	}
-	// success
-	resolve(data);
-});
-});
-	
-}
-
-
+	return new Promise(function (resolve, reject) {
+		pool.query(query2, function (err, data) {
+			if (err) {
+				reject(err); // failure
+			}
+			// success
+			resolve(data);
+		});
+	});
+};
 
 module.exports = {
 	getSalesMaster,
@@ -274,5 +294,5 @@ module.exports = {
 	insertAuditTblforDeleteSaleDetailsRecAsync,
 	deleteSaleDetailsRecAsync,
 	updateStockWhileDeleteAsync,
-	updateItemHistoryTable
+	updateItemHistoryTable,
 };

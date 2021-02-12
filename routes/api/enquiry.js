@@ -1,26 +1,28 @@
 /** @format */
 
-const express = require("express");
+const express = require('express');
 const enquiryRoute = express.Router();
-const { handleError, ErrorHandler } = require("./../helpers/error");
-const { toTimeZone, currentTimeInTimeZone } = require("./../helpers/utils");
+const { handleError, ErrorHandler } = require('./../helpers/error');
+const { toTimeZone, currentTimeInTimeZone } = require('./../helpers/utils');
 
-var pool = require("./../helpers/db");
-const moment = require("moment");
-const logger = require("../../routes/helpers/log4js");
+var pool = require('./../helpers/db');
+const moment = require('moment');
+const logger = require('../../routes/helpers/log4js');
 
-const { insertEnquiryDetail, fetchEnquiryDetailByEnqId, fetchCustomerDetailsByEnqId } = require("../modules/enquiry/enquiry");
+const {
+	insertEnquiryDetail,
+	fetchEnquiryDetailByEnqId,
+	fetchCustomerDetailsByEnqId,
+} = require('../modules/enquiry/enquiry');
 
-enquiryRoute.post("/draft-enquiry", (req, res) => {
+enquiryRoute.post('/draft-enquiry', (req, res) => {
 	let jsonObj = req.body;
 
 	let today = new Date();
 
 	let now = new Date();
 
-	
-
-	now = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
+	now = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 
 	var objectKeysArray = Object.keys(jsonObj);
 	objectKeysArray.forEach(function (objKey) {
@@ -31,7 +33,10 @@ enquiryRoute.post("/draft-enquiry", (req, res) => {
 
 		pool.query(upQry1, function (err, data) {
 			if (err) {
-				return handleError(new ErrorHandler("500", "Error Updating draft-enquiry."), res);
+				return handleError(
+					new ErrorHandler('500', 'Error Updating draft-enquiry.'),
+					res
+				);
 			}
 		});
 
@@ -58,30 +63,33 @@ enquiryRoute.post("/draft-enquiry", (req, res) => {
 
 		pool.query(uQrys, function (err, data) {
 			if (err) {
-				return handleError(new ErrorHandler("500", "Error Updating draft-enquiry."), res);
+				return handleError(
+					new ErrorHandler('500', 'Error Updating draft-enquiry.'),
+					res
+				);
 			}
 		});
 	});
 
 	res.json({
-		result: "success",
+		result: 'success',
 	});
 });
 
-enquiryRoute.post("/move-to-sale", (req, res) => {
+enquiryRoute.post('/move-to-sale', (req, res) => {
 	let jsonObj = req.body;
 
 	let today = new Date();
 	let now = new Date();
 
-	now = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
+	now = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 
 	var objectKeysArray = Object.keys(jsonObj);
 	objectKeysArray.forEach(function (objKey) {
 		var objValue = jsonObj[objKey];
 
 		/** No Product Id, obviously its a backorder */
-		if (objValue.product_id === "" || objValue.product_id === null) {
+		if (objValue.product_id === '' || objValue.product_id === null) {
 			// b - full back order
 			// updt enq_det_tbl status as B , giveqty = 0
 			// insert backorder tbl with reason prodcut code not found
@@ -94,7 +102,13 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 
 			pool.query(upQuery, function (err, data) {
 				if (err) {
-					return handleError(new ErrorHandler("500", "Error Updating move to sale. Backorder failure"), res);
+					return handleError(
+						new ErrorHandler(
+							'500',
+							'Error Updating move to sale. Backorder failure'
+						),
+						res
+					);
 				}
 			});
 
@@ -103,7 +117,10 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 
 			pool.query(insQry, function (err, data) {
 				if (err) {
-					return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
+					return handleError(
+						new ErrorHandler('500', 'Error Updating move to sale.'),
+						res
+					);
 				}
 			});
 		} else if (objValue.askqty > objValue.giveqty && objValue.giveqty === 0) {
@@ -122,7 +139,10 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 
 			pool.query(upQuery1, function (err, data) {
 				if (err) {
-					return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
+					return handleError(
+						new ErrorHandler('500', 'Error Updating move to sale.'),
+						res
+					);
 				}
 			});
 
@@ -131,7 +151,10 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 
 			pool.query(insQry2, function (err, data) {
 				if (err) {
-					return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
+					return handleError(
+						new ErrorHandler('500', 'Error Updating move to sale.'),
+						res
+					);
 				}
 			});
 		} else if (objValue.askqty > objValue.giveqty && objValue.giveqty !== 0) {
@@ -152,7 +175,10 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 
 			pool.query(upQuery1, function (err, data) {
 				if (err) {
-					return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
+					return handleError(
+						new ErrorHandler('500', 'Error Updating move to sale.'),
+						res
+					);
 				}
 			});
 
@@ -161,10 +187,17 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 
 			pool.query(insQry2, function (err, data) {
 				if (err) {
-					return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
+					return handleError(
+						new ErrorHandler('500', 'Error Updating move to sale.'),
+						res
+					);
 				}
 			});
-		} else if (objValue.giveqty >= objValue.askqty && objValue.product_id !== "" && objValue.product_id !== null) {
+		} else if (
+			objValue.giveqty >= objValue.askqty &&
+			objValue.product_id !== '' &&
+			objValue.product_id !== null
+		) {
 			// F- fullfilled
 			// updt enq_det_tbl status as F, give qty = actual given
 
@@ -179,7 +212,10 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 
 			pool.query(upQuery3, function (err, data) {
 				if (err) {
-					return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
+					return handleError(
+						new ErrorHandler('500', 'Error Updating move to sale.'),
+						res
+					);
 				}
 			});
 		}
@@ -191,18 +227,21 @@ enquiryRoute.post("/move-to-sale", (req, res) => {
 
 		pool.query(upQuery4, function (err, data) {
 			if (err) {
-				return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
+				return handleError(
+					new ErrorHandler('500', 'Error Updating move to sale.'),
+					res
+				);
 			}
 		});
 	});
 
 	res.json({
-		result: "success",
+		result: 'success',
 	});
 });
 
 // todo this end point not used, check and delete
-enquiryRoute.post("/update-giveqty-enquiry-details", (req, res) => {
+enquiryRoute.post('/update-giveqty-enquiry-details', (req, res) => {
 	let giveqty = req.body.giveqty;
 	let id = req.body.enqdetailid;
 
@@ -213,13 +252,16 @@ enquiryRoute.post("/update-giveqty-enquiry-details", (req, res) => {
 
 	pool.query(query, function (err, data) {
 		if (err) {
-			return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
+			return handleError(
+				new ErrorHandler('500', 'Error Updating move to sale.'),
+				res
+			);
 		} else {
 		}
 	});
 });
 
-enquiryRoute.get("/update-customer/:id/:enqid", (req, res) => {
+enquiryRoute.get('/update-customer/:id/:enqid', (req, res) => {
 	let id = req.params.id;
 	let enqid = req.params.enqid;
 	let query = `update enquiry
@@ -229,21 +271,24 @@ enquiryRoute.get("/update-customer/:id/:enqid", (req, res) => {
 
 	pool.query(query, function (err, data) {
 		if (err) {
-			return handleError(new ErrorHandler("500", "Error Updating customer id."), res);
+			return handleError(
+				new ErrorHandler('500', 'Error Updating customer id.'),
+				res
+			);
 		} else {
 			res.json({
-				result: "success",
+				result: 'success',
 			});
 		}
 	});
 });
 
 // todo, can be deleted, check and delete
-enquiryRoute.post("/update-status-enquiry-details", (req, res) => {
+enquiryRoute.post('/update-status-enquiry-details', (req, res) => {
 	let status = req.body.status;
 	let id = req.body.enqdetailid;
 
-	if (status === "B") {
+	if (status === 'B') {
 		let query = `update enquiry_detail
 		set
 		product_id = null,
@@ -252,14 +297,17 @@ enquiryRoute.post("/update-status-enquiry-details", (req, res) => {
 
 		pool.query(query, function (err, data) {
 			if (err) {
-				return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
+				return handleError(
+					new ErrorHandler('500', 'Error Updating move to sale.'),
+					res
+				);
 			} else {
 			}
 		});
 	}
 });
 
-enquiryRoute.post("/update-enquiry-details", (req, res) => {
+enquiryRoute.post('/update-enquiry-details', (req, res) => {
 	let jsonObj = req.body;
 
 	var objectKeysArray = Object.keys(jsonObj);
@@ -268,31 +316,37 @@ enquiryRoute.post("/update-enquiry-details", (req, res) => {
 	});
 });
 
-enquiryRoute.post("/insert-enquiry-details", (req, res) => {
+enquiryRoute.post('/insert-enquiry-details', (req, res) => {
 	let jsonObj = req.body;
 
 	var today = new Date();
 	let count = 0;
-	
-	today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
+
+	today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 
 	let query = `INSERT INTO enquiry ( center_id, customer_id, enquiry_date, estatus, remarks) 
 							values ( '${jsonObj.center_id}', '${jsonObj.customerctrl.id}', '${today}', 'O','${jsonObj.remarks}')`;
 
 	pool.query(query, async function (err, data) {
 		if (err) {
-			return handleError(new ErrorHandler("500", "error insert enquiry details..step1.."), res);
+			return handleError(
+				new ErrorHandler('500', 'error insert enquiry details..step1..'),
+				res
+			);
 		} else {
 			let tmpid = data.insertId;
 
-			const prodArr = jsonObj["productarr"];
+			const prodArr = jsonObj['productarr'];
 
 			for (const k of prodArr) {
 				await insertEnquiryDetail(k, jsonObj, tmpid, (err, data) => {
 					if (err) {
 						let errTxt = err.message;
 
-						return handleError(new ErrorHandler("500", "error in enquiry details insert."), res);
+						return handleError(
+							new ErrorHandler('500', 'error in enquiry details insert.'),
+							res
+						);
 					} else {
 						let newPK = data.insertId;
 						// do nothing...
@@ -302,7 +356,7 @@ enquiryRoute.post("/insert-enquiry-details", (req, res) => {
 				count++;
 				if (count === prodArr.length) {
 					res.json({
-						result: "success",
+						result: 'success',
 					});
 				}
 			}
@@ -310,14 +364,14 @@ enquiryRoute.post("/insert-enquiry-details", (req, res) => {
 	});
 });
 
-enquiryRoute.post("/add-more-enquiry-details", (req, res) => {
+enquiryRoute.post('/add-more-enquiry-details', (req, res) => {
 	let jsonObj = req.body;
 
 	var today = new Date();
-	
-	today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
 
-	const prodArr = jsonObj["productarr"];
+	today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
+
+	const prodArr = jsonObj['productarr'];
 
 	let newProdArr = [];
 
@@ -327,7 +381,10 @@ enquiryRoute.post("/add-more-enquiry-details", (req, res) => {
 
 		pool.query(query1, function (err, data) {
 			if (err) {
-				return handleError(new ErrorHandler("500", "Error add-more-enquiry-details."), res);
+				return handleError(
+					new ErrorHandler('500', 'Error add-more-enquiry-details.'),
+					res
+				);
 			} else {
 				let tmpid = data.insertId;
 				newProdArr.push(tmpid);
@@ -358,7 +415,10 @@ enquiryRoute.post("/add-more-enquiry-details", (req, res) => {
 
 					pool.query(sql, function (err, data) {
 						if (err) {
-							return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
+							return handleError(
+								new ErrorHandler('500', 'Error Updating move to sale.'),
+								res
+							);
 						} else {
 							newProdArr.push(data[0]);
 
@@ -375,7 +435,7 @@ enquiryRoute.post("/add-more-enquiry-details", (req, res) => {
 	});
 });
 
-enquiryRoute.get("/open-enquiries/:centerid/:status", (req, res) => {
+enquiryRoute.get('/open-enquiries/:centerid/:status', (req, res) => {
 	let centerid = req.params.centerid;
 	let status = req.params.status;
 
@@ -392,14 +452,17 @@ enquiryRoute.get("/open-enquiries/:centerid/:status", (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
+			return handleError(
+				new ErrorHandler('500', 'Error Updating move to sale.'),
+				res
+			);
 		} else {
 			return res.json(data);
 		}
 	});
 });
 
-enquiryRoute.get("/get-enquiry-details/:enqid", async (req, res) => {
+enquiryRoute.get('/get-enquiry-details/:enqid', async (req, res) => {
 	let enqid = req.params.enqid;
 
 	let enquiryDetails;
@@ -409,7 +472,10 @@ enquiryRoute.get("/get-enquiry-details/:enqid", async (req, res) => {
 		if (err) {
 			let errTxt = err.message;
 
-			return handleError(new ErrorHandler("500", "error in fetch enquiry details ."), res);
+			return handleError(
+				new ErrorHandler('500', 'error in fetch enquiry details .'),
+				res
+			);
 		} else {
 			enquiryDetails = data;
 			// do nothing...
@@ -420,17 +486,23 @@ enquiryRoute.get("/get-enquiry-details/:enqid", async (req, res) => {
 		if (err) {
 			let errTxt = err.message;
 
-			return handleError(new ErrorHandler("500", "error in fetch enquiry details ."), res);
+			return handleError(
+				new ErrorHandler('500', 'error in fetch enquiry details .'),
+				res
+			);
 		} else {
 			customerDetails = data;
 			// do nothing...
 		}
 	});
 
-	return res.json({ enquiryDetails: enquiryDetails, customerDetails: customerDetails });
+	return res.json({
+		enquiryDetails: enquiryDetails,
+		customerDetails: customerDetails,
+	});
 });
 
-enquiryRoute.get("/get-enquiry-master/:enqid", (req, res) => {
+enquiryRoute.get('/get-enquiry-master/:enqid', (req, res) => {
 	let enqid = req.params.enqid;
 
 	let sql = `
@@ -462,14 +534,17 @@ enquiryRoute.get("/get-enquiry-master/:enqid", (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
+			return handleError(
+				new ErrorHandler('500', 'Error Updating move to sale.'),
+				res
+			);
 		} else {
 			return res.json(data);
 		}
 	});
 });
 
-enquiryRoute.get("/get-customer-data/:enqid", (req, res) => {
+enquiryRoute.get('/get-customer-data/:enqid', (req, res) => {
 	let enqid = req.params.enqid;
 
 	let sql = `select c.*, s.code 
@@ -485,21 +560,26 @@ enquiryRoute.get("/get-customer-data/:enqid", (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
+			return handleError(
+				new ErrorHandler('500', 'Error Updating move to sale.'),
+				res
+			);
 		} else {
 			return res.json(data);
 		}
 	});
 });
 
-enquiryRoute.get("/get-enquired-product-data/:centerid/:customerid/:enqid/:invdt", (req, res) => {
-	let centerid = req.params.centerid;
-	let customerid = req.params.customerid;
-	let enqid = req.params.enqid;
-	let orderdate = req.params.invdt;
+enquiryRoute.get(
+	'/get-enquired-product-data/:centerid/:customerid/:enqid/:invdt',
+	(req, res) => {
+		let centerid = req.params.centerid;
+		let customerid = req.params.customerid;
+		let enqid = req.params.enqid;
+		let orderdate = req.params.invdt;
 
-	// fetch values only of enq detail status in {P - processed, F - fullfilled} B- backorder is ignored
-	let sql = `select a.product_code as product_code, a.description, a.mrp, a.taxrate, b.available_stock,
+		// fetch values only of enq detail status in {P - processed, F - fullfilled} B- backorder is ignored
+		let sql = `select a.product_code as product_code, a.description, a.mrp, a.taxrate, b.available_stock,
 	ed.giveqty as qty, a.unit_price, a.id as product_id, b.id as stock_pk, e.enquiry_date,
 	IFNULL(
 	(
@@ -539,16 +619,20 @@ discount.brand_id = 0 )
 	e.id = ${enqid}
 	`;
 
-	pool.query(sql, function (err, data) {
-		if (err) {
-			return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
-		} else {
-			return res.json(data);
-		}
-	});
-});
+		pool.query(sql, function (err, data) {
+			if (err) {
+				return handleError(
+					new ErrorHandler('500', 'Error Updating move to sale.'),
+					res
+				);
+			} else {
+				return res.json(data);
+			}
+		});
+	}
+);
 
-enquiryRoute.get("/back-order/:centerid", (req, res) => {
+enquiryRoute.get('/back-order/:centerid', (req, res) => {
 	let centerid = req.params.centerid;
 
 	let sql = `SELECT c.name as customer_name, p.product_code as product_code, p.id as product_id,
@@ -577,26 +661,32 @@ enquiryRoute.get("/back-order/:centerid", (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(new ErrorHandler("500", "Error Updating move to sale."), res);
+			return handleError(
+				new ErrorHandler('500', 'Error Updating move to sale.'),
+				res
+			);
 		} else {
 			return res.json(data);
 		}
 	});
 });
 
-enquiryRoute.get("/search-enquiries/:centerid/:customerid/:status/:fromdate/:todate", (req, res) => {
-	let center_id = req.params.centerid;
-	let status = req.params.status;
-	let customer_id = req.params.customerid;
-	let from_date = req.params.fromdate;
-	let to_date = req.params.todate;
+enquiryRoute.post('/search-enquiries', (req, res) => {
+	let center_id = req.body.centerid;
+	let status = req.body.status;
+	let customer_id = req.body.customerid;
+	let from_date = req.body.fromdate;
+	let to_date = req.body.todate;
 
-	if (from_date !== "") {
-		from_date = moment(new Date(req.params.fromdate)).format("DD-MM-YYYY");
+	if (from_date !== '') {
+		// from_date = moment(new Date(req.params.fromdate)).format("DD-MM-YYYY");
+		from_date = toTimeZone(req.body.fromdate, 'Asia/Kolkata');
 	}
 
-	if (to_date !== "") {
-		to_date = moment(new Date(req.params.todate)).format("DD-MM-YYYY");
+	if (to_date !== '') {
+		// to_date = moment(new Date(req.params.todate)).format("DD-MM-YYYY");
+
+		to_date = toTimeZone(req.body.todate, 'Asia/Kolkata');
 	}
 
 	let custsql = `and e.customer_id = '${customer_id}' `;
@@ -623,17 +713,20 @@ enquiryRoute.get("/search-enquiries/:centerid/:customerid/:status/:fromdate/:tod
 	str_to_date('${from_date}', '%d-%m-%YYYY') and
 	str_to_date('${to_date}', '%d-%m-%YYYY')  `;
 
-	if (customer_id !== "all") {
+	if (customer_id !== 'all') {
 		sql = sql + custsql;
 	}
 
-	if (status !== "all") {
+	if (status !== 'all') {
 		sql = sql + ` and e.estatus =  '${status}' `;
 	}
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(new ErrorHandler("500", "Error fetching search enquiry"), res);
+			return handleError(
+				new ErrorHandler('500', 'Error fetching search enquiry'),
+				res
+			);
 		} else {
 			return res.json(data);
 		}
@@ -642,11 +735,11 @@ enquiryRoute.get("/search-enquiries/:centerid/:customerid/:status/:fromdate/:tod
 
 //**** START */
 
-enquiryRoute.post("/delete-enquiry-details", async (req, res) => {
+enquiryRoute.post('/delete-enquiry-details', async (req, res) => {
 	let id = req.body.id;
 	let enq_id = req.body.enquiry_id;
 
-	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
+	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 
 	// step 1
 	let auditQuery = `
@@ -668,7 +761,9 @@ enquiryRoute.post("/delete-enquiry-details", async (req, res) => {
 	let auditPromise = await new Promise(function (resolve, reject) {
 		pool.query(auditQuery, function (err, data) {
 			if (err) {
-				return reject(handleError(new ErrorHandler("500", "Error adding sale audit."), res));
+				return reject(
+					handleError(new ErrorHandler('500', 'Error adding sale audit.'), res)
+				);
 			}
 			resolve(data);
 		});
@@ -681,14 +776,19 @@ enquiryRoute.post("/delete-enquiry-details", async (req, res) => {
 
 		pool.query(query, function (err, data) {
 			if (err) {
-				return reject(handleError(new ErrorHandler("500", "Error deleting enquiry details"), res));
+				return reject(
+					handleError(
+						new ErrorHandler('500', 'Error deleting enquiry details'),
+						res
+					)
+				);
 			}
 			resolve(data);
 		});
 	});
 
 	return res.json({
-		result: "success",
+		result: 'success',
 	});
 });
 

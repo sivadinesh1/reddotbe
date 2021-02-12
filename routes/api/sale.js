@@ -254,21 +254,21 @@ function getSequenceNo(cloneReq) {
 	let invNoQry = "";
 	if (cloneReq.invoicetype === "gstinvoice" && cloneReq.status !== "D") {
 		invNoQry = ` select 
-		concat('${toTimeZoneFrmt(cloneReq.invoicedate, "Asia/Kolkata", "YY")}', "/", 
-		'${toTimeZoneFrmt(cloneReq.invoicedate, "Asia/Kolkata", "MM")}', "/", lpad(invseq, 5, "0")) as invNo from financialyear 
+		concat('${currentTimeInTimeZone("Asia/Kolkata", "YY")}', "/", 
+		'${currentTimeInTimeZone("Asia/Kolkata", "MM")}', "/", lpad(invseq, 5, "0")) as invNo from financialyear 
 				where 
 				center_id = '${cloneReq.center_id}' and  
 				CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
 	} else if (cloneReq.invoicetype === "gstinvoice" && cloneReq.status === "D") {
 		invNoQry = ` select concat("D/", 
-		'${toTimeZoneFrmt(cloneReq.invoicedate, "Asia/Kolkata", "YY")}', "/", 
-		'${toTimeZoneFrmt(cloneReq.invoicedate, "Asia/Kolkata", "MM")}', "/", lpad(draft_inv_seq, 5, "0")) as invNo from financialyear 
+		'${currentTimeInTimeZone("Asia/Kolkata", "YY")}', "/", 
+		'${currentTimeInTimeZone("Asia/Kolkata", "MM")}', "/", lpad(draft_inv_seq, 5, "0")) as invNo from financialyear 
 							where 
 							center_id = '${cloneReq.center_id}' and  
 							CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
 	} else if (cloneReq.invoicetype === "stockissue") {
-		invNoQry = ` select concat('SI',"-",'${toTimeZoneFrmt(cloneReq.invoicedate, "Asia/Kolkata", "YY")}', "/", 
-		'${toTimeZoneFrmt(cloneReq.invoicedate, "Asia/Kolkata", "MM")}', "/", lpad(stock_issue_seq, 5, "0")) as invNo from financialyear 
+		invNoQry = ` select concat('SI',"-",'${currentTimeInTimeZone("Asia/Kolkata", "YY")}', "/", 
+		'${currentTimeInTimeZone("Asia/Kolkata", "MM")}', "/", lpad(stock_issue_seq, 5, "0")) as invNo from financialyear 
 				where 
 				center_id = '${cloneReq.center_id}' and  
 				CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
