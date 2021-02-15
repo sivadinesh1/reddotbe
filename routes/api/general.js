@@ -373,7 +373,10 @@ router.get('/all-active-customers/:centerid', (req, res) => {
 	let centerid = req.params.centerid;
 
 	let sql = `select c.id, c.center_id, c.name, c.address1, c.address2, c.district, s.id as state_id, s.code, s.description,
-	c.pin, c.gst, c.phone, c.mobile, c.mobile2, c.whatsapp, c.email, c.isactive, c.credit_amt as credit_amt, c.balance_amt as balance_amt  from 
+	c.pin, c.gst, c.phone, c.mobile, c.mobile2, c.whatsapp, c.email, 
+	c.isactive, c.credit_amt as credit_amt, c.balance_amt as balance_amt, 
+	DATE_FORMAT(c.last_paid_date, '%d-%b-%Y') as last_paid_date
+	from 
 	customer c,
 	state s
 	where 

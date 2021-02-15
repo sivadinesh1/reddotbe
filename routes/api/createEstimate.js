@@ -4,19 +4,22 @@ const fs = require('fs');
 const PDFDocument = require('pdfkit');
 const blobStream = require('blob-stream');
 
-var util = require('./../helpers/utils');
-const logger = require('../../routes/helpers/log4js');
+var util = require('../helpers/utils');
+const logger = require('../helpers/log4js');
 
-const { number2text } = require('./../helpers/utils');
+const { number2text } = require('../helpers/utils');
 
 let line_x_start = 24;
-let line_x_end = 571;
+let line_x_end = 600;
+let sumqty = 0;
+let itemqty = 0;
 
-function createInvoice(
+function createEstimate(
 	saleMaster,
 	saleDetails,
 	customerDetails,
 	centerDetails,
+
 	path,
 	res,
 	print_type
@@ -26,6 +29,9 @@ function createInvoice(
 	let salemasterdata = saleMaster[0];
 	let saledetailsdata = saleDetails;
 	res.contentType('application/pdf');
+
+	sumqty = saledetailsdata.reduce((total, e) => total + e.qty, 0);
+	itemqty = saledetailsdata.length;
 
 	let doc = new PDFDocument({
 		'page-size': 'A4',
@@ -51,25 +57,10 @@ function createInvoice(
 				e,
 				customerdata
 			);
-			generateFooterSummary(doc, centerdata);
 
 			//		doc[counter].pipe(fs.createWriteStream(path));
 		});
 	}
-
-	//	var stream = doc.pipe(blobStream());
-	// stream.on("finish", function() {
-
-	// get a blob you can do whatever you like with
-	// const blob = stream.toBlob("application/pdf");
-
-	// doc.pipe(blob);
-
-	// or get a blob URL for display in the browser
-	// const url = stream.toBlobURL('application/pdf');
-	//  // iframe.src = url;
-	// res.send(url);
-	// });
 
 	// pipe the resposne
 	doc.end();
@@ -77,136 +68,49 @@ function createInvoice(
 }
 
 function generateHeader(doc, centerdata, print_type) {
-	doc.image('tractor.png', 24, 24, { width: 70 }).fillColor('darkblue');
-
-	doc
-		.font('Helvetica')
-		.fontSize(10)
-		.text(print_type, 400, 20, { align: 'right' })
-		.font('Helvetica');
-
 	doc.fillColor('#000000');
 	doc
 		.font('Helvetica-Bold')
 		.fontSize(14)
-		.text(centerdata.name, 10, 40, {
+		.text('Estimate', 10, 40, {
 			align: 'center',
 			lineGap: 2,
 			characterSpacing: 1.2,
 		})
-		.font('Helvetica')
-		.fontSize(9)
-
-		.text(centerdata.tagline, {
-			align: 'center',
-			lineGap: 1.5,
-			characterSpacing: 1,
-		})
-		.text(
-			centerdata.address1 +
-				',' +
-				centerdata.address2 +
-				', ' +
-				centerdata.district +
-				'-' +
-				centerdata.pin,
-			{
-				align: 'center',
-				lineGap: 1.5,
-			}
-		)
-
-		.text('GSTIN : ' + centerdata.gst, { align: 'center', lineGap: 1.5 })
-		.text('Email: ' + centerdata.email, { align: 'center', lineGap: 1.5 })
-
-		.text('Phone : ' + centerdata.phone + ' & ' + centerdata.mobile, 410, 92)
-
-		.image('swaraj.png', 475, 62, { width: 80 })
 
 		.moveDown();
 }
 
 function generateCustomerInformation(doc, customerdata, salemasterdata) {
 	// first line before customer section
-	generateHr(doc, line_x_start, line_x_end, 109);
-
-	doc.fillColor('#000000').fontSize(13).text('To', 24, 117);
-
-	let invoice_type =
-		salemasterdata.sale_type === 'gstinvoice' ? 'GST INVOICE' : 'STOCK ISSUE';
-
-	doc
-		.fillColor('#000000')
-		.fontSize(12)
-		.text(invoice_type, 375, 119, { align: 'center' });
-	doc.fillColor('#000000');
-	doc
-		.strokeColor('#000000')
-		.moveTo(400, 136)
-		.lineTo(550, 136)
-
-		.stroke();
+	generateHr(doc, line_x_start, line_x_end, 60);
 
 	doc
 		.fillColor('#000000')
 		.fontSize(10)
-		.text('BILL No.           :    ' + salemasterdata.invoice_no, 410, 145);
+		.text('Number       :    ' + salemasterdata.invoice_no, 410, 70);
 
 	doc
 		.fillColor('#000000')
 		.fontSize(10)
-		.text('BILL Date         :    ' + salemasterdata.invoice_date, 410, 160);
+		.text('Date             :    ' + salemasterdata.invoice_date, 410, 85);
 
-	const customerInformationTop = 136;
-
-	if (customerdata.name === 'Walk In') {
-		doc
-			.fillColor('#000000')
-			.fontSize(10)
-			.text(
-				customerdata.name + salemasterdata.retail_customer_name,
-				40,
-				customerInformationTop
-			)
-			.text(
-				customerdata.address1 + salemasterdata.retail_customer_address,
-				40,
-				151
-			);
-	} else {
-		doc
-			.fillColor('#000000')
-			.fontSize(10)
-			.text(customerdata.name, 40, customerInformationTop)
-			.text(customerdata.address1, 40, 151);
-	}
-
-	if (customerdata.district !== '') {
-		doc.text(
-			customerdata.address2 + ', District: ' + customerdata.district,
-			40,
-			166
-		);
-	} else {
-		doc.text(customerdata.address2, 40, 166);
-	}
+	const customerInformationTop = 70;
 
 	doc
 		.fillColor('#000000')
-		.text(
-			'State: ' + customerdata.code + '-' + customerdata.description,
-			40,
-			181
-		)
-		.text(
-			'Phone: ' + customerdata.mobile + ' GSTIN: ' + customerdata.gst,
-			40,
-			196
-		)
+		.fontSize(10)
+		.text('NAME:' + customerdata.name, 40, customerInformationTop)
+		.text('PLACE:', 40, 85); // fetch from FE
+
+	doc
+		.fillColor('#000000')
+
+		.text('Phone: ' + customerdata.mobile, 40, 100)
 		.moveDown();
 
 	// line end of customer section
-	generateHr(doc, line_x_start, line_x_end, 210);
+	generateHr(doc, line_x_start, line_x_end, 115);
 }
 
 function generateInvoiceTable(
@@ -218,7 +122,7 @@ function generateInvoiceTable(
 	customerdata
 ) {
 	let i;
-	let invoiceTableTop = 216;
+	let invoiceTableTop = 125;
 	let x_start = 24;
 	let isIGST = false;
 
@@ -265,34 +169,34 @@ function generateInvoiceTable(
 	//runnig HEADER vertical lines SI
 	doc
 		.strokeColor('#000000')
-		.moveTo(x_start + snow, 210)
+		.moveTo(x_start + snow, 115)
 		.lineWidth(1)
-		.lineTo(x_start + snow, 230)
+		.lineTo(x_start + snow, 136)
 
 		.stroke();
 
 	// product code
 	doc
 		.strokeColor('#000000')
-		.moveTo(x_start + (snow + 1) + pcodew, 210)
+		.moveTo(x_start + (snow + 1) + pcodew, 115)
 		.lineWidth(1)
-		.lineTo(x_start + (snow + 1) + pcodew, 229);
+		.lineTo(x_start + (snow + 1) + pcodew, 136);
 
 	// product desc
 	doc
 		.strokeColor('#000000')
-		.moveTo(x_start + (snow + 1) + (pcodew + 1) + pdescw, 210)
+		.moveTo(x_start + (snow + 1) + (pcodew + 1) + pdescw, 115)
 		.lineWidth(1)
-		.lineTo(x_start + (snow + 1) + (pcodew + 1) + pdescw, 229)
+		.lineTo(x_start + (snow + 1) + (pcodew + 1) + pdescw, 136)
 
 		.stroke();
 
 	// // hsncode
 	doc
 		.strokeColor('#000000')
-		.moveTo(x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + hsnw, 210)
+		.moveTo(x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + hsnw, 115)
 		.lineWidth(1)
-		.lineTo(x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + hsnw, 229)
+		.lineTo(x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + hsnw, 136)
 
 		.stroke();
 
@@ -301,12 +205,12 @@ function generateInvoiceTable(
 		.strokeColor('#000000')
 		.moveTo(
 			x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + (hsnw + 1) + qtyw,
-			210
+			115
 		)
 		.lineWidth(1)
 		.lineTo(
 			x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + (hsnw + 1) + qtyw,
-			229
+			136
 		)
 
 		.stroke();
@@ -322,7 +226,7 @@ function generateInvoiceTable(
 				(hsnw + 1) +
 				(qtyw + 1) +
 				uomw,
-			210
+			115
 		)
 		.lineWidth(1)
 		.lineTo(
@@ -333,7 +237,7 @@ function generateInvoiceTable(
 				(hsnw + 1) +
 				(qtyw + 1) +
 				uomw,
-			229
+			136
 		)
 
 		.stroke();
@@ -350,7 +254,7 @@ function generateInvoiceTable(
 				(qtyw + 1) +
 				(uomw + 1) +
 				mrpw,
-			210
+			115
 		)
 		.lineWidth(1)
 		.lineTo(
@@ -362,7 +266,7 @@ function generateInvoiceTable(
 				(qtyw + 1) +
 				(uomw + 1) +
 				mrpw,
-			229
+			136
 		)
 
 		.stroke();
@@ -380,7 +284,7 @@ function generateInvoiceTable(
 				(uomw + 1) +
 				(mrpw + 1) +
 				discpw,
-			210
+			115
 		)
 		.lineWidth(1)
 		.lineTo(
@@ -393,7 +297,7 @@ function generateInvoiceTable(
 				(uomw + 1) +
 				(mrpw + 1) +
 				discpw,
-			229
+			136
 		)
 
 		.stroke();
@@ -412,7 +316,7 @@ function generateInvoiceTable(
 				(mrpw + 1) +
 				(discpw + 1) +
 				amountw,
-			210
+			115
 		)
 		.lineWidth(1)
 		.lineTo(
@@ -426,7 +330,7 @@ function generateInvoiceTable(
 				(mrpw + 1) +
 				(discpw + 1) +
 				amountw,
-			229
+			136
 		)
 
 		.stroke();
@@ -447,7 +351,7 @@ function generateInvoiceTable(
 					(discpw + 1) +
 					(amountw + 1) +
 					sgstw,
-				210
+				115
 			)
 			.lineWidth(1)
 			.lineTo(
@@ -462,7 +366,7 @@ function generateInvoiceTable(
 					(discpw + 1) +
 					(amountw + 1) +
 					sgstw,
-				229
+				136
 			)
 
 			.stroke();
@@ -483,7 +387,7 @@ function generateInvoiceTable(
 					(amountw + 1) +
 					(sgstw + 1) +
 					cgstw,
-				210
+				115
 			)
 			.lineWidth(1)
 			.lineTo(
@@ -499,7 +403,7 @@ function generateInvoiceTable(
 					(amountw + 1) +
 					(sgstw + 1) +
 					cgstw,
-				229
+				136
 			)
 
 			.stroke();
@@ -519,7 +423,7 @@ function generateInvoiceTable(
 					(discpw + 1) +
 					(amountw + 1) +
 					igstw,
-				210
+				115
 			)
 			.lineWidth(1)
 			.lineTo(
@@ -534,7 +438,7 @@ function generateInvoiceTable(
 					(discpw + 1) +
 					(amountw + 1) +
 					igstw,
-				229
+				136
 			)
 
 			.stroke();
@@ -1091,111 +995,6 @@ function generateSummaryLeft(doc, saledetailsdata, isIGST, salemasterdata) {
 	let start = 539;
 	generateHr(doc, line_x_start, line_x_end, start);
 	doc.font('Helvetica-Bold');
-	generateSummaryLeftTableRow(
-		doc,
-		start + 10,
-		'CLASS',
-		'SUB TOTAL',
-		'DISC',
-		'AMOUNT',
-		'SGST',
-		'CGST',
-		'GST',
-		'TOTAL',
-		isIGST,
-		'IGST'
-	);
-	doc.font('Helvetica');
-	generateSummaryLeftTableRow(
-		doc,
-		start + 25,
-		'GST 5%',
-		sumTotalPercent_5,
-		sumDiscountPercent_5,
-		sumTaxablePercent_5,
-		sum_SGST_5,
-		sum_CGST_5,
-		GST_5,
-		sumTotalPercent_5,
-		isIGST,
-		sum_IGST_5
-	);
-	generateSummaryLeftTableRow(
-		doc,
-		start + 40,
-		'GST 12%',
-		sumTotalPercent_12,
-		sumDiscountPercent_12,
-		sumTaxablePercent_12,
-		sum_SGST_12,
-		sum_CGST_12,
-		GST_12,
-		sumTotalPercent_12,
-		isIGST,
-		sum_IGST_12
-	);
-	generateSummaryLeftTableRow(
-		doc,
-		start + 55,
-		'GST 18%',
-		sumTotalPercent_18,
-		sumDiscountPercent_18,
-		sumTaxablePercent_18,
-		sum_SGST_18,
-		sum_CGST_18,
-		GST_18,
-		sumTotalPercent_18,
-		isIGST,
-		sum_CGST_18
-	);
-	generateSummaryLeftTableRow(
-		doc,
-		start + 70,
-		'GST 28%',
-		sumTotalPercent_28,
-		sumDiscountPercent_28,
-		sumTaxablePercent_28,
-		sum_SGST_28,
-		sum_CGST_28,
-		GST_28,
-		sumTotalPercent_28,
-		isIGST,
-		sum_CGST_28
-	);
-	generateSummaryLeftTableRow(
-		doc,
-		start + 85,
-		'GST 0%',
-		sumTotalPercent_0,
-		sumDiscountPercent_0,
-		sumTaxablePercent_0,
-		sum_SGST_0,
-		sum_CGST_0,
-		GST_0,
-		sumTotalPercent_0,
-		isIGST,
-		sum_CGST_0
-	);
-
-	generateHr(doc, line_x_start, line_x_end, start + 97);
-
-	doc.font('Helvetica-Bold');
-	generateSummaryLeftTableRow(
-		doc,
-		start + 105,
-		'TOTAL',
-		totalAllTax,
-		discountAllTax,
-		subtotalAllTax,
-
-		SGSTAllTax * 2,
-		CGSTAllTax * 2,
-		SGSTAllTax + CGSTAllTax + IGSTAllTax,
-		finalTotalAllTax,
-		isIGST,
-		IGSTAllTax
-	);
-	doc.font('Helvetica');
 
 	generateSummaryRightTableRow(
 		doc,
@@ -1209,112 +1008,7 @@ function generateSummaryLeft(doc, saledetailsdata, isIGST, salemasterdata) {
 		IGSTAllTax,
 		salemasterdata
 	);
-	generateHr(doc, line_x_start, line_x_end, start + 120);
-	numberToText(doc, finalTotalAllTax, start);
-	generateHr(doc, line_x_start, line_x_end, start + 137);
-}
-
-function numberToText(doc, finalTotalAllTax, start) {
-	doc.font('Helvetica-Bold');
-	doc
-		.fontSize(9)
-		.text(
-			number2text(roundOffFn(finalTotalAllTax, 'rounding')),
-			24,
-			start + 125,
-			{
-				align: 'left',
-			}
-		);
-	doc.font('Helvetica');
-}
-
-function generateFooter(doc) {
-	doc
-		.fontSize(10)
-		.text(
-			'Payment is due within 15 days. Thank you for your business.',
-			50,
-			780,
-			{
-				align: 'center',
-				width: 500,
-			}
-		);
-}
-
-function generateToBlock(doc, customerdata) {
-	doc.fontSize(11).text('To', 50, 350);
-}
-
-function generateFooterSummary(doc, centerdata) {
-	// adjusting footer section 2
-	let start = 680;
-
-	doc
-		.fontSize(8)
-		.text('Terms & Conditions:', 24, start)
-		.text('Goods once sold will not be taken back or exchanged.', {
-			lineGap: 1.8,
-		})
-		.text('Bills not paid due date will attract 24% interest.', {
-			lineGap: 1.8,
-		})
-		.text('All disputes subject to Jurisdication only.', { lineGap: 1.8 })
-		.text('Prescribed Sales Tax declaration will be given.', { lineGap: 1.8 });
-
-	doc
-		.strokeColor('#000000')
-		.lineWidth(1)
-		.moveTo(24, start + 54)
-		.lineTo(280, start + 54)
-		.stroke();
-
-	doc
-		.fontSize(8)
-		.text(
-			'Certified that the particulars given above are true and correct',
-			24,
-			start + 60,
-			{ lineGap: 1.8 }
-		)
-		.text(
-			'and the amount indicated represents the price actually charged.',
-			24,
-			start + 70,
-			{ lineGap: 1.8 }
-		);
-
-	doc
-		.fontSize(8)
-		.font('Helvetica-Bold')
-		.text('OUR BANK        : ' + centerdata.bankname, 320, start, {
-			lineGap: 1.8,
-		})
-		.text('A/C NAME          : ' + centerdata.accountname, 320, start + 10, {
-			lineGap: 1.8,
-		})
-		.text('A/C NO               : ' + centerdata.accountno, 320, start + 20, {
-			lineGap: 1.8,
-		});
-	doc.font('Times-BoldItalic');
-	doc
-		.fontSize(6)
-		.text(
-			`Plz pay Cash/Cheque/DD in favour of '${centerdata.accountname}'.`,
-			320,
-			start + 30,
-			{ lineGap: 1.4 }
-		);
-
-	doc.fontSize(7).text('For    ' + centerdata.accountname, 400, start + 40);
-	doc.fontSize(7).text('Authorised signatory', 400, start + 75);
-
-	//  doc.fontSize(8).text("Checked By    " + centerdata.name, 350, 680);
-	//  doc.fontSize(8).text("  E.&O.E.", 350, 700);
-
-	// doc.fontSize(8).text("Prepared by:", 50, 800).text("Packed by:", 150, 800).text("Checked by:", 250, 800).text("Authorised signatory:", 350, 800);
-	doc.fontSize(8).text('Software By: 97316 16386', 250, 758);
+	generateHr(doc, line_x_start, line_x_end, start + 30);
 }
 
 function generateTableRow(
@@ -1693,46 +1387,6 @@ function generateTableRow(
 			{ width: netw - 1, align: 'right' }
 		);
 	}
-
-	// if (igst === "IGST" && isIGST) {
-	// 	doc.text(
-	// 		net_amount,
-	// 		x_start +
-	// 			(snow + 2) +
-	// 			(pcodew + 2) +
-	// 			(pdescw + 2) +
-	// 			(hsnw + 2) +
-	// 			(qtyw + 2) +
-	// 			(uomw + 2) +
-	// 			(mrpw + 2) +
-	// 			(discpw + 2) +
-	// 			(amountw + 2) +
-	// 			(igstw + 2),
-	// 		y,
-	// 		{ width: netw - 1, align: "right" },
-	// 	);
-	// } else {
-	// 	doc.text(
-	// 		net_amount,
-	// 		x_start +
-	// 			(snow + 2) +
-	// 			(pcodew + 2) +
-	// 			(pdescw + 2) +
-	// 			(hsnw + 2) +
-	// 			(qtyw + 2) +
-	// 			(uomw + 2) +
-	// 			(mrpw + 2) +
-	// 			(discpw + 2) +
-	// 			(amountw + 2) +
-	// 			(sgstw + 2) +
-	// 			(cgstw + 2),
-	// 		y,
-	// 		{
-	// 			width: netw - 1,
-	// 			align: "right",
-	// 		},
-	// 	);
-	// }
 }
 
 // FINAL SUMMARY TOTAL LEFT
@@ -1829,52 +1483,6 @@ function generateSummaryRightTableRow(
 	salemasterdata
 ) {
 	doc.fillColor('#000000');
-	doc
-		.fontSize(9)
-		.font('Helvetica-Bold')
-		.text('SUB TOTAL', 450, y, { width: 70, align: 'left' })
-		.font('Helvetica')
-		.text((+subtotal + +discount).toFixed(2), 500, y, {
-			width: 70,
-			align: 'right',
-		})
-
-		.text('DISCOUNT', 450, y + 15, { width: 70, align: 'left' })
-
-		.text((+discount).toFixed(2), 500, y + 15, { width: 70, align: 'right' });
-
-	if (!isIGST) {
-		doc
-			.text('SGST', 450, y + 30, { width: 70, align: 'left' })
-
-			.text((+sgst / 2).toFixed(2), 500, y + 30, { width: 70, align: 'right' })
-
-			.text('CGST', 450, y + 45, { width: 70, align: 'left' })
-
-			.text((+cgst / 2).toFixed(2), 500, y + 45, { width: 70, align: 'right' });
-	} else if (isIGST) {
-		doc
-			.text('IGST', 450, y + 30, { width: 70, align: 'left' })
-
-			.text((+igst).toFixed(2), 500, y + 30, { width: 70, align: 'right' });
-	}
-
-	doc
-		.text('Misc.', 450, y + 60, { width: 70, align: 'left' })
-
-		.text(
-			(+(
-				+salemasterdata.transport_charges +
-				+salemasterdata.unloading_charges +
-				+salemasterdata.misc_charges
-			)).toFixed(2),
-			500,
-			y + 60,
-			{
-				width: 70,
-				align: 'right',
-			}
-		);
 
 	let finalSumTotal = +(
 		+finalTotalAllTax +
@@ -1884,29 +1492,23 @@ function generateSummaryRightTableRow(
 	);
 
 	doc
-		.text('ROUNDED OFF', 450, y + 75, { width: 70, align: 'left' })
+		.fillColor('#000000')
+		.fontSize(10)
+		.text('Total Items:' + sumqty, 200, y);
 
-		.text(
-			(
-				roundOffFn(finalSumTotal, 'rounding') -
-				roundOffFn(finalSumTotal, 'withoutrounding')
-			).toFixed(2),
-			500,
-			y + 75,
-			{
-				width: 70,
-				align: 'right',
-			}
-		);
+	doc
+		.fillColor('#000000')
+		.fontSize(10)
+		.text('Total Qty:' + itemqty, 300, y);
 
 	doc.font('Helvetica-Bold');
 	doc
-		.text('TOTAL', 450, y + 95, { width: 70, align: 'left' })
+		.text('TOTAL', 480, y, { width: 70, align: 'left' })
 
 		.text(
 			roundOffFn(finalSumTotal, 'rounding').toLocaleString('en-IN'),
 			500,
-			y + 95,
+			y,
 			{
 				width: 70,
 				align: 'right',
@@ -1922,18 +1524,6 @@ function generateHr(doc, line_x_start, line_x_end, y) {
 		.moveTo(line_x_start, y)
 		.lineTo(line_x_end, y)
 		.stroke();
-}
-
-function formatCurrency(cents) {
-	return '$' + (cents / 100).toFixed(2);
-}
-
-function formatDate(date) {
-	const day = date.getDate();
-	const month = date.getMonth() + 1;
-	const year = date.getFullYear();
-
-	return year + '/' + month + '/' + day;
 }
 
 function getSumByTaxtypeAndTaxPercent(dataArr, tax_type, tax_percent) {
@@ -1985,7 +1575,5 @@ function roundOffFn(value, param) {
 }
 
 module.exports = {
-	createInvoice,
+	createEstimate,
 };
-
-// Array.from(Array(120)).forEach(function (k, idx) {

@@ -26,13 +26,6 @@ VALUES
 		insertValues.net_total,
 	];
 
-	// pool.query(query, values, function (err, data) {
-	// 	if (err) {
-	// 		return callback(err);
-	// 	}
-	// 	return callback(null, data);
-	// });
-
 	return new Promise(function (resolve, reject) {
 		pool.query(query, values, async function (err, data) {
 			if (err) {
@@ -197,10 +190,15 @@ const addPaymentMaster = async (cloneReq, pymtNo, insertValues, callback) => {
 		VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, '${today}' ) `;
 
 	return new Promise(function (resolve, reject) {
-		pool.query(query, values, function (err, data) {
+		pool.query(query, values, async function (err, data) {
 			if (err) {
 				return reject(callback(err));
 			}
+
+			await updateCustomerLastPaidDate(
+				cloneReq.customer.id,
+				insertValues.receiveddate
+			);
 			return resolve(callback(null, data));
 		});
 	});
@@ -393,7 +391,10 @@ const getLedgerByCustomers = (center_id, customer_id, callback) => {
 const getSaleInvoiceByCustomers = (center_id, customer_id, callback) => {
 	// let query = ` select * from sale where sale_type = 'gstinvoice' and center_id =  '${center_id}' and customer_id = '${customer_id}' order by id desc `;
 
-	let query = `	select s.id as sale_id, s.center_id as center_id, s.customer_id as customer_id, s.invoice_no as invoice_no, s.invoice_date as invoice_date, s.net_total as invoice_amt, s.sale_type as sale_type, c.name as customer_name, c.address1 as customer_address1,
+	let query = `	select s.id as sale_id, s.center_id as center_id, s.customer_id as customer_id, s.invoice_no as invoice_no, 
+	s.invoice_date as invoice_date, 
+	abs(datediff(STR_TO_DATE(s.invoice_date,'%d-%m-%Y'), CURDATE())) as aging_days,
+	s.net_total as invoice_amt, s.sale_type as sale_type, c.name as customer_name, c.address1 as customer_address1,
 	c.address2 as customer_address2,
 	(select
 	(
@@ -415,10 +416,12 @@ const getSaleInvoiceByCustomers = (center_id, customer_id, callback) => {
 	where
 	c.id = '${customer_id}' and
 	s.center_id = '${center_id}' and
-	s.customer_id = c.id and
-	s.sale_type= 'gstinvoice'
+	s.customer_id = c.id 
 	`;
+	//and
+	//s.sale_type= 'gstinvoice'
 
+	// stock issue should also be pulled out, check
 	pool.query(query, function (err, data) {
 		if (err) {
 			return callback(err);
@@ -428,7 +431,11 @@ const getSaleInvoiceByCustomers = (center_id, customer_id, callback) => {
 };
 
 const getSaleInvoiceByCenter = (center_id, callback) => {
-	let query = `	select s.id as sale_id, s.center_id as center_id, s.customer_id as customer_id, s.invoice_no as invoice_no, s.invoice_date as invoice_date, s.net_total as invoice_amt, s.sale_type as sale_type, c.name as customer_name, c.address1 as customer_address1,
+	let query = `	select s.id as sale_id, s.center_id as center_id, s.customer_id as customer_id, 
+	s.invoice_no as invoice_no, s.invoice_date as invoice_date, 
+	abs(datediff(STR_TO_DATE(s.invoice_date,'%d-%m-%Y'), CURDATE())) as aging_days,
+	s.net_total as invoice_amt, 
+	s.sale_type as sale_type, c.name as customer_name, c.address1 as customer_address1,
 	c.address2 as customer_address2,
 	(select
 	(
@@ -529,6 +536,23 @@ const updateCustomerBalanceAmount = (customer_id) => {
 	});
 };
 
+const updateCustomerLastPaidDate = (customer_id, last_paid_date) => {
+	let dt = moment(last_paid_date).format('YYYY-MM-DD');
+	let qryUpdate = `
+	update customer c set c.last_paid_date = '${dt}' 
+		where c.id = '${customer_id}' 
+		 `;
+
+	return new Promise(function (resolve, reject) {
+		pool.query(qryUpdate, function (err, data) {
+			if (err) {
+				reject(err);
+			}
+			resolve(data);
+		});
+	});
+};
+
 module.exports = {
 	addSaleLedgerRecord,
 	addPaymentMaster,
@@ -546,6 +570,7 @@ module.exports = {
 	addReverseSaleLedgerRecord,
 	addSaleLedgerAfterReversalRecord,
 	getPymtTransactionByCustomers,
+	updateCustomerLastPaidDate,
 };
 
 // select s.id as sale_id, s.center_id as center_id, s.customer_id as customer_id, s.invoice_no as invoice_no, s.invoice_date as invoice_date, s.net_total as invoice_amt, s.sale_type as sale_type, c.name as customer_name, c.address1 as customer_address1,
