@@ -244,7 +244,15 @@ const getPymtSequenceNo = (cloneReq) => {
 	});
 };
 
-const getPaymentsByCustomers = (center_id, customer_id, callback) => {
+const getPaymentsByCustomers = (
+	center_id,
+	customer_id,
+	from_date,
+	to_date,
+	searchtype,
+	invoiceno,
+	callback
+) => {
 	let query = ` select p.*, pd.applied_amount as applied_amount, s.invoice_no as invoice_no, 
 	s.invoice_date as invoice_date, s.net_total as invoice_amount,  pm.pymt_mode_name as pymt_mode from 
         payment p,
@@ -255,7 +263,29 @@ const getPaymentsByCustomers = (center_id, customer_id, callback) => {
 				pm.id = p.pymt_mode_ref_id and
         p.id = pd.pymt_ref_id and
         pd.sale_ref_id = s.id and
-        p.center_id =   '${center_id}' and p.customer_id = '${customer_id}' order by id desc  `;
+        p.center_id =   '${center_id}' `;
+
+	if (customer_id !== undefined && searchtype === 'all') {
+		query =
+			query +
+			` and STR_TO_DATE(s.invoice_date,'%d-%m-%Y') between
+					str_to_date('${from_date}', '%d-%m-%YYYY') and
+					str_to_date('${to_date}', '%d-%m-%YYYY')`;
+	}
+
+	if (
+		customer_id !== undefined &&
+		customer_id !== 'all' &&
+		searchtype === 'all'
+	) {
+		query = query + ` and	p.customer_id = '${customer_id}' `;
+	}
+
+	if (searchtype === 'invonly') {
+		query = query + ` and s.invoice_no = '${invoiceno}' `;
+	}
+
+	query = query + ` order by id desc  `;
 
 	pool.query(query, function (err, data) {
 		if (err) {
@@ -298,7 +328,15 @@ const getPymtTransactionByCustomers = (center_id, customer_id, callback) => {
 	});
 };
 
-const getPaymentsByCenter = (center_id, callback) => {
+const getPaymentsByCenter = (
+	center_id,
+	from_date,
+	to_date,
+	customer_id,
+	searchtype,
+	invoiceno,
+	callback
+) => {
 	let query = `
 	select 
 	c.name as customer_name,
@@ -326,10 +364,29 @@ const getPaymentsByCenter = (center_id, callback) => {
 				 c.id = p.customer_id and
 				 p.id = pd.pymt_ref_id and
 				 pd.sale_ref_id = s.id and
-				 p.center_id = '${center_id}' order by pymt_date desc 
-				 
-				 
-	`;
+				 p.center_id = '${center_id}' `;
+
+	if (customer_id !== undefined && searchtype === 'all') {
+		query =
+			query +
+			` and STR_TO_DATE(s.invoice_date,'%d-%m-%Y') between
+		str_to_date('${from_date}', '%d-%m-%YYYY') and
+		str_to_date('${to_date}', '%d-%m-%YYYY')`;
+	}
+
+	if (
+		customer_id !== undefined &&
+		customer_id !== 'all' &&
+		searchtype === 'all'
+	) {
+		query = query + ` and	p.customer_id = '${customer_id}' `;
+	}
+
+	if (searchtype === 'invonly') {
+		query = query + ` and s.invoice_no = '${invoiceno}' `;
+	}
+
+	query = query + ` order by pymt_date desc  `;
 
 	pool.query(query, function (err, data) {
 		if (err) {
@@ -388,9 +445,15 @@ const getLedgerByCustomers = (center_id, customer_id, callback) => {
 	});
 };
 
-const getSaleInvoiceByCustomers = (center_id, customer_id, callback) => {
-	// let query = ` select * from sale where sale_type = 'gstinvoice' and center_id =  '${center_id}' and customer_id = '${customer_id}' order by id desc `;
-
+const getSaleInvoiceByCustomers = (
+	center_id,
+	customer_id,
+	from_date,
+	to_date,
+	searchtype,
+	invoiceno,
+	callback
+) => {
 	let query = `	select s.id as sale_id, s.center_id as center_id, s.customer_id as customer_id, s.invoice_no as invoice_no, 
 	s.invoice_date as invoice_date, 
 	abs(datediff(STR_TO_DATE(s.invoice_date,'%d-%m-%Y'), CURDATE())) as aging_days,
@@ -417,9 +480,29 @@ const getSaleInvoiceByCustomers = (center_id, customer_id, callback) => {
 	c.id = '${customer_id}' and
 	s.center_id = '${center_id}' and
 	s.customer_id = c.id 
+	and
+	s.sale_type= 'gstinvoice' 
 	`;
-	//and
-	//s.sale_type= 'gstinvoice'
+
+	if (customer_id !== undefined && searchtype === 'all') {
+		query =
+			query +
+			` and STR_TO_DATE(s.invoice_date,'%d-%m-%Y') between
+		str_to_date('${from_date}', '%d-%m-%YYYY') and
+		str_to_date('${to_date}', '%d-%m-%YYYY')`;
+	}
+
+	if (
+		customer_id !== undefined &&
+		customer_id !== 'all' &&
+		searchtype === 'all'
+	) {
+		query = query + ` and	s.customer_id = '${customer_id}' `;
+	}
+
+	if (searchtype === 'invonly') {
+		query = query + ` and s.invoice_no = '${invoiceno}' `;
+	}
 
 	// stock issue should also be pulled out, check
 	pool.query(query, function (err, data) {
@@ -430,7 +513,15 @@ const getSaleInvoiceByCustomers = (center_id, customer_id, callback) => {
 	});
 };
 
-const getSaleInvoiceByCenter = (center_id, callback) => {
+const getSaleInvoiceByCenter = (
+	center_id,
+	from_date,
+	to_date,
+	customer_id,
+	searchtype,
+	invoiceno,
+	callback
+) => {
 	let query = `	select s.id as sale_id, s.center_id as center_id, s.customer_id as customer_id, 
 	s.invoice_no as invoice_no, s.invoice_date as invoice_date, 
 	abs(datediff(STR_TO_DATE(s.invoice_date,'%d-%m-%Y'), CURDATE())) as aging_days,
@@ -460,6 +551,26 @@ const getSaleInvoiceByCenter = (center_id, callback) => {
 	s.customer_id = c.id and
 	s.sale_type= 'gstinvoice'
 	`;
+
+	if (customer_id !== undefined && searchtype === 'all') {
+		query =
+			query +
+			` and STR_TO_DATE(s.invoice_date,'%d-%m-%Y') between
+		str_to_date('${from_date}', '%d-%m-%YYYY') and
+		str_to_date('${to_date}', '%d-%m-%YYYY')`;
+	}
+
+	if (
+		customer_id !== undefined &&
+		customer_id !== 'all' &&
+		searchtype === 'all'
+	) {
+		query = query + ` and	s.customer_id = '${customer_id}' `;
+	}
+
+	if (searchtype === 'invonly') {
+		query = query + ` and s.invoice_no = '${invoiceno}' `;
+	}
 
 	pool.query(query, function (err, data) {
 		if (err) {
@@ -572,32 +683,3 @@ module.exports = {
 	getPymtTransactionByCustomers,
 	updateCustomerLastPaidDate,
 };
-
-// select s.id as sale_id, s.center_id as center_id, s.customer_id as customer_id, s.invoice_no as invoice_no, s.invoice_date as invoice_date, s.net_total as invoice_amt, s.sale_type as sale_type, c.name as customer_name, c.address1 as customer_address1,
-// c.address2 as customer_address2,
-// (select sum(pd.applied_amount) from payment_detail pd, payment p2
-// where pd.sale_ref_id = s.id and pd.pymt_ref_id = p2.id and p2.is_cancelled = 'NO') as paid_amout
-// from sale s, customer c
-// where
-// c.id = 4 and
-// s.customer_id = c.id and
-// s.sale_type= 'gstinvoice'
-
-// select s.id as sale_id, s.center_id as center_id, s.customer_id as customer_id, s.invoice_no as invoice_no, s.invoice_date as invoice_date, s.net_total as invoice_amt, s.sale_type as sale_type, c.name as customer_name, c.address1 as customer_address1,
-// c.address2 as customer_address2,
-// (select
-// (
-//      CASE
-//         WHEN  sum(pd.applied_amount) = s.net_total THEN 'paid'
-//         WHEN  sum(pd.applied_amount) = s.net_total THEN 'paid'
-
-//         ELSE 'UN PAID'
-//     END)  as paid_amout
-
-// from payment_detail pd, payment p2
-// where pd.sale_ref_id = s.id and pd.pymt_ref_id = p2.id and p2.is_cancelled = 'NO') as paid_amout
-// from sale s, customer c
-// where
-// c.id = 4 and
-// s.customer_id = c.id and
-// s.sale_type= 'gstinvoice'

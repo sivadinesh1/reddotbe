@@ -1,6 +1,6 @@
-var pool = require("../../helpers/db");
-const moment = require("moment");
-const logger = require("./../../helpers/log4js");
+var pool = require('../../helpers/db');
+const moment = require('moment');
+const logger = require('./../../helpers/log4js');
 
 const getInquirySummary = (center_id, from_date, to_date, callback) => {
 	let query = ` select 
@@ -130,6 +130,30 @@ const getPaymentsByCustomers = (center_id, from_date, to_date, callback) => {
 	});
 };
 
+const topClients = (center_id, limit) => {
+	let query = `
+		select c.name as customer_name, s.customer_id as id, sum(net_total) as sum_total
+		from 
+			sale s,
+			customer c
+		where
+			c.id = s.customer_id and
+			s.center_id = '${center_id}'
+			group by customer_id 
+		order by
+			sum_total desc
+			limit ${limit} `;
+
+	return new Promise(function (resolve, reject) {
+		pool.query(query, function (err, data) {
+			if (err) {
+				reject(err);
+			}
+			resolve(data);
+		});
+	});
+};
+
 module.exports = {
 	getInquirySummary,
 	getSalesSummary,
@@ -138,4 +162,5 @@ module.exports = {
 	getCenterSummary,
 	getReceivablesOutstanding,
 	getPaymentsByCustomers,
+	topClients,
 };

@@ -1,12 +1,12 @@
-const express = require("express");
+const express = require('express');
 const accountsRouter = express.Router();
 
-const mysql = require("mysql");
-const moment = require("moment");
-const logger = require("../../routes/helpers/log4js");
-var pool = require("../helpers/db");
-const { handleError, ErrorHandler } = require("./../helpers/error");
-const { toTimeZone, currentTimeInTimeZone } = require("./../helpers/utils");
+const mysql = require('mysql');
+const moment = require('moment');
+const logger = require('../../routes/helpers/log4js');
+var pool = require('../helpers/db');
+const { handleError, ErrorHandler } = require('./../helpers/error');
+const { toTimeZone, currentTimeInTimeZone } = require('./../helpers/utils');
 
 const {
 	addPaymentMaster,
@@ -22,11 +22,11 @@ const {
 	updateCustomerCredit,
 	updateCustomerCreditMinus,
 	getPymtTransactionByCustomers,
-} = require("../modules/accounts/accounts.js");
+} = require('../modules/accounts/accounts.js');
 
-accountsRouter.post("/add-payment-received", async (req, res) => {
+accountsRouter.post('/add-payment-received', async (req, res) => {
 	var today = new Date();
-	today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
+	today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 
 	const cloneReq = { ...req.body };
 
@@ -45,13 +45,21 @@ accountsRouter.post("/add-payment-received", async (req, res) => {
 			let newPK = data.insertId;
 
 			// (3) - updates pymt details
-			let process = processItems(cloneReq, newPK, k.sale_ref_id, k.receivedamount);
+			let process = processItems(
+				cloneReq,
+				newPK,
+				k.sale_ref_id,
+				k.receivedamount
+			);
 		}).catch((err) => {
-			return handleError(new ErrorHandler("500", "Error pymtMaster/Details Entry > " + err), res);
+			return handleError(
+				new ErrorHandler('500', 'Error pymtMaster/Details Entry > ' + err),
+				res
+			);
 		});
 
 		if (index == accountarr.length - 1) {
-			return res.status(200).json("success");
+			return res.status(200).json('success');
 		}
 		index++;
 		// });
@@ -69,13 +77,19 @@ function processItems(cloneReq, newPK, sale_ref_id, receivedamount) {
 			} else {
 				// check if there is any credit balance for the customer, if yes, first apply that
 
-				addPaymentLedgerRecord(cloneReq, newPK, receivedamount, sale_ref_id, (err, data) => {
-					if (err) {
-						let errTxt = err.message;
-					} else {
-						// todo
+				addPaymentLedgerRecord(
+					cloneReq,
+					newPK,
+					receivedamount,
+					sale_ref_id,
+					(err, data) => {
+						if (err) {
+							let errTxt = err.message;
+						} else {
+							// todo
+						}
 					}
-				});
+				);
 
 				resolve(data);
 			}
@@ -83,81 +97,181 @@ function processItems(cloneReq, newPK, sale_ref_id, receivedamount) {
 	});
 }
 
-accountsRouter.get("/get-ledger-customer/:centerid/:customerid", (req, res) => {
-	getLedgerByCustomers(req.params.centerid, req.params.customerid, (err, data) => {
-		if (err) {
-			return handleError(new ErrorHandler("500", "Error fetching get ledger customer."), res);
-		} else {
-			return res.status(200).json(data);
+accountsRouter.get('/get-ledger-customer/:centerid/:customerid', (req, res) => {
+	getLedgerByCustomers(
+		req.params.centerid,
+		req.params.customerid,
+		(err, data) => {
+			if (err) {
+				return handleError(
+					new ErrorHandler('500', 'Error fetching get ledger customer.'),
+					res
+				);
+			} else {
+				return res.status(200).json(data);
+			}
 		}
-	});
+	);
 });
 
-accountsRouter.get("/get-sale-invoice-customer/:centerid/:customerid", (req, res) => {
-	getSaleInvoiceByCustomers(req.params.centerid, req.params.customerid, (err, data) => {
-		if (err) {
-			return handleError(new ErrorHandler("500", "Error fetching get ledger customer."), res);
-		} else {
-			return res.status(200).json(data);
+accountsRouter.post('/get-sale-invoice-customer', (req, res) => {
+	let center_id = req.body.centerid;
+	let from_date = toTimeZone(req.body.fromdate, 'Asia/Kolkata');
+	let to_date = toTimeZone(req.body.todate, 'Asia/Kolkata');
+	let customer_id = req.body.customerid;
+	let searchtype = req.body.searchtype;
+	let invoiceno = req.body.invoiceno;
+
+	getSaleInvoiceByCustomers(
+		center_id,
+		customer_id,
+		from_date,
+		to_date,
+		searchtype,
+		invoiceno,
+		(err, data) => {
+			if (err) {
+				return handleError(
+					new ErrorHandler('500', 'Error fetching get ledger customer.'),
+					res
+				);
+			} else {
+				return res.status(200).json(data);
+			}
 		}
-	});
+	);
 });
 
-accountsRouter.get("/get-sale-invoice-center/:centerid", (req, res) => {
-	getSaleInvoiceByCenter(req.params.centerid, (err, data) => {
-		if (err) {
-			return handleError(new ErrorHandler("500", "Error fetching get ledger customer."), res);
-		} else {
-			return res.status(200).json(data);
+accountsRouter.post('/get-sale-invoice-center', (req, res) => {
+	let center_id = req.body.centerid;
+	let from_date = toTimeZone(req.body.fromdate, 'Asia/Kolkata');
+	let to_date = toTimeZone(req.body.todate, 'Asia/Kolkata');
+	let customer_id = req.body.customerid;
+	let searchtype = req.body.searchtype;
+	let invoiceno = req.body.invoiceno;
+
+	getSaleInvoiceByCenter(
+		center_id,
+		from_date,
+		to_date,
+		customer_id,
+		searchtype,
+		invoiceno,
+		(err, data) => {
+			if (err) {
+				return handleError(
+					new ErrorHandler('500', 'Error fetching get ledger customer.'),
+					res
+				);
+			} else {
+				return res.status(200).json(data);
+			}
 		}
-	});
+	);
 });
 
-accountsRouter.get("/get-payments-customer/:centerid/:customerid", (req, res) => {
-	getPaymentsByCustomers(req.params.centerid, req.params.customerid, (err, data) => {
-		if (err) {
-			return handleError(new ErrorHandler("500", "Error fetching get ledger customer."), res);
-		} else {
-			return res.status(200).json(data);
+accountsRouter.post('/get-payments-customer', (req, res) => {
+	let center_id = req.body.centerid;
+	let from_date = toTimeZone(req.body.fromdate, 'Asia/Kolkata');
+	let to_date = toTimeZone(req.body.todate, 'Asia/Kolkata');
+	let customer_id = req.body.customerid;
+	let searchtype = req.body.searchtype;
+	let invoiceno = req.body.invoiceno;
+
+	getPaymentsByCustomers(
+		center_id,
+		customer_id,
+		from_date,
+		to_date,
+		searchtype,
+		invoiceno,
+		(err, data) => {
+			if (err) {
+				return handleError(
+					new ErrorHandler('500', 'Error fetching get ledger customer.'),
+					res
+				);
+			} else {
+				return res.status(200).json(data);
+			}
 		}
-	});
+	);
 });
 
-accountsRouter.get("/get-pymt-transactions-customer/:centerid/:customerid", (req, res) => {
-	getPymtTransactionByCustomers(req.params.centerid, req.params.customerid, (err, data) => {
-		if (err) {
-			return handleError(new ErrorHandler("500", "Error fetching get ledger customer."), res);
-		} else {
-			return res.status(200).json(data);
+accountsRouter.get(
+	'/get-pymt-transactions-customer/:centerid/:customerid',
+	(req, res) => {
+		getPymtTransactionByCustomers(
+			req.params.centerid,
+			req.params.customerid,
+			(err, data) => {
+				if (err) {
+					return handleError(
+						new ErrorHandler('500', 'Error fetching get ledger customer.'),
+						res
+					);
+				} else {
+					return res.status(200).json(data);
+				}
+			}
+		);
+	}
+);
+
+accountsRouter.post('/get-payments-center', (req, res) => {
+	let center_id = req.body.centerid;
+	let from_date = toTimeZone(req.body.fromdate, 'Asia/Kolkata');
+	let to_date = toTimeZone(req.body.todate, 'Asia/Kolkata');
+	let customer_id = req.body.customerid;
+	let searchtype = req.body.searchtype;
+	let invoiceno = req.body.invoiceno;
+
+	getPaymentsByCenter(
+		center_id,
+		from_date,
+		to_date,
+		customer_id,
+		searchtype,
+		invoiceno,
+		(err, data) => {
+			if (err) {
+				return handleError(
+					new ErrorHandler('500', 'Error fetching get getPaymentsByCenter .'),
+					res
+				);
+			} else {
+				return res.status(200).json(data);
+			}
 		}
-	});
+	);
 });
 
-accountsRouter.get("/get-payments-center/:centerid", (req, res) => {
-	getPaymentsByCenter(req.params.centerid, (err, data) => {
-		if (err) {
-			return handleError(new ErrorHandler("500", "Error fetching get getPaymentsByCenter ."), res);
-		} else {
-			return res.status(200).json(data);
-		}
-	});
-});
-
-accountsRouter.get("/get-pymt-transactions-center/:centerid", (req, res) => {
+accountsRouter.get('/get-pymt-transactions-center/:centerid', (req, res) => {
 	getPymtTransactionsByCenter(req.params.centerid, (err, data) => {
 		if (err) {
-			return handleError(new ErrorHandler("500", "Error fetching get getPymtTransactionsByCenter ."), res);
+			return handleError(
+				new ErrorHandler(
+					'500',
+					'Error fetching get getPymtTransactionsByCenter .'
+				),
+				res
+			);
 		} else {
 			return res.status(200).json(data);
 		}
 	});
 });
 
-accountsRouter.post("/add-bulk-payment-received", async (req, res) => {
-	
+accountsRouter.post('/add-bulk-payment-received', async (req, res) => {
 	const cloneReq = { ...req.body };
 
-	const [customer, center_id, accountarr, invoicesplit, balanceamount] = Object.values(req.body);
+	const [
+		customer,
+		center_id,
+		accountarr,
+		invoicesplit,
+		balanceamount,
+	] = Object.values(req.body);
 
 	let index = 0;
 
@@ -173,32 +287,45 @@ accountsRouter.post("/add-bulk-payment-received", async (req, res) => {
 			// (3) - updates pymt details
 			let process = processBulkItems(cloneReq, newPK, invoicesplit);
 		}).catch((err) => {
-			return handleError(new ErrorHandler("500", "Error bulk pymtMaster/Details Entry > " + err), res);
+			return handleError(
+				new ErrorHandler('500', 'Error bulk pymtMaster/Details Entry > ' + err),
+				res
+			);
 		});
 
 		if (index == accountarr.length - 1) {
-			if (req.body.creditsused === "YES") {
-				updateCustomerCreditMinus(req.body.creditusedamount, cloneReq.centerid, cloneReq.customer.id, (err, data1) => {
-					if (err) {
-						let errTxt = err.message;
-					} else {
-						// todo nothing
+			if (req.body.creditsused === 'YES') {
+				updateCustomerCreditMinus(
+					req.body.creditusedamount,
+					cloneReq.centerid,
+					cloneReq.customer.id,
+					(err, data1) => {
+						if (err) {
+							let errTxt = err.message;
+						} else {
+							// todo nothing
+						}
 					}
-				});
+				);
 			}
 
 			// apply the excess amount to custome credit
 			// applicable only if balanceamount < 0
 			if (balanceamount < 0) {
-				updateCustomerCredit(balanceamount, cloneReq.centerid, cloneReq.customer.id, (err, data1) => {
-					if (err) {
-						let errTxt = err.message;
-					} else {
-						// todo nothing
+				updateCustomerCredit(
+					balanceamount,
+					cloneReq.centerid,
+					cloneReq.customer.id,
+					(err, data1) => {
+						if (err) {
+							let errTxt = err.message;
+						} else {
+							// todo nothing
+						}
 					}
-				});
+				);
 			}
-			return res.status(200).json("success");
+			return res.status(200).json('success');
 		}
 		index++;
 	}
@@ -216,13 +343,19 @@ function processBulkItems(cloneReq, newPK, invoicesplit) {
 				} else {
 					// check if there is any credit balance for the customer, if yes, first apply that
 
-					addPaymentLedgerRecord(cloneReq, newPK, e.applied_amount, e.id, (err, data2) => {
-						if (err) {
-							let errTxt = err.message;
-						} else {
-							// do nothing
+					addPaymentLedgerRecord(
+						cloneReq,
+						newPK,
+						e.applied_amount,
+						e.id,
+						(err, data2) => {
+							if (err) {
+								let errTxt = err.message;
+							} else {
+								// do nothing
+							}
 						}
-					});
+					);
 					resolve(data);
 				}
 			});

@@ -212,7 +212,10 @@ router.get('/all-active-vendors/:centerid', (req, res) => {
 	let centerid = req.params.centerid;
 
 	let sql = `select v.id, v.center_id, v.name, v.address1, v.address2, v.address3, v.district, s.id as state_id, s.code, s.description as state,
-	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp, v.email, v.isactive  from 
+	v.pin, v.gst, v.phone, v.mobile, v.mobile2, v.whatsapp, v.email, v.isactive, v.credit_amt,
+	v.balance_amt, 
+	DATE_FORMAT(v.last_paid_date, '%d-%b-%Y') as last_paid_date
+	from 
 	vendor v,
 	state s
 	where 

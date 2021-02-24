@@ -9,6 +9,13 @@ const { handleError, ErrorHandler } = require('../helpers/error');
 var pool = require('../helpers/db');
 const { toTimeZone, currentTimeInTimeZone } = require('./../helpers/utils');
 
+const {
+	addPurchaseLedgerRecord,
+	addReversePurchaseLedgerRecord,
+	addPurchaseLedgerAfterReversalRecord,
+	getPurchaseInvoiceByCenter,
+} = require('../modules/accounts/purchaseaccounts');
+
 purchaseRouter.post('/insert-purchase-details', async (req, res) => {
 	const cloneReq = { ...req.body };
 
@@ -18,6 +25,15 @@ purchaseRouter.post('/insert-purchase-details', async (req, res) => {
 
 	try {
 		let processItemsPromise = processItems(cloneReq, newPK);
+
+		// ledger entry should NOT be done if status is draft ("D")
+		if (cloneReq.status === 'C' && cloneReq.purchaseid === '') {
+			await addPurchaseLedgerRecord(cloneReq, newPK);
+		} else if (cloneReq.status === 'C' && cloneReq.purchaseid !== '') {
+			await addReversePurchaseLedgerRecord(cloneReq, newPK);
+			await addPurchaseLedgerAfterReversalRecord(cloneReq, newPK);
+		} else {
+		}
 
 		res.json({
 			result: 'success',

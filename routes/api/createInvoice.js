@@ -19,7 +19,8 @@ function createInvoice(
 	centerDetails,
 	path,
 	res,
-	print_type
+	print_type,
+	print_ship_to
 ) {
 	let centerdata = centerDetails[0];
 	let customerdata = customerDetails[0];
@@ -43,6 +44,11 @@ function createInvoice(
 			doc.font('Helvetica');
 			generateHeader(doc, centerdata, e);
 			generateCustomerInformation(doc, customerdata, salemasterdata);
+
+			if (print_ship_to) {
+				generateShippingInformation(doc, customerdata, salemasterdata);
+			}
+
 			generateInvoiceTable(
 				doc,
 				salemasterdata,
@@ -138,24 +144,24 @@ function generateCustomerInformation(doc, customerdata, salemasterdata) {
 	doc
 		.fillColor('#000000')
 		.fontSize(12)
-		.text(invoice_type, 375, 119, { align: 'center' });
+		.text(invoice_type, 440, 119, { align: 'center' });
 	doc.fillColor('#000000');
 	doc
 		.strokeColor('#000000')
-		.moveTo(400, 136)
-		.lineTo(550, 136)
+		.moveTo(460, 136)
+		.lineTo(570, 136)
 
 		.stroke();
 
 	doc
 		.fillColor('#000000')
 		.fontSize(10)
-		.text('BILL No.           :    ' + salemasterdata.invoice_no, 410, 145);
+		.text('BILL No.     : ' + salemasterdata.invoice_no, 460, 145);
 
 	doc
 		.fillColor('#000000')
 		.fontSize(10)
-		.text('BILL Date         :    ' + salemasterdata.invoice_date, 410, 160);
+		.text('BILL Date    : ' + salemasterdata.invoice_date, 460, 160);
 
 	const customerInformationTop = 136;
 
@@ -201,6 +207,64 @@ function generateCustomerInformation(doc, customerdata, salemasterdata) {
 		.text(
 			'Phone: ' + customerdata.mobile + ' GSTIN: ' + customerdata.gst,
 			40,
+			196
+		)
+		.moveDown();
+
+	// line end of customer section
+	generateHr(doc, line_x_start, line_x_end, 210);
+}
+
+function generateShippingInformation(doc, customerdata, salemasterdata) {
+	// first line before customer section
+	generateHr(doc, line_x_start, line_x_end, 109);
+
+	doc.fillColor('#000000').fontSize(12).text('Ship To', 260, 117);
+
+	const customerInformationTop = 136;
+
+	if (customerdata.name === 'Walk In') {
+		doc
+			.fillColor('#000000')
+			.fontSize(10)
+			.text(
+				customerdata.name + salemasterdata.retail_customer_name,
+				40,
+				customerInformationTop
+			)
+			.text(
+				customerdata.csa_address1 + salemasterdata.retail_customer_address,
+				40,
+				151
+			);
+	} else {
+		doc
+			.fillColor('#000000')
+			.fontSize(10)
+			.text(customerdata.name, 270, customerInformationTop)
+			.text(customerdata.csa_address1, 270, 151);
+	}
+
+	if (customerdata.csa_district !== '') {
+		doc.text(
+			customerdata.csa_address2 + ', District: ' + customerdata.cas_district,
+			270,
+			166
+		);
+	} else {
+		doc.text(customerdata.csa_address2, 270, 166);
+	}
+
+	doc
+		.fillColor('#000000')
+		.text(
+			'State: ' + customerdata.csa_code + '-' + customerdata.csa_description,
+			270,
+			181
+		)
+		.text(
+			'Phone: ' + customerdata.mobile + ' GSTIN: ' + customerdata.gst,
+			270,
 			196
 		)
 		.moveDown();
@@ -577,7 +641,7 @@ function generateInvoiceTable(
 			});
 			// for each new page this adds the center and customer data
 			generateHeader(doc, centerdata, print_type);
-			generateCustomerInformation(doc, customerdata, salemasterdata);
+			//generateCustomerInformation(doc, customerdata, salemasterdata);
 
 			generateTableRow(
 				doc,

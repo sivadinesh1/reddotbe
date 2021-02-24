@@ -1,11 +1,11 @@
-const express = require("express");
+const express = require('express');
 const dashboardRouter = express.Router();
 
-const mysql = require("mysql");
-const moment = require("moment");
-const logger = require("../../routes/helpers/log4js");
+const mysql = require('mysql');
+const moment = require('moment');
+const logger = require('../../routes/helpers/log4js');
 
-const { handleError, ErrorHandler } = require("./../helpers/error");
+const { handleError, ErrorHandler } = require('./../helpers/error');
 
 const {
 	getInquirySummary,
@@ -15,92 +15,121 @@ const {
 	getCenterSummary,
 	getReceivablesOutstanding,
 	getPaymentsByCustomers,
-} = require("../modules/dashboard/dashboard.js");
+	topClients,
+} = require('../modules/dashboard/dashboard.js');
 
-var pool = require("./../helpers/db");
+var pool = require('./../helpers/db');
 
-dashboardRouter.post("/inquiry-summary", (req, res) => {
+dashboardRouter.post('/inquiry-summary', (req, res) => {
 	const [center_id, from_date, to_date] = Object.values(req.body);
 
 	getInquirySummary(center_id, from_date, to_date, (err, data) => {
 		if (err) {
-			return handleError(new ErrorHandler("500", "Error fetching getInquirySummary."), res);
+			return handleError(
+				new ErrorHandler('500', 'Error fetching getInquirySummary.'),
+				res
+			);
 		} else {
 			return res.status(200).json(data);
 		}
 	});
 });
 
-dashboardRouter.post("/sales-summary", (req, res) => {
+dashboardRouter.post('/sales-summary', (req, res) => {
 	const [center_id, from_date, to_date] = Object.values(req.body);
 
 	getSalesSummary(center_id, from_date, to_date, (err, data) => {
 		if (err) {
-			return handleError(new ErrorHandler("500", "Error fetching getSalesSummary."), res);
+			return handleError(
+				new ErrorHandler('500', 'Error fetching getSalesSummary.'),
+				res
+			);
 		} else {
 			return res.status(200).json(data);
 		}
 	});
 });
 
-dashboardRouter.post("/purchase-summary", (req, res) => {
+dashboardRouter.post('/purchase-summary', (req, res) => {
 	const [center_id, from_date, to_date] = Object.values(req.body);
 
 	getPurchaseSummary(center_id, from_date, to_date, (err, data) => {
 		if (err) {
-			return handleError(new ErrorHandler("500", "Error fetching getPurchaseSummary."), res);
+			return handleError(
+				new ErrorHandler('500', 'Error fetching getPurchaseSummary.'),
+				res
+			);
 		} else {
 			return res.status(200).json(data);
 		}
 	});
 });
 
-dashboardRouter.post("/sales-total", (req, res) => {
+dashboardRouter.post('/sales-total', (req, res) => {
 	const [center_id, from_date, to_date] = Object.values(req.body);
 
 	getSaleTotal(center_id, from_date, to_date, (err, data) => {
 		if (err) {
-			return handleError(new ErrorHandler("500", "Error fetching getSaleTotal."), res);
+			return handleError(
+				new ErrorHandler('500', 'Error fetching getSaleTotal.'),
+				res
+			);
 		} else {
 			return res.status(200).json(data);
 		}
 	});
 });
 
-dashboardRouter.post("/center-summary", (req, res) => {
+dashboardRouter.post('/center-summary', (req, res) => {
 	const [center_id, from_date, to_date] = Object.values(req.body);
 
 	getCenterSummary(center_id, from_date, to_date, (err, data) => {
 		if (err) {
-			return handleError(new ErrorHandler("500", "Error fetching getCenterSummary."), res);
+			return handleError(
+				new ErrorHandler('500', 'Error fetching getCenterSummary.'),
+				res
+			);
 		} else {
 			return res.status(200).json(data);
 		}
 	});
 });
 
-dashboardRouter.post("/center-receivables-summary", (req, res) => {
+dashboardRouter.post('/center-receivables-summary', (req, res) => {
 	const [center_id, from_date, to_date] = Object.values(req.body);
 
 	getReceivablesOutstanding(center_id, from_date, to_date, (err, data) => {
 		if (err) {
-			return handleError(new ErrorHandler("500", "Error fetching getreceivablesoutstanding."), res);
+			return handleError(
+				new ErrorHandler('500', 'Error fetching getreceivablesoutstanding.'),
+				res
+			);
 		} else {
 			return res.status(200).json(data);
 		}
 	});
 });
 
-dashboardRouter.post("/payments-customers", (req, res) => {
+dashboardRouter.post('/payments-customers', (req, res) => {
 	const [center_id, from_date, to_date] = Object.values(req.body);
 
 	getPaymentsByCustomers(center_id, from_date, to_date, (err, data) => {
 		if (err) {
-			return handleError(new ErrorHandler("500", "Error fetching getPaymentsByCustomers."), res);
+			return handleError(
+				new ErrorHandler('500', 'Error fetching getPaymentsByCustomers.'),
+				res
+			);
 		} else {
 			return res.status(200).json(data);
 		}
 	});
+});
+
+// get customer outstanding balance
+dashboardRouter.post('/get-top-clients', async (req, res) => {
+	let rows = await topClients(req.body.center_id, req.body.limit);
+
+	return res.status(200).json(rows);
 });
 
 module.exports = dashboardRouter;

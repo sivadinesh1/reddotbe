@@ -23,6 +23,7 @@ const { printSaleInvoice } = require('./../modules/sales/printSaleInvoice.js');
 printRouter.post('/invoice-pdf', async (req, res) => {
 	let sale_id = req.body.sale_id;
 	let print_type = req.body.print_type;
+	let print_ship_to = req.body.print_ship_to;
 
 	// using saleid get SALE MASTER & SALE DETAILS
 	let saleMaster = await getSalesMaster(sale_id);
@@ -45,7 +46,8 @@ printRouter.post('/invoice-pdf', async (req, res) => {
 
 		'invoice.pdf',
 		res,
-		print_type
+		print_type,
+		print_ship_to
 	);
 });
 

@@ -1,13 +1,12 @@
-var pool = require("../../helpers/db");
-const moment = require("moment");
+var pool = require('../../helpers/db');
+const moment = require('moment');
 
-const logger = require("./../../helpers/log4js");
-const { toTimeZone, currentTimeInTimeZone } = require("../../helpers/utils");
+const logger = require('./../../helpers/log4js');
+const { toTimeZone, currentTimeInTimeZone } = require('../../helpers/utils');
 
 // insert row in customer tbl
 const insertCustomer = (insertValues, callback) => {
-	
-	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
+	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 
 	let taxSlabArr = [
 		{ gstslab: 0, gstvalue: insertValues.gstzero },
@@ -51,13 +50,17 @@ const insertCustomer = (insertValues, callback) => {
 					type: insertValues.disctype,
 					value: e.gstvalue,
 					gst_slab: e.gstslab,
-					startdate: currentTimeInTimeZone("Asia/Kolkata", "DD-MM-YYYY"),
-					enddate: "01-04-9999",
+					startdate: currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY'),
+					enddate: '01-04-9999',
 					brand_id: 0,
 				};
 
 				insertCustomerDiscount(formObj, (err, rows) => {
-					if (err) return handleError(new ErrorHandler("500", "Error fetching sales master"), res);
+					if (err)
+						return handleError(
+							new ErrorHandler('500', 'Error fetching sales master'),
+							res
+						);
 				});
 			});
 
@@ -89,8 +92,7 @@ const insertCustomer = (insertValues, callback) => {
 };
 
 const updateCustomer = (updateValues, id, callback) => {
-	
-	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
+	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 
 	let query = `
 	update customer set center_id = '${updateValues.center_id}',
@@ -290,7 +292,7 @@ const insertCustomerDiscount = (insertValues, callback) => {
 // update rows in discount tbl // check
 const updateCustomerDiscount = (updateValues, callback) => {
 	updateValues.forEach((element) => {
-		let stdate = moment(element.startdate).format("DD-MM-YYYY");
+		let stdate = moment(element.startdate).format('DD-MM-YYYY');
 
 		let query = ` update discount set type = '${element.type}', value = '${element.value}', 
                   gst_slab = '${element.gst_slab}', startdate = '${stdate}', enddate = '${element.enddate}' 
@@ -315,7 +317,7 @@ const updateDefaultCustomerDiscount = (updateValues, callback) => {
 	when gst_slab = 28 then '${updateValues.gsttwentyeight}'
 
 									end),
-									startdate = '${toTimeZone(updateValues.effDiscStDate, "Asia/Kolkata")}',
+									startdate = '${toTimeZone(updateValues.effDiscStDate, 'Asia/Kolkata')}',
 			type= '${updateValues.disctype}'
 	WHERE 
 	brand_id = '${updateValues.brand_id}' and
@@ -341,6 +343,7 @@ const getCustomerDetails = (centerid, customerid) => {
 	csa.pin as csa_pin,
 	csa.def_address as def_address,
 	s1.code as csa_code,
+	s1.description as csa_description,
 	c.credit_amt
 	from 
 	customer c,
@@ -409,8 +412,7 @@ s1.code as csa_code
 
 // insert row in customer tbl
 const insertDiscountsByBrands = (insertValues, callback) => {
-	
-	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
+	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 
 	let taxSlabArr = [
 		{ gstslab: 0, gstvalue: insertValues.gstzero },
@@ -428,15 +430,19 @@ const insertDiscountsByBrands = (insertValues, callback) => {
 			type: insertValues.disctype,
 			value: e.gstvalue,
 			gst_slab: e.gstslab,
-			startdate: toTimeZone(insertValues.effDiscStDate, "Asia/Kolkata"),
-			enddate: "01-04-9999",
+			startdate: toTimeZone(insertValues.effDiscStDate, 'Asia/Kolkata'),
+			enddate: '01-04-9999',
 		};
 
 		insertCustomerDiscount(formObj, (err, rows) => {
-			if (err) return handleError(new ErrorHandler("500", "Error fetching sales master"), res);
+			if (err)
+				return handleError(
+					new ErrorHandler('500', 'Error fetching sales master'),
+					res
+				);
 		});
 	});
-	return callback(null, "1");
+	return callback(null, '1');
 };
 
 // SHIPPING ADDRESS
@@ -459,9 +465,9 @@ customer_id = ? order by id desc `;
 };
 
 const insertCustomerShippingAddress = (insertValues, callback) => {
-	let def_address = insertValues.def_address === true ? "Y" : "N";
+	let def_address = insertValues.def_address === true ? 'Y' : 'N';
 
-	if (def_address === "Y") {
+	if (def_address === 'Y') {
 		let sql = `update customer_shipping_address set def_address = 'N' where customer_id = '${insertValues.customer_id}' `;
 
 		pool.query(sql, function (err, data1) {
@@ -494,8 +500,7 @@ const insertCustomerShippingAddress = (insertValues, callback) => {
 };
 
 const updateCustomerShippingAddress = (updateValues, id, callback) => {
-	
-	let today = currentTimeInTimeZone("Asia/Kolkata", "YYYY-MM-DD HH:mm:ss");
+	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 
 	if (updateValues.def_address) {
 		let sql = `update customer_shipping_address set def_address = 'N' where customer_id = '${updateValues.customer_id}' `;
@@ -505,8 +510,10 @@ const updateCustomerShippingAddress = (updateValues, id, callback) => {
 			let query = `
 			update customer_shipping_address set
 			address1 = '${updateValues.address1}',address2 = '${updateValues.address2}',
-			district = '${updateValues.district}', state_id = '${updateValues.state_id}', pin = '${updateValues.pin}', def_address = '${
-				updateValues.def_address === true ? "Y" : "N"
+			district = '${updateValues.district}', state_id = '${
+				updateValues.state_id
+			}', pin = '${updateValues.pin}', def_address = '${
+				updateValues.def_address === true ? 'Y' : 'N'
 			}'
 			where
 			id = '${id}'
@@ -521,8 +528,10 @@ const updateCustomerShippingAddress = (updateValues, id, callback) => {
 		let query = `
 		update customer_shipping_address set
 		address1 = '${updateValues.address1}',address2 = '${updateValues.address2}',
-		district = '${updateValues.district}', state_id = '${updateValues.state_id}', pin = '${updateValues.pin}', def_address = '${
-			updateValues.def_address === true ? "Y" : "N"
+		district = '${updateValues.district}', state_id = '${
+			updateValues.state_id
+		}', pin = '${updateValues.pin}', def_address = '${
+			updateValues.def_address === true ? 'Y' : 'N'
 		}'
 		where
 		id = '${id}'
