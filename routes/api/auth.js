@@ -1,42 +1,45 @@
-const express = require("express");
+const express = require('express');
 const authRoute = express.Router();
-const logger = require("../../routes/helpers/log4js");
+const logger = require('../../routes/helpers/log4js');
 const bcrypt = require('bcrypt');
 
-var pool = require("./../helpers/db");
-const { handleError, ErrorHandler } = require("./../helpers/error");
+var pool = require('./../helpers/db');
+const { handleError, ErrorHandler } = require('./../helpers/error');
 
-const { getPermissions, checkUsernameExists } = require("../modules/auth/auth.js");
-const e = require("express");
+const {
+	getPermissions,
+	checkUsernameExists,
+} = require('../modules/auth/auth.js');
+const e = require('express');
 
 // if(await bcrypt.compare(password, user.hashed_password)) {
 // 	console.log('object ::: password matched' )
 
-authRoute.post("/login", async (req, res) => {
+authRoute.post('/login', async (req, res) => {
 	const [username, password] = Object.values(req.body);
 
-
 	let user = await checkUsernameExists(username);
-	
 
 	if (user != null) {
 		// check password
 		if (await bcrypt.compare(password, user[0].userpass)) {
-			console.log('object ::: password matched')
-						return res.status(200).json({
-				result: "success",
+			console.log('object ::: password matched');
+			return res.status(200).json({
+				result: 'success',
 				role: user[0].role,
 				userid: user[0].userid,
 				obj: user[0],
 			});
 		} else {
-			res.json({ 'message': 'Invalid Credentials.' });
+			return handleError(new ErrorHandler('600', 'Invalid Credentials.'), res);
 		}
 	} else {
 		// res.json({ 'message': 'Error while authenticating' });
-		return handleError(new ErrorHandler("100", "Error while authenticating."), res);
+		return handleError(
+			new ErrorHandler('100', 'Error while authenticating.'),
+			res
+		);
 	}
-
 
 	// let query = `select u.id as userid, u.username, u.firstname, r.name as role, r.id as role_id, c.id as center_id, c.name as center_name, cm.id as company_id,
 	// cm.name as company_name, s.code, p.name as plan_name
@@ -78,7 +81,7 @@ authRoute.post("/login", async (req, res) => {
 	// });
 });
 
-authRoute.get("/fetch-permissions/:centerid/:roleid", async (req, res) => {
+authRoute.get('/fetch-permissions/:centerid/:roleid', async (req, res) => {
 	let center_id = req.params.centerid;
 	let role_id = req.params.roleid;
 
