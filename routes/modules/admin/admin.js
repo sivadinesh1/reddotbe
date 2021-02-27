@@ -25,7 +25,6 @@ const insertUser = async (insertValues) => {
 			if (err) {
 				reject(err);
 			}
-			console.log('object' + JSON.stringify(data));
 
 			resolve(data.insertId);
 		});

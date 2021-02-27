@@ -17,6 +17,7 @@ const {
 const {
 	getStatement,
 	getVendorStatement,
+	getItemWiseSale,
 } = require('../modules/reports/statementreports');
 var pool = require('./../helpers/db');
 
@@ -73,6 +74,22 @@ reportsRouter.post('/vendor-statement', async (req, res) => {
 		vendor_id,
 		start_date,
 		end_date
+	);
+	return res.status(200).json(data);
+});
+
+reportsRouter.post('/item-wise-sale', async (req, res) => {
+	let start_date = toTimeZone(req.body.startdate, 'Asia/Kolkata') + ' 00:00:00';
+	let end_date = toTimeZone(req.body.enddate, 'Asia/Kolkata') + ' 23:59:59';
+
+	let data = await getItemWiseSale(
+		req.body.center_id,
+		req.body.brandid,
+		start_date,
+		end_date,
+		req.body.saletype,
+		req.body.start,
+		req.body.end
 	);
 	return res.status(200).json(data);
 });

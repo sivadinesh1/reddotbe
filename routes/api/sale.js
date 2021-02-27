@@ -469,8 +469,6 @@ saleRouter.post('/convert-sale', async (req, res) => {
 	let customer_id = req.body.customer_id;
 	let net_total = req.body.net_total;
 
-	console.log('old dt ' + old_stock_issued_date);
-
 	let today = currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY');
 
 	// (1) Updates invseq in tbl financialyear, then {returns} formated sequence {YY/MM/INVSEQ}
@@ -491,7 +489,7 @@ saleRouter.post('/convert-sale', async (req, res) => {
 	'${toTimeZone(old_stock_issued_date, 'Asia/Kolkata')}'
 	
 	where id = ${sales_id} `;
-	console.log('query >>>>  ' + sql);
+
 	pool.query(sql, async function (err, data) {
 		if (err) {
 			return handleError(

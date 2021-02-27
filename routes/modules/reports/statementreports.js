@@ -64,7 +64,70 @@ any_value((select p.vendor_payment_no from vendor_payment p where p.id = l.payme
 	});
 };
 
+const getItemWiseSale = (
+	center_id,
+	brand_id,
+	start_date,
+	end_date,
+	sale_type,
+	start,
+	end
+) => {
+	let query = ` 
+		select 
+			p2.product_code , 
+			p2.description , 
+			p2.brand_id , 
+			b.name as brand_name,
+			sum(sd.qty) qty, 
+			sum(sd.taxable_value)/sum(sd.qty) avg_SP 
+		from 
+			sale s2 , 
+			sale_detail sd , 
+			product p2,
+			brand b 
+		where 
+			b.id = p2.brand_id and
+			s2.id = sd.sale_id and  
+			s2.center_id = '${center_id}' and 
+			sd.product_id = p2.id `;
+
+	if (brand_id !== 'all') {
+		query = query + ` and p2.brand_id = '${brand_id}' `;
+	}
+
+	if (sale_type !== 'all') {
+		query = query + ` and s2.sale_type  = '${sale_type}' `;
+	}
+
+	query =
+		query +
+		` 
+	and str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+	str_to_date('${start_date}',  '%d-%m-%Y %T') and
+	str_to_date('${end_date}',  '%d-%m-%Y %T') 	
+	
+	group by 
+		p2.product_code , 
+		p2.description , 
+		p2.brand_id
+	order by 
+		qty desc
+	
+	`;
+
+	return new Promise(function (resolve, reject) {
+		pool.query(query, function (err, data) {
+			if (err) {
+				reject(err);
+			}
+			resolve(data);
+		});
+	});
+};
+
 module.exports = {
 	getStatement,
 	getVendorStatement,
+	getItemWiseSale,
 };
