@@ -72,7 +72,7 @@ const insertCustomer = (insertValues, callback) => {
 
 				insertValues.address1,
 				insertValues.address2,
-				insertValues.address3,
+				insertValues.district,
 				insertValues.district,
 				insertValues.state_id,
 				insertValues.pin,
@@ -483,7 +483,7 @@ const insertCustomerShippingAddress = (insertValues, callback) => {
 
 		insertValues.address1,
 		insertValues.address2,
-		insertValues.address3,
+		insertValues.district,
 		insertValues.district,
 		insertValues.state_id,
 		insertValues.pin,

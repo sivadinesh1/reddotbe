@@ -43,7 +43,12 @@ function createInvoice(
 			doc.addPage();
 			doc.font('Helvetica');
 			generateHeader(doc, centerdata, e);
-			generateCustomerInformation(doc, customerdata, salemasterdata);
+			generateCustomerInformation(
+				doc,
+				customerdata,
+				salemasterdata,
+				print_ship_to
+			);
 
 			if (print_ship_to) {
 				generateShippingInformation(doc, customerdata, salemasterdata);
@@ -132,11 +137,25 @@ function generateHeader(doc, centerdata, print_type) {
 		.moveDown();
 }
 
-function generateCustomerInformation(doc, customerdata, salemasterdata) {
+function generateCustomerInformation(
+	doc,
+	customerdata,
+	salemasterdata,
+	print_ship_to
+) {
 	// first line before customer section
 	generateHr(doc, line_x_start, line_x_end, 109);
 
-	doc.fillColor('#000000').fontSize(13).text('To', 24, 117);
+	if (print_ship_to) {
+		doc.fillColor('#000000').fontSize(13).text('Registered Office', 260, 117);
+	} else {
+		doc
+			.fillColor('#000000')
+			.fontSize(13)
+			.font('Helvetica-Bold')
+			.text('To', 24, 117)
+			.font('Helvetica');
+	}
 
 	let invoice_type =
 		salemasterdata.sale_type === 'gstinvoice' ? 'GST INVOICE' : 'STOCK ISSUE';
@@ -169,47 +188,92 @@ function generateCustomerInformation(doc, customerdata, salemasterdata) {
 		doc
 			.fillColor('#000000')
 			.fontSize(10)
+			.font('Helvetica-Bold')
 			.text(
 				customerdata.name + salemasterdata.retail_customer_name,
 				40,
 				customerInformationTop
 			)
+			.font('Helvetica')
 			.text(
 				customerdata.address1 + salemasterdata.retail_customer_address,
 				40,
 				151
 			);
 	} else {
-		doc
-			.fillColor('#000000')
-			.fontSize(10)
-			.text(customerdata.name, 40, customerInformationTop)
-			.text(customerdata.address1, 40, 151);
+		if (print_ship_to) {
+			doc
+				.fillColor('#000000')
+				.fontSize(10)
+				.font('Helvetica-Bold')
+				.text(customerdata.name, 270, customerInformationTop)
+				.font('Helvetica')
+				.text(customerdata.address1, 270, 151);
+		} else {
+			doc
+				.fillColor('#000000')
+				.fontSize(10)
+				.font('Helvetica-Bold')
+				.text(customerdata.name, 40, customerInformationTop)
+				.font('Helvetica')
+				.text(customerdata.address1, 40, 151);
+		}
 	}
 
 	if (customerdata.district !== '') {
-		doc.text(
-			customerdata.address2 + ', District: ' + customerdata.district,
-			40,
-			166
-		);
+		if (print_ship_to) {
+			doc.text(
+				customerdata.address2 + ', District: ' + customerdata.district,
+				270,
+				166
+			);
+		} else {
+			doc.text(
+				customerdata.address2 + ', District: ' + customerdata.district,
+				40,
+				166
+			);
+		}
 	} else {
-		doc.text(customerdata.address2, 40, 166);
+		if (print_ship_to) {
+			doc.text(customerdata.address2, 270, 166);
+		} else {
+			doc.text(customerdata.address2, 40, 166);
+		}
 	}
-
-	doc
-		.fillColor('#000000')
-		.text(
-			'State: ' + customerdata.code + '-' + customerdata.description,
-			40,
-			181
-		)
-		.text(
-			'Phone: ' + customerdata.mobile + ' GSTIN: ' + customerdata.gst,
-			40,
-			196
-		)
-		.moveDown();
+	if (print_ship_to) {
+		doc
+			.fillColor('#000000')
+			.text(
+				'State: ' + customerdata.code + '-' + customerdata.description,
+				270,
+				181
+			)
+			.font('Helvetica-Bold')
+			.text(
+				'Phone: ' + customerdata.mobile + ' GSTIN: ' + customerdata.gst,
+				270,
+				196
+			)
+			.font('Helvetica')
+			.moveDown();
+	} else {
+		doc
+			.fillColor('#000000')
+			.text(
+				'State: ' + customerdata.code + '-' + customerdata.description,
+				40,
+				181
+			)
+			.font('Helvetica-Bold')
+			.text(
+				'Phone: ' + customerdata.mobile + ' GSTIN: ' + customerdata.gst,
+				40,
+				196
+			)
+			.font('Helvetica')
+			.moveDown();
+	}
 
 	// line end of customer section
 	generateHr(doc, line_x_start, line_x_end, 210);
@@ -219,7 +283,7 @@ function generateShippingInformation(doc, customerdata, salemasterdata) {
 	// first line before customer section
 	generateHr(doc, line_x_start, line_x_end, 109);
 
-	doc.fillColor('#000000').fontSize(12).text('Ship To', 260, 117);
+	doc.fillColor('#000000').fontSize(12).text('Ship To', 24, 117);
 
 	const customerInformationTop = 136;
 
@@ -227,11 +291,13 @@ function generateShippingInformation(doc, customerdata, salemasterdata) {
 		doc
 			.fillColor('#000000')
 			.fontSize(10)
+			.font('Helvetica-Bold')
 			.text(
 				customerdata.name + salemasterdata.retail_customer_name,
 				40,
 				customerInformationTop
 			)
+			.font('Helvetica')
 			.text(
 				customerdata.csa_address1 + salemasterdata.retail_customer_address,
 				40,
@@ -241,32 +307,36 @@ function generateShippingInformation(doc, customerdata, salemasterdata) {
 		doc
 			.fillColor('#000000')
 			.fontSize(10)
-			.text(customerdata.name, 270, customerInformationTop)
-			.text(customerdata.csa_address1, 270, 151);
+			.font('Helvetica-Bold')
+			.text(customerdata.name, 40, customerInformationTop)
+			.font('Helvetica')
+			.text(customerdata.csa_address1, 40, 151);
 	}
 
 	if (customerdata.csa_district !== '') {
 		doc.text(
 			customerdata.csa_address2 + ', District: ' + customerdata.cas_district,
-			270,
+			40,
 			166
 		);
 	} else {
-		doc.text(customerdata.csa_address2, 270, 166);
+		doc.text(customerdata.csa_address2, 40, 166);
 	}
 
 	doc
 		.fillColor('#000000')
 		.text(
 			'State: ' + customerdata.csa_code + '-' + customerdata.csa_description,
-			270,
+			40,
 			181
 		)
+		.font('Helvetica-Bold')
 		.text(
 			'Phone: ' + customerdata.mobile + ' GSTIN: ' + customerdata.gst,
-			270,
+			40,
 			196
 		)
+		.font('Helvetica')
 		.moveDown();
 
 	// line end of customer section
@@ -641,7 +711,6 @@ function generateInvoiceTable(
 			});
 			// for each new page this adds the center and customer data
 			generateHeader(doc, centerdata, print_type);
-			//generateCustomerInformation(doc, customerdata, salemasterdata);
 
 			generateTableRow(
 				doc,
@@ -1968,7 +2037,7 @@ function generateSummaryRightTableRow(
 		.text('TOTAL', 450, y + 95, { width: 70, align: 'left' })
 
 		.text(
-			roundOffFn(finalSumTotal, 'rounding').toLocaleString('en-IN'),
+			roundOffFn(finalSumTotal, 'rounding').toLocaleString('en-IN') + '.00',
 			500,
 			y + 95,
 			{
