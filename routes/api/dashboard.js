@@ -25,10 +25,7 @@ dashboardRouter.post('/inquiry-summary', (req, res) => {
 
 	getInquirySummary(center_id, from_date, to_date, (err, data) => {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', 'Error fetching getInquirySummary.'),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/inquiry-summary`, err), res);
 		} else {
 			return res.status(200).json(data);
 		}
@@ -40,10 +37,7 @@ dashboardRouter.post('/sales-summary', (req, res) => {
 
 	getSalesSummary(center_id, from_date, to_date, (err, data) => {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', 'Error fetching getSalesSummary.'),
-				res
-			);
+			return handleError(new ErrorHandler('500', '/sales-summary', err), res);
 		} else {
 			return res.status(200).json(data);
 		}
@@ -56,7 +50,7 @@ dashboardRouter.post('/purchase-summary', (req, res) => {
 	getPurchaseSummary(center_id, from_date, to_date, (err, data) => {
 		if (err) {
 			return handleError(
-				new ErrorHandler('500', 'Error fetching getPurchaseSummary.'),
+				new ErrorHandler('500', `/purchase-summary`, err),
 				res
 			);
 		} else {
@@ -70,10 +64,7 @@ dashboardRouter.post('/sales-total', (req, res) => {
 
 	getSaleTotal(center_id, from_date, to_date, (err, data) => {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', 'Error fetching getSaleTotal.'),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/sales-total`, err), res);
 		} else {
 			return res.status(200).json(data);
 		}
@@ -85,10 +76,7 @@ dashboardRouter.post('/center-summary', (req, res) => {
 
 	getCenterSummary(center_id, from_date, to_date, (err, data) => {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', 'Error fetching getCenterSummary.'),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/center-summary`, err), res);
 		} else {
 			return res.status(200).json(data);
 		}
@@ -101,7 +89,7 @@ dashboardRouter.post('/center-receivables-summary', (req, res) => {
 	getReceivablesOutstanding(center_id, from_date, to_date, (err, data) => {
 		if (err) {
 			return handleError(
-				new ErrorHandler('500', 'Error fetching getreceivablesoutstanding.'),
+				new ErrorHandler('500', `/center-receivables-summary`, err),
 				res
 			);
 		} else {
@@ -116,7 +104,7 @@ dashboardRouter.post('/payments-customers', (req, res) => {
 	getPaymentsByCustomers(center_id, from_date, to_date, (err, data) => {
 		if (err) {
 			return handleError(
-				new ErrorHandler('500', 'Error fetching getPaymentsByCustomers.'),
+				new ErrorHandler('500', `/payments-customers`, err),
 				res
 			);
 		} else {

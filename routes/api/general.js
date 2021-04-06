@@ -94,7 +94,7 @@ a.description like '%${searchstr}%' ) limit 50
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(
-				new ErrorHandler('500', 'Error fetching search products.'),
+				new ErrorHandler('500', '/search-product-information', err),
 				res
 			);
 		} else {
@@ -126,10 +126,7 @@ router.post('/search-product', (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', 'Error fetching search products.'),
-				res
-			);
+			return handleError(new ErrorHandler('500', '/search-product', err), res);
 		} else {
 			return res.status(200).json(data);
 		}
@@ -141,10 +138,7 @@ router.post('/search-customer', (req, res) => {
 
 	getSearchCustomers(centerid, searchstr, (err, data) => {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', 'Error fetching customer details.'),
-				res
-			);
+			return handleError(new ErrorHandler('500', '/search-customer', err), res);
 		} else {
 			return res.status(200).json(data);
 		}
@@ -156,10 +150,7 @@ router.post('/search-vendor', (req, res) => {
 
 	getSearchVendors(centerid, searchstr, (err, data) => {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', 'Error fetching customer details.'),
-				res
-			);
+			return handleError(new ErrorHandler('500', '/search-vendor', err), res);
 		} else {
 			return res.status(200).json(data);
 		}
@@ -181,10 +172,7 @@ router.get('/inventory/all', (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', 'Error fetching inventory'),
-				res
-			);
+			return handleError(new ErrorHandler('500', '/inventory/all', err), res);
 		} else {
 			return res.json(data);
 		}
@@ -197,10 +185,7 @@ router.get('/all-clients', (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', 'Error fetching all clients.'),
-				res
-			);
+			return handleError(new ErrorHandler('500', '/all-clients', err), res);
 		} else {
 			return res.json(data);
 		}
@@ -224,7 +209,11 @@ router.get('/all-active-vendors/:centerid', (req, res) => {
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(
-				new ErrorHandler('500', 'Error fetching active vendors.'),
+				new ErrorHandler(
+					'500',
+					`/all-active-vendors/:centerid ${centerid}`,
+					err
+				),
 				res
 			);
 		} else {
@@ -238,7 +227,11 @@ router.get('/all-active-brands/:centerid/:status', (req, res) => {
 	getAllBrands(req.params.centerid, req.params.status, (err, rows) => {
 		if (err) {
 			return handleError(
-				new ErrorHandler('500', 'Error fetching customer details.'),
+				new ErrorHandler(
+					'500',
+					`/all-active-brands/:centerid/:status ${req.params.centerid} ${req.params.status}`,
+					err
+				),
 				res
 			);
 		} else {
@@ -256,7 +249,14 @@ router.get('/vendor-exists/:name/:center_id', (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(new ErrorHandler('500', 'Error vendor exists.'), res);
+			return handleError(
+				new ErrorHandler(
+					'500',
+					`/vendor-exists/:name/:center_id ${name} ${center_id}`,
+					err
+				),
+				res
+			);
 		} else {
 			return res.status(200).json({
 				result: data,
@@ -274,7 +274,14 @@ router.get('/brand-exists/:name/:center_id', (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(new ErrorHandler('500', 'Error brand exists.'), res);
+			return handleError(
+				new ErrorHandler(
+					'500',
+					`/brand-exists/:name/:center_id ${name} ${center_id}`,
+					err
+				),
+				res
+			);
 		} else {
 			return res.status(200).json({
 				result: data,
@@ -292,7 +299,7 @@ router.get('/customer-exists/:name', (req, res) => {
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(
-				new ErrorHandler('500', 'Error Customer exists.'),
+				new ErrorHandler('500', `/customer-exists/:name ${name}`, err),
 				res
 			);
 		} else {
@@ -310,7 +317,10 @@ router.get('/brand-delete/:id', (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(new ErrorHandler('500', 'Error delete brand'), res);
+			return handleError(
+				new ErrorHandler('500', `/brand-delete/:id ${id}`, err),
+				res
+			);
 		} else {
 			return res.status(200).json({
 				result: data,
@@ -326,7 +336,10 @@ router.get('/enquiry-delete/:id', (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(new ErrorHandler('500', 'Error delete vendor'), res);
+			return handleError(
+				new ErrorHandler('500', `/enquiry-delete/:id ${id}`, err),
+				res
+			);
 		} else {
 			return res.status(200).json({
 				result: data,
@@ -342,7 +355,10 @@ router.get('/vendor-delete/:id', (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(new ErrorHandler('500', 'Error delete vendor'), res);
+			return handleError(
+				new ErrorHandler('500', `/vendor-delete/:id ${id}`, err),
+				res
+			);
 		} else {
 			return res.status(200).json({
 				result: data,
@@ -362,7 +378,11 @@ router.get(
 			(err, rows) => {
 				if (err) {
 					return handleError(
-						new ErrorHandler('500', 'Error fetching customer details.'),
+						new ErrorHandler(
+							'500',
+							`/brands-missing-discounts/:centerid/:status/:customerid ${req.params.centerid} ${req.params.status} ${req.params.customerid}`,
+							err
+						),
 						res
 					);
 				} else {
@@ -389,7 +409,11 @@ router.get('/all-active-customers/:centerid', (req, res) => {
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(
-				new ErrorHandler('500', 'Error fetching inventory'),
+				new ErrorHandler(
+					'500',
+					`/all-active-customers/:centerid ${centerid}`,
+					err
+				),
 				res
 			);
 		} else {
@@ -410,7 +434,7 @@ router.post('/add-parts-details-enquiry', (req, res) => {
 		pool.query(query, function (err, data) {
 			if (err) {
 				return handleError(
-					new ErrorHandler('500', 'Error fetching inventory'),
+					new ErrorHandler('500', '/add-parts-details-enquiry', err),
 					res
 				);
 			}
@@ -437,7 +461,7 @@ router.get('/get-enquiry/:enquiryid', (req, res) => {
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(
-				new ErrorHandler('500', 'Error fetching get enquiry'),
+				new ErrorHandler('500', `/get-enquiry/:enquiryid ${enquiryid}`, err),
 				res
 			);
 		} else {
@@ -460,7 +484,11 @@ em.id = ${enquiryid}`;
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(
-				new ErrorHandler('404', 'Error fetching get customer details'),
+				new ErrorHandler(
+					'404',
+					`/get-customer-details/:enquiryid ${enquiryid}`,
+					err
+				),
 				res
 			);
 		} else {
@@ -480,15 +508,12 @@ router.post('/update-taxrate', (req, res) => {
 
 	pool.query(query, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', 'Error updating update tax rate'),
-				res
-			);
+			return handleError(new ErrorHandler('500', '/update-taxrate', err), res);
 		} else {
 		}
 	});
 });
-
+// error check
 router.get('/purchase/:purchaseid/:status', (req, res) => {
 	try {
 		let centerid = req.params.centerid;
@@ -503,7 +528,11 @@ router.get('/purchase/:purchaseid/:status', (req, res) => {
 		pool.query(sql, function (err, data) {
 			if (err) {
 				return handleError(
-					new ErrorHandler('500', 'Error fetching purchase'),
+					new ErrorHandler(
+						'500',
+						`/purchase/:purchaseid/:status ${centerid}`,
+						err
+					),
 					res
 				);
 			} else {
@@ -512,7 +541,7 @@ router.get('/purchase/:purchaseid/:status', (req, res) => {
 		});
 	} catch (error) {
 		return handleError(
-			new ErrorHandler('500', 'Error processing request'),
+			new ErrorHandler('500', 'Error processing request', err),
 			res
 		);
 	}
@@ -525,7 +554,11 @@ router.get('/all-pymt-modes/:center_id/:status', (req, res) => {
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(
-				new ErrorHandler('500', 'Error fetching all all-pymt-modes.'),
+				new ErrorHandler(
+					'500',
+					`/all-pymt-modes/:center_id/:status ${req.params.center_id} ${req.params.status}`,
+					err
+				),
 				res
 			);
 		} else {

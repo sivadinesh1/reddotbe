@@ -40,7 +40,11 @@ purchaseRouter.post('/insert-purchase-details', async (req, res) => {
 		});
 	} catch (err) {
 		return handleError(
-			new ErrorHandler('500', 'Error saleMasterEntry > ' + err),
+			new ErrorHandler(
+				'500',
+				'Error saleMasterEntry > /insert-purchase-details',
+				err
+			),
 			res
 		);
 	}
@@ -128,7 +132,7 @@ function purchaseMasterEntry(cloneReq) {
 			function (err, data) {
 				if (err) {
 					return reject(
-						new ErrorHandler('500', 'Error Purchase master entry.'),
+						new ErrorHandler('500', 'Error Purchase master entry.', err),
 						res
 					);
 				}
@@ -174,7 +178,7 @@ async function processItems(cloneReq, newPK) {
 				function (err, data) {
 					if (err) {
 						return reject(
-							new ErrorHandler('500', 'Error Purchase master entry.'),
+							new ErrorHandler('500', 'Error Purchase process items.', err),
 							res
 						);
 					} else {

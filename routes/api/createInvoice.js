@@ -60,7 +60,8 @@ function createInvoice(
 				saledetailsdata,
 				centerdata,
 				e,
-				customerdata
+				customerdata,
+				print_ship_to
 			);
 			generateFooterSummary(doc, centerdata);
 
@@ -153,7 +154,7 @@ function generateCustomerInformation(
 			.fillColor('#000000')
 			.fontSize(13)
 			.font('Helvetica-Bold')
-			.text('To', 24, 117)
+			.text('To', 34, 117)
 			.font('Helvetica');
 	}
 
@@ -189,11 +190,7 @@ function generateCustomerInformation(
 			.fillColor('#000000')
 			.fontSize(10)
 			.font('Helvetica-Bold')
-			.text(
-				customerdata.name + salemasterdata.retail_customer_name,
-				40,
-				customerInformationTop
-			)
+			.text(salemasterdata.retail_customer_name, 40, customerInformationTop)
 			.font('Helvetica')
 			.text(
 				customerdata.address1 + salemasterdata.retail_customer_address,
@@ -292,11 +289,7 @@ function generateShippingInformation(doc, customerdata, salemasterdata) {
 			.fillColor('#000000')
 			.fontSize(10)
 			.font('Helvetica-Bold')
-			.text(
-				customerdata.name + salemasterdata.retail_customer_name,
-				40,
-				customerInformationTop
-			)
+			.text(salemasterdata.retail_customer_name, 40, customerInformationTop)
 			.font('Helvetica')
 			.text(
 				customerdata.csa_address1 + salemasterdata.retail_customer_address,
@@ -349,7 +342,8 @@ function generateInvoiceTable(
 	saledetailsdata,
 	centerdata,
 	print_type,
-	customerdata
+	customerdata,
+	print_ship_to
 ) {
 	let i;
 	let invoiceTableTop = 216;
@@ -701,6 +695,7 @@ function generateInvoiceTable(
 			k.igst
 		);
 
+		// new page
 		if (invoiceTableTop > 520) {
 			doc.fontSize(14);
 			doc.text('continue in next page', 50, invoiceTableTop + 50);
@@ -711,7 +706,17 @@ function generateInvoiceTable(
 			});
 			// for each new page this adds the center and customer data
 			generateHeader(doc, centerdata, print_type);
+			generateHr(doc, line_x_start, line_x_end, 107);
+			generateCustomerInformation(
+				doc,
+				customerdata,
+				salemasterdata,
+				print_ship_to
+			);
 
+			if (print_ship_to) {
+				generateShippingInformation(doc, customerdata, salemasterdata);
+			}
 			generateTableRow(
 				doc,
 				invoiceTableTop,

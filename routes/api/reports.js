@@ -26,10 +26,7 @@ reportsRouter.post('/inventory-report', (req, res) => {
 
 	getProductInventoryReport(center_id, product_code, (err, data) => {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', 'Error fetching getProductInventoryReport.'),
-				res
-			);
+			return handleError(new ErrorHandler('500', 'inventory-report', err), res);
 		} else {
 			return res.status(200).json(data);
 		}
@@ -42,7 +39,7 @@ reportsRouter.post('/product-summary-report', (req, res) => {
 	getProductSummaryReport(center_id, start, end, (err, data) => {
 		if (err) {
 			return handleError(
-				new ErrorHandler('500', 'Error fetching product-summary-report.'),
+				new ErrorHandler('500', '/product-summary-report', err),
 				res
 			);
 		} else {

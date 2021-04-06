@@ -63,6 +63,7 @@ const IUSaleDetailsAsync = (k) => {
 	}', '${k.disc_type}', '${(k.total_value - k.disc_value) / k.qty}', '${
 		k.mrp
 	}', 
+	
 		'${currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY')}',
 		'${k.taxrate}', '${k.igst}', 
 		'${k.cgst}', '${k.sgst}', '${k.taxable_value}', '${k.total_value}', '${

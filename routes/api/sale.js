@@ -83,7 +83,7 @@ saleRouter.post('/delete-sales-details', async (req, res) => {
 				if (err) {
 					return reject(
 						handleError(
-							new ErrorHandler('500', 'Error adding sale audit.'),
+							new ErrorHandler('500', 'Error adding sale audit.', err),
 							res
 						)
 					);
@@ -102,7 +102,7 @@ saleRouter.post('/delete-sales-details', async (req, res) => {
 			if (err) {
 				return reject(
 					handleError(
-						new ErrorHandler('500', 'Error deleting sale details'),
+						new ErrorHandler('500', 'Error deleting sale details', err),
 						res
 					)
 				);
@@ -121,10 +121,7 @@ where product_id = '${product_id}' and id = '${stock_id}'  `;
 		pool.query(stockUpdateQuery, function (err, data) {
 			if (err) {
 				return reject(
-					handleError(
-						new ErrorHandler('500', 'Error deleting sale details'),
-						res
-					)
+					handleError(new ErrorHandler('500', 'Error update stock ', err), res)
 				);
 			}
 			resolve(data);
@@ -228,7 +225,7 @@ saleRouter.post('/insert-sale-details', async (req, res) => {
 		})
 		.catch((err) => {
 			return handleError(
-				new ErrorHandler('500', 'Error saleMasterEntry > ' + err),
+				new ErrorHandler('500', 'Error saleMasterEntry > ', err),
 				res
 			);
 		});
@@ -400,9 +397,9 @@ function saleMasterEntry(cloneReq, invNo) {
 			unloading_charges = '${cloneReq.unloading_charges}', misc_charges = '${
 		cloneReq.misc_charges
 	}', status = '${cloneReq.status}',
-			sale_datetime = '${currentTimeInTimeZone(
+			sale_datetime = 	'${currentTimeInTimeZone(
 				'Asia/Kolkata',
-				'DD-MM-YYYY'
+				'DD-MM-YYYY HH:mm:ss'
 			)}', revision = '${revisionCnt}', roundoff = '${cloneReq.roundoff}', 
 			retail_customer_name = '${cloneReq.retail_customer_name}',
 			retail_customer_address = '${cloneReq.retail_customer_address}'
@@ -493,7 +490,11 @@ saleRouter.post('/convert-sale', async (req, res) => {
 	pool.query(sql, async function (err, data) {
 		if (err) {
 			return handleError(
-				new ErrorHandler('500', 'Error coverting to sale invoice.'),
+				new ErrorHandler(
+					'500',
+					'Error update sale coverting to sale invoice.',
+					err
+				),
 				res
 			);
 		} else {
@@ -541,7 +542,7 @@ saleRouter.get('/delete-sale-master/:id', async (req, res) => {
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(
-				new ErrorHandler('500', 'Error deleting sale detail / master'),
+				new ErrorHandler('500', `/delete-sale-master/:id ${sale_id}`, err),
 				res
 			);
 		} else {

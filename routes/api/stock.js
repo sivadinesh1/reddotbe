@@ -34,7 +34,11 @@ stockRouter.get('/search-all-draft-purchase/:centerid', (req, res) => {
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(
-				new ErrorHandler('500', 'Error seacrching draft purchase'),
+				new ErrorHandler(
+					'500',
+					`/search-all-draft-purchase/:centerid ${center_id}`,
+					err
+				),
 				res
 			);
 		} else {
@@ -53,6 +57,7 @@ stockRouter.post('/search-purchase', (req, res) => {
 	let vendor_id = req.body.vendorid;
 	let from_date = req.body.fromdate;
 	let to_date = req.body.todate;
+	let order = req.body.order;
 
 	if (from_date !== '') {
 		// from_date =
@@ -79,7 +84,7 @@ stockRouter.post('/search-purchase', (req, res) => {
 	v.id = p.vendor_id and
 	
 	p.center_id = '${center_id}' and
-	str_to_date(stock_inwards_datetime,  '%d-%m-%Y %T') between
+	str_to_date(invoice_date,  '%d-%m-%Y %T') between
 	str_to_date('${from_date}',  '%d-%m-%Y %T') and
 	str_to_date('${to_date}',  '%d-%m-%Y %T') `;
 
@@ -91,12 +96,11 @@ stockRouter.post('/search-purchase', (req, res) => {
 		sql = sql + statussql;
 	}
 
+	sql = sql + `order by invoice_date ${order}`;
+
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', 'Error fetching search purchase'),
-				res
-			);
+			return handleError(new ErrorHandler('500', '/search-purchase', err), res);
 		} else {
 			return res.json(data);
 		}
@@ -112,6 +116,7 @@ stockRouter.post('/search-sales', (req, res) => {
 	let sale_type = req.body.saletype;
 	let search_type = req.body.searchtype;
 	let invoice_no = req.body.invoiceno;
+	let order = req.body.order;
 
 	let sql = '';
 	let query = '';
@@ -143,7 +148,7 @@ stockRouter.post('/search-sales', (req, res) => {
         
 				s.center_id = '${center_id}' and
 				
-				str_to_date(sale_datetime,  '%d-%m-%Y %T') between
+				str_to_date(invoice_date,  '%d-%m-%Y %T') between
 				str_to_date('${from_date}',  '%d-%m-%Y %T') and
 				str_to_date('${to_date}',  '%d-%m-%Y %T') `;
 
@@ -167,7 +172,7 @@ stockRouter.post('/search-sales', (req, res) => {
 			sql = sql + `and invoice_no = '${invoice_no.trim()}' `;
 		}
 
-		sql = sql + ' order by invoice_no ';
+		sql = sql + ' order by invoice_no ' + order;
 	} else if (search_type !== 'all') {
 		query = ` 
 		select s.*, c.id as customer_id, c.name as customer_name
@@ -186,7 +191,7 @@ stockRouter.post('/search-sales', (req, res) => {
 	pool.query(search_type === 'all' ? sql : query, function (err, data) {
 		if (err) {
 			return handleError(
-				new ErrorHandler('500', 'Error fetching search sales'),
+				new ErrorHandler('500', 'Error fetching search sales', err),
 				res
 			);
 		} else {
@@ -208,7 +213,7 @@ p.id = '${purchase_id}' `;
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(
-				new ErrorHandler('500', 'Error fetching purchase master'),
+				new ErrorHandler('500', `/purchase-master/:id ${purchase_id}`, err),
 				res
 			);
 		} else {
@@ -246,7 +251,7 @@ stockRouter.post('/delete-sale-details', (req, res) => {
 	pool.query(query, function (err, data) {
 		if (err) {
 			return handleError(
-				new ErrorHandler('500', 'Error deleting sale details'),
+				new ErrorHandler('500', '/delete-sale-details', err),
 				res
 			);
 		} else {
@@ -276,7 +281,8 @@ pd.sgst as sgst,
 pd.taxable_value as tax_value,
 pd.total_value as total_value,
 ps.revision as revision,
-p.product_code, p.description, p.packetsize, p.taxrate, s.id as stock_pk from  
+p.product_code, p.description, p.packetsize, p.taxrate,
+s.id as stock_pk, p.hsncode as hsncode from
 purchase_detail pd,
 product p,
 stock s,
@@ -292,7 +298,7 @@ pd.purchase_id = '${purchase_id}'
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(
-				new ErrorHandler('500', 'Error fetching purchase master'),
+				new ErrorHandler('500', `/purchase-details/:id ${purchase_id}`, err),
 				res
 			);
 		} else {
@@ -332,7 +338,10 @@ stockRouter.post('/delete-purchase-details', async (req, res) => {
 		pool.query(auditQuery, function (err, data) {
 			if (err) {
 				return reject(
-					handleError(new ErrorHandler('500', 'Error adding sale audit.'), res)
+					handleError(
+						new ErrorHandler('500', '/delete-purchase-details', err),
+						res
+					)
 				);
 			}
 			resolve(data);
@@ -348,7 +357,7 @@ stockRouter.post('/delete-purchase-details', async (req, res) => {
 			if (err) {
 				return reject(
 					handleError(
-						new ErrorHandler('500', 'Error deleting sale details'),
+						new ErrorHandler('500', 'Error deleting purchase_detail ', err),
 						res
 					)
 				);
@@ -367,10 +376,7 @@ where product_id = '${product_id}' and id = '${stock_id}'  `;
 		pool.query(stockUpdateQuery, function (err, data) {
 			if (err) {
 				return reject(
-					handleError(
-						new ErrorHandler('500', 'Error deleting sale details'),
-						res
-					)
+					handleError(new ErrorHandler('500', 'Error updating stock', err), res)
 				);
 			}
 			resolve(data);
@@ -477,7 +483,11 @@ function deletePurchaseDetailsRecs(purchaseDetails, purchase_id) {
 				if (err) {
 					return reject(
 						handleError(
-							new ErrorHandler('500', 'Error adding sale audit.'),
+							new ErrorHandler(
+								'500',
+								'Error adding sale audit. deletePurchaseDetailsRecs',
+								err
+							),
 							res
 						)
 					);
@@ -495,7 +505,7 @@ function deletePurchaseDetailsRecs(purchaseDetails, purchase_id) {
 				if (err) {
 					return reject(
 						handleError(
-							new ErrorHandler('500', 'Error deleting sale details'),
+							new ErrorHandler('500', 'Error deleting purchase_detail ', err),
 							res
 						)
 					);
@@ -515,7 +525,7 @@ where product_id = '${element.product_id}' and id = '${element.stock_id}'  `;
 				if (err) {
 					return reject(
 						handleError(
-							new ErrorHandler('500', 'Error deleting sale details'),
+							new ErrorHandler('500', 'Error update stock ', err),
 							res
 						)
 					);
@@ -544,7 +554,11 @@ stockRouter.get('/delete-purchase-master/:id', async (req, res) => {
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(
-				new ErrorHandler('500', 'Error deleting sale detail / master'),
+				new ErrorHandler(
+					'500',
+					`/delete-purchase-master/:id ${purchase_id}`,
+					err
+				),
 				res
 			);
 		} else {

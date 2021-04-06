@@ -58,7 +58,7 @@ const insertCustomer = (insertValues, callback) => {
 				insertCustomerDiscount(formObj, (err, rows) => {
 					if (err)
 						return handleError(
-							new ErrorHandler('500', 'Error fetching sales master'),
+							new ErrorHandler('500', 'Error insertCustomerDiscount', err),
 							res
 						);
 				});
@@ -437,7 +437,7 @@ const insertDiscountsByBrands = (insertValues, callback) => {
 		insertCustomerDiscount(formObj, (err, rows) => {
 			if (err)
 				return handleError(
-					new ErrorHandler('500', 'Error fetching sales master'),
+					new ErrorHandler('500', 'Error insertDiscountsByBrands ', err),
 					res
 				);
 		});

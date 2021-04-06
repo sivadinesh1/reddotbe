@@ -52,7 +52,11 @@ adminRoute.get('/view-products-count/:centerid', (req, res) => {
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(
-				new ErrorHandler('500', 'Error fetching product count.'),
+				new ErrorHandler(
+					'500',
+					`view-products-count/:centerid ${center_id}`,
+					err
+				),
 				res
 			);
 		} else {
@@ -77,7 +81,11 @@ adminRoute.get('/view-product-info/:centerid/:productid', (req, res) => {
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(
-				new ErrorHandler('500', 'Error fetching product info.'),
+				new ErrorHandler(
+					'500',
+					`/view-product-info/:centerid/:productid ${center_id}, ${product_id}`,
+					err
+				),
 				res
 			);
 		} else {
@@ -96,7 +104,7 @@ adminRoute.post('/add-product', (req, res, next) => {
 
 			if (errTxt.indexOf('pcode_center_fk') > -1) {
 				return handleError(
-					new ErrorHandler('555', 'Duplicate product code'),
+					new ErrorHandler('555', 'Duplicate product code', err),
 					res
 				);
 			}
@@ -115,10 +123,7 @@ adminRoute.post('/update-product', (req, res) => {
 
 	updateProduct(jsonObj, (err, data) => {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', 'Error Updating product' + err.message),
-				res
-			);
+			return handleError(new ErrorHandler('500', `update-product`, err), res);
 		} else {
 			res.status(200).json({
 				result: 'success',
@@ -143,7 +148,11 @@ adminRoute.get('/get-vendor-details/:centerid/:vendorid', (req, res) => {
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(
-				new ErrorHandler('500', 'Error fetching vendor details'),
+				new ErrorHandler(
+					'500',
+					`/get-vendor-details/:centerid/:vendorid ${center_id} ${vendor_id}`,
+					err
+				),
 				res
 			);
 		} else {
@@ -157,10 +166,7 @@ adminRoute.get('/get-states', (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', 'Error fetching get status'),
-				res
-			);
+			return handleError(new ErrorHandler('500', 'get-states', err), res);
 		} else {
 			return res.status(200).json(data);
 		}
@@ -172,10 +178,7 @@ adminRoute.get('/get-timezones', (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', 'Error fetching get timezones'),
-				res
-			);
+			return handleError(new ErrorHandler('500', 'get-timezones', err), res);
 		} else {
 			return res.status(200).json(data);
 		}
@@ -188,7 +191,7 @@ adminRoute.put('/update-vendor/:id', (req, res) => {
 	updateVendor(req.body, req.params.id, (err, data) => {
 		if (err) {
 			return handleError(
-				new ErrorHandler('500', 'Error updating vendor details'),
+				new ErrorHandler('500', `/update-vendor/:id ${req.params.id}`, err),
 				res
 			);
 		} else {
@@ -204,7 +207,7 @@ adminRoute.put('/update-brand/:id', (req, res) => {
 	updateBrand(req.body, req.params.id, (err, data) => {
 		if (err) {
 			return handleError(
-				new ErrorHandler('500', 'Error updating brand details'),
+				new ErrorHandler('500', `/update-brand/:id ${req.params.id}`, err),
 				res
 			);
 		} else {
@@ -265,7 +268,7 @@ adminRoute.put('/update-customer/:id', (req, res) => {
 	updateCustomer(req.body, req.params.id, (err, data) => {
 		if (err) {
 			return handleError(
-				new ErrorHandler('500', 'Error updating customer details'),
+				new ErrorHandler('500', `/update-customer/:id ${req.params.id}`, err),
 				res
 			);
 		} else {
@@ -280,10 +283,7 @@ adminRoute.post('/add-customer', (req, res) => {
 	let jsonObj = req.body;
 	insertCustomer(jsonObj, (err, data) => {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', 'Error adding customer.'),
-				res
-			);
+			return handleError(new ErrorHandler('500', '/add-customer', err), res);
 		} else {
 			let resdata = JSON.stringify(data);
 			return res.status(200).json({
@@ -346,10 +346,7 @@ adminRoute.post('/update-center', (req, res) => {
 
 	pool.query(query, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', 'Error Updating center.'),
-				res
-			);
+			return handleError(new ErrorHandler('500', 'update-center', err), res);
 		} else {
 			return res.status(200).json({
 				result: 'success',
@@ -369,7 +366,7 @@ adminRoute.get('/prod-exists/:pcode', (req, res) => {
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(
-				new ErrorHandler('500', 'Error fetching product count.'),
+				new ErrorHandler('500', `/prod-exists/:pcode ${pcode}`, err),
 				res
 			);
 		} else {
@@ -387,7 +384,7 @@ adminRoute.post('/insert-customer-shipping-address', (req, res) => {
 	insertCustomerShippingAddress(jsonObj, (err, data) => {
 		if (err) {
 			return handleError(
-				new ErrorHandler('500', 'Error adding customer shipping address.'),
+				new ErrorHandler('500', '/insert-customer-shipping-address', err),
 				res
 			);
 		} else {
@@ -404,7 +401,11 @@ adminRoute.get('/get-shipping-address/:customerid', (req, res) => {
 	getCustomerShippingAddress(`${req.params.customerid}`, (err, rows) => {
 		if (err)
 			return handleError(
-				new ErrorHandler('500', 'Error fetching shipping address'),
+				new ErrorHandler(
+					'500',
+					`/get-shipping-address/:customerid ${req.params.customerid}`,
+					err
+				),
 				res
 			);
 		return res.json(rows);
@@ -418,7 +419,11 @@ adminRoute.put('/update-customer-shipping-address/:id', (req, res) => {
 	updateCustomerShippingAddress(req.body, req.params.id, (err, rows) => {
 		if (err)
 			return handleError(
-				new ErrorHandler('500', 'Error fetching sales master'),
+				new ErrorHandler(
+					'500',
+					`/update-customer-shipping-address/:id ${req.params.id}`,
+					err
+				),
 				res
 			);
 		return res.json(rows);
@@ -435,7 +440,11 @@ adminRoute.get('/customer-discount/:centerid/:customerid', (req, res) => {
 		(err, rows) => {
 			if (err)
 				return handleError(
-					new ErrorHandler('500', 'Error fetching sales master'),
+					new ErrorHandler(
+						'500',
+						`/customer-discount/:centerid/:customerid ${req.params.centerid} ${req.params.customerid}`,
+						err
+					),
 					res
 				);
 			return res.json(rows);
@@ -448,7 +457,11 @@ adminRoute.get('/all-customer-default-discounts/:centerid', (req, res) => {
 	getAllCustomerDefaultDiscounts(`${req.params.centerid}`, (err, rows) => {
 		if (err)
 			return handleError(
-				new ErrorHandler('500', 'Error fetching sales master'),
+				new ErrorHandler(
+					'500',
+					`/all-customer-default-discounts/:centerid ${req.params.centerid}`,
+					err
+				),
 				res
 			);
 		return res.json(rows);
@@ -463,7 +476,11 @@ adminRoute.get('/discounts-customer/:centerid/:customerid', (req, res) => {
 		(err, rows) => {
 			if (err)
 				return handleError(
-					new ErrorHandler('500', 'Error fetching sales master'),
+					new ErrorHandler(
+						'500',
+						`/discounts-customer/:centerid/:customerid ${req.params.centerid} ${req.params.customerid}`,
+						err
+					),
 					res
 				);
 			return res.json(rows);
@@ -481,7 +498,11 @@ adminRoute.get(
 			(err, rows) => {
 				if (err)
 					return handleError(
-						new ErrorHandler('500', 'Error fetching sales master'),
+						new ErrorHandler(
+							'500',
+							`/discounts-customer-brands/:centerid/:customerid ${req.params.centerid} ${req.params.customerid}`,
+							err
+						),
 						res
 					);
 				return res.json(rows);
@@ -497,7 +518,7 @@ adminRoute.put('/update-default-customer-discount', (req, res) => {
 	updateDefaultCustomerDiscount(jsonObj, (err, rows) => {
 		if (err)
 			return handleError(
-				new ErrorHandler('500', 'Error fetching sales master'),
+				new ErrorHandler('500', `update-default-customer-discount`, err),
 				res
 			);
 		return res.json(rows);
@@ -512,7 +533,7 @@ adminRoute.put('/update-customer-discount', (req, res) => {
 	updateCustomerDiscount(jsonObj, (err, rows) => {
 		if (err)
 			return handleError(
-				new ErrorHandler('500', 'Error fetching sales master'),
+				new ErrorHandler('500', '/update-customer-discount', err),
 				res
 			);
 		return res.json(rows);
@@ -524,7 +545,7 @@ adminRoute.post('/add-discounts-brand', (req, res) => {
 	insertDiscountsByBrands(jsonObj, (err, data) => {
 		if (err) {
 			return handleError(
-				new ErrorHandler('500', 'Error adding discounts by brand.'),
+				new ErrorHandler('500', '/add-discounts-brand', err),
 				res
 			);
 		} else {
@@ -539,8 +560,6 @@ adminRoute.post('/add-discounts-brand', (req, res) => {
 // Add User,
 adminRoute.post('/add-user', async (req, res, next) => {
 	let jsonObj = req.body;
-
-	// console.log('object' + JSON.stringify(jsonObj));
 
 	let id = await insertUser(jsonObj);
 
@@ -558,8 +577,6 @@ adminRoute.post('/add-user', async (req, res, next) => {
 // update user status
 adminRoute.post('/update-user-status', async (req, res, next) => {
 	let jsonObj = req.body;
-
-	//	console.log('object' + JSON.stringify(jsonObj));
 
 	let id = await updateUserStatus(jsonObj);
 

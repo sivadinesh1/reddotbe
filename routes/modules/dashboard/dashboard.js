@@ -1,6 +1,6 @@
 var pool = require('../../helpers/db');
 const moment = require('moment');
-const logger = require('./../../helpers/log4js');
+const { logger } = require('./../../helpers/log4js');
 
 const getInquirySummary = (center_id, from_date, to_date, callback) => {
 	let query = ` select 

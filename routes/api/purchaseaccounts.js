@@ -42,7 +42,7 @@ purchaseaccountsRouter.post('/get-purchase-invoice-center', (req, res) => {
 		(err, data) => {
 			if (err) {
 				return handleError(
-					new ErrorHandler('500', 'Error fetching get purchase ledger .'),
+					new ErrorHandler('500', '/get-purchase-invoice-center', err),
 					res
 				);
 			} else {
@@ -83,7 +83,11 @@ purchaseaccountsRouter.post(
 				);
 			}).catch((err) => {
 				return handleError(
-					new ErrorHandler('500', 'Error pymtMaster/Details Entry > ' + err),
+					new ErrorHandler(
+						'500',
+						'Error addVendorPaymentMaster::processitems',
+						err
+					),
 					res
 				);
 			});
@@ -158,7 +162,8 @@ purchaseaccountsRouter.post(
 				return handleError(
 					new ErrorHandler(
 						'500',
-						'Error bulk pymtMaster/Details Entry > ' + err
+						'Error addVendorPaymentMaster::processBulkItems > ',
+						err
 					),
 					res
 				);
@@ -253,10 +258,7 @@ purchaseaccountsRouter.post('/get-vendor-payments-center', (req, res) => {
 		(err, data) => {
 			if (err) {
 				return handleError(
-					new ErrorHandler(
-						'500',
-						'Error fetching get getVendorPaymentsByCenter .'
-					),
+					new ErrorHandler('500', '/get-vendor-payments-center.', err),
 					res
 				);
 			} else {
@@ -284,7 +286,11 @@ purchaseaccountsRouter.post('/get-purchase-invoice-vendor', (req, res) => {
 		(err, data) => {
 			if (err) {
 				return handleError(
-					new ErrorHandler('500', 'Error fetching get ledger vendor.'),
+					new ErrorHandler(
+						'500',
+						'Error get-purchase-invoice-vendor getPurchaseInvoiceByVendors',
+						err
+					),
 					res
 				);
 			} else {
@@ -312,7 +318,11 @@ purchaseaccountsRouter.post('/get-payments-vendor', (req, res) => {
 		(err, data) => {
 			if (err) {
 				return handleError(
-					new ErrorHandler('500', 'Error fetching get ledger Vendor.'),
+					new ErrorHandler(
+						'500',
+						'Error /get-payments-vendor getPaymentsByVendors.',
+						err
+					),
 					res
 				);
 			} else {
@@ -331,7 +341,11 @@ purchaseaccountsRouter.get(
 			(err, data) => {
 				if (err) {
 					return handleError(
-						new ErrorHandler('500', 'Error fetching get ledger vendor.'),
+						new ErrorHandler(
+							'500',
+							`/get-pymt-transactions-vendor/:centerid/:vendorid ${req.params.centerid} ${req.params.vendorid}`,
+							err
+						),
 						res
 					);
 				} else {
@@ -351,7 +365,11 @@ purchaseaccountsRouter.get(
 			(err, data) => {
 				if (err) {
 					return handleError(
-						new ErrorHandler('500', 'Error fetching get ledger vendor.'),
+						new ErrorHandler(
+							'500',
+							`/get-ledger-vendor/:centerid/:vendorid ${req.params.centerid} ${req.params.vendorid}`,
+							err
+						),
 						res
 					);
 				} else {

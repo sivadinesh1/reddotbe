@@ -53,7 +53,11 @@ accountsRouter.post('/add-payment-received', async (req, res) => {
 			);
 		}).catch((err) => {
 			return handleError(
-				new ErrorHandler('500', 'Error pymtMaster/Details Entry > ' + err),
+				new ErrorHandler(
+					'500',
+					'/add-payment-received && addPaymentMaster',
+					err
+				),
 				res
 			);
 		});
@@ -104,7 +108,11 @@ accountsRouter.get('/get-ledger-customer/:centerid/:customerid', (req, res) => {
 		(err, data) => {
 			if (err) {
 				return handleError(
-					new ErrorHandler('500', 'Error fetching get ledger customer.'),
+					new ErrorHandler(
+						'500',
+						`/get-ledger-customer/:centerid/:customerid ${req.params.centerid} ${req.params.customerid}`,
+						err
+					),
 					res
 				);
 			} else {
@@ -132,7 +140,7 @@ accountsRouter.post('/get-sale-invoice-customer', (req, res) => {
 		(err, data) => {
 			if (err) {
 				return handleError(
-					new ErrorHandler('500', 'Error fetching get ledger customer.'),
+					new ErrorHandler('500', '/get-sale-invoice-customer', err),
 					res
 				);
 			} else {
@@ -160,7 +168,7 @@ accountsRouter.post('/get-sale-invoice-center', (req, res) => {
 		(err, data) => {
 			if (err) {
 				return handleError(
-					new ErrorHandler('500', 'Error fetching get ledger customer.'),
+					new ErrorHandler('500', '/get-sale-invoice-center', err),
 					res
 				);
 			} else {
@@ -188,7 +196,7 @@ accountsRouter.post('/get-payments-customer', (req, res) => {
 		(err, data) => {
 			if (err) {
 				return handleError(
-					new ErrorHandler('500', 'Error fetching get ledger customer.'),
+					new ErrorHandler('500', '/get-payments-customer', err),
 					res
 				);
 			} else {
@@ -207,7 +215,11 @@ accountsRouter.get(
 			(err, data) => {
 				if (err) {
 					return handleError(
-						new ErrorHandler('500', 'Error fetching get ledger customer.'),
+						new ErrorHandler(
+							'500',
+							'/get-pymt-transactions-customer/:centerid/:customerid',
+							err
+						),
 						res
 					);
 				} else {
@@ -236,7 +248,7 @@ accountsRouter.post('/get-payments-center', (req, res) => {
 		(err, data) => {
 			if (err) {
 				return handleError(
-					new ErrorHandler('500', 'Error fetching get getPaymentsByCenter .'),
+					new ErrorHandler('500', '/get-payments-center', err),
 					res
 				);
 			} else {
@@ -250,10 +262,7 @@ accountsRouter.get('/get-pymt-transactions-center/:centerid', (req, res) => {
 	getPymtTransactionsByCenter(req.params.centerid, (err, data) => {
 		if (err) {
 			return handleError(
-				new ErrorHandler(
-					'500',
-					'Error fetching get getPymtTransactionsByCenter .'
-				),
+				new ErrorHandler('500', '/get-pymt-transactions-center/:centerid', err),
 				res
 			);
 		} else {
@@ -288,7 +297,7 @@ accountsRouter.post('/add-bulk-payment-received', async (req, res) => {
 			let process = processBulkItems(cloneReq, newPK, invoicesplit);
 		}).catch((err) => {
 			return handleError(
-				new ErrorHandler('500', 'Error bulk pymtMaster/Details Entry > ' + err),
+				new ErrorHandler('500', '/add-bulk-payment-received', err),
 				res
 			);
 		});

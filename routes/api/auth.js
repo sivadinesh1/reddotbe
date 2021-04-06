@@ -2,7 +2,7 @@ const express = require('express');
 const authRoute = express.Router();
 const logger = require('../../routes/helpers/log4js');
 const bcrypt = require('bcrypt');
-
+const env = require('dotenv/config');
 var pool = require('./../helpers/db');
 const { handleError, ErrorHandler } = require('./../helpers/error');
 
@@ -31,12 +31,23 @@ authRoute.post('/login', async (req, res) => {
 				obj: user[0],
 			});
 		} else {
-			return handleError(new ErrorHandler('600', 'Invalid Credentials.'), res);
+			return handleError(
+				new ErrorHandler(
+					'600',
+					'Invalid Credentials.',
+					`invalid credentials: ${username} ${password}`
+				),
+				res
+			);
 		}
 	} else {
 		// res.json({ 'message': 'Error while authenticating' });
 		return handleError(
-			new ErrorHandler('100', 'Error while authenticating.'),
+			new ErrorHandler(
+				'100',
+				'Error while authenticating.',
+				`invalid credentials: ${username} ${password}`
+			),
 			res
 		);
 	}
@@ -87,6 +98,36 @@ authRoute.get('/fetch-permissions/:centerid/:roleid', async (req, res) => {
 
 	let rows = await getPermissions(center_id, role_id);
 	return res.status(200).json(rows);
+});
+
+authRoute.get('/logs', function (req, res, next) {
+	var filePath =
+		process.env.NODE_ENV === 'development'
+			? process.env.DEV_LOG_PATH
+			: process.env.PROD_LOG_PATH;
+
+	res.sendFile(filePath, function (err) {
+		if (err) {
+			next(err);
+		} else {
+			console.log('Sent the logs..');
+		}
+	});
+});
+
+authRoute.get('/access-logs', function (req, res, next) {
+	var filePath =
+		process.env.NODE_ENV === 'development'
+			? process.env.DEV_ACCESS_LOG_PATH
+			: process.env.PROD_ACCESS_LOG_PATH;
+
+	res.sendFile(filePath, function (err) {
+		if (err) {
+			next(err);
+		} else {
+			console.log('Sent the logs..');
+		}
+	});
 });
 
 module.exports = authRoute;
