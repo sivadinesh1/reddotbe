@@ -166,7 +166,10 @@ saleRouter.post('/insert-sale-details', async (req, res) => {
 		await updateSequenceGenerator(cloneReq);
 	} else if (cloneReq.status === 'D') {
 		if (cloneReq.invoiceno !== undefined && cloneReq.invoiceno !== null) {
-			if (cloneReq.invoiceno.startsWith('D')) {
+			if (
+				cloneReq.invoiceno.startsWith('D') ||
+				cloneReq.invoiceno.startsWith('SI')
+			) {
 				// do nothing
 			} else {
 				await updateDraftSequenceGenerator(cloneReq);
@@ -241,10 +244,15 @@ function updateSequenceGenerator(cloneReq) {
 		center_id = '${cloneReq.center_id}' and  
 		CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
 	} else if (cloneReq.invoicetype === 'stockissue') {
-		qryUpdateSqnc = `
-	update financialyear set stock_issue_seq = stock_issue_seq + 1 where 
-	center_id = '${cloneReq.center_id}' and  
-	CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
+		// qryUpdateSqnc = `
+		// update financialyear set stock_issue_seq = stock_issue_seq + 1 where
+		// center_id = '${cloneReq.center_id}' and
+		// CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
+		qryUpdateSqnc = `		
+	update financialyear set 
+	stock_issue_seq = @stock_issue_seq:= stock_issue_seq + 1 where 
+ center_id = '${cloneReq.center_id}' and  
+ CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') LIMIT 1  `;
 	}
 
 	return new Promise(function (resolve, reject) {
@@ -333,6 +341,17 @@ function getSequenceNo(cloneReq) {
 // format and send sequence #
 function saleMasterEntry(cloneReq, invNo) {
 	let revisionCnt = 0;
+
+	let invoicedate = toTimeZone(cloneReq.invoicedate, 'Asia/Kolkata');
+
+	// if inv # starts with 'D' (eg:invno: "D/21/04/00024") + status: "C" + revision: 0
+	if (
+		cloneReq.invoiceno.startsWith('D') &&
+		cloneReq.status === 'C' &&
+		cloneReq.revision === 0
+	) {
+		invoicedate = currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY');
+	}
 
 	// always very first insert will increment revision to 1, on consicutive inserts, it will be +1
 	if (cloneReq.status === 'C' && cloneReq.revision === 0) {
@@ -436,7 +455,8 @@ async function processItems(cloneReq, newPK) {
 	// if sale master insert success, then insert in sale details.
 
 	for (const k of cloneReq.productarr) {
-		let p_data = await IUSaleDetailsAsync(k); //returns promise
+		//insert(sale_det_id == '')/update sale details.
+		let p_data = await IUSaleDetailsAsync(k);
 		let p_data1 = await updateStockAsync(k); // returns promise
 		//	let p_data2 = await updateProductAsync(k); // updating product master is not necessary, check if needed
 		let p_data3;

@@ -479,7 +479,7 @@ const getSaleInvoiceByCustomers = (
 	where
 	c.id = '${customer_id}' and
 	s.center_id = '${center_id}' and
-	s.customer_id = c.id 
+	s.customer_id = c.id and s.status = 'C'
 	and
 	s.sale_type= 'gstinvoice' 
 	`;

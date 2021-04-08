@@ -101,10 +101,15 @@ authRoute.get('/fetch-permissions/:centerid/:roleid', async (req, res) => {
 });
 
 authRoute.get('/logs', function (req, res, next) {
-	var filePath =
-		process.env.NODE_ENV === 'development'
-			? process.env.DEV_LOG_PATH
-			: process.env.PROD_LOG_PATH;
+	let filePath = '';
+
+	if (process.env.NODE_ENV === 'development') {
+		filePath = process.env.DEV_LOG_PATH;
+	} else if (process.env.NODE_ENV === 'production') {
+		filePath = process.env.PROD_LOG_PATH;
+	} else if (process.env.NODE_ENV === 'uat') {
+		filePath = process.env.UAT_LOG_PATH;
+	}
 
 	res.sendFile(filePath, function (err) {
 		if (err) {
@@ -116,10 +121,15 @@ authRoute.get('/logs', function (req, res, next) {
 });
 
 authRoute.get('/access-logs', function (req, res, next) {
-	var filePath =
-		process.env.NODE_ENV === 'development'
-			? process.env.DEV_ACCESS_LOG_PATH
-			: process.env.PROD_ACCESS_LOG_PATH;
+	let filePath = '';
+
+	if (process.env.NODE_ENV === 'development') {
+		filePath = process.env.DEV_ACCESS_LOG_PATH;
+	} else if (process.env.NODE_ENV === 'production') {
+		filePath = process.env.PROD_ACCESS_LOG_PATH;
+	} else if (process.env.NODE_ENV === 'uat') {
+		filePath = process.env.UAT_ACCESS_LOG_PATH;
+	}
 
 	res.sendFile(filePath, function (err) {
 		if (err) {

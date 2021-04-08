@@ -786,7 +786,6 @@ enquiryRoute.post('/search-enquiries', (req, res) => {
 	}
 
 	sql = sql + `order by enquiry_date ${order} `;
-	console.log('dinesh ' + sql);
 
 	pool.query(sql, function (err, data) {
 		if (err) {

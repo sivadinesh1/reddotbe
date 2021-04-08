@@ -84,7 +84,7 @@ stockRouter.post('/search-purchase', (req, res) => {
 	v.id = p.vendor_id and
 	
 	p.center_id = '${center_id}' and
-	str_to_date(invoice_date,  '%d-%m-%Y %T') between
+	str_to_date(received_date,  '%d-%m-%Y %T') between
 	str_to_date('${from_date}',  '%d-%m-%Y %T') and
 	str_to_date('${to_date}',  '%d-%m-%Y %T') `;
 
@@ -96,7 +96,7 @@ stockRouter.post('/search-purchase', (req, res) => {
 		sql = sql + statussql;
 	}
 
-	sql = sql + `order by invoice_date ${order}`;
+	sql = sql + `order by received_date ${order}`;
 
 	pool.query(sql, function (err, data) {
 		if (err) {

@@ -131,30 +131,42 @@ const updateProductAsync = (k) => {
 };
 
 const insertItemHistoryAsync = (k, vSale_id, vSale_det_id, cloneReq) => {
+	// to avoid duplicate entry of history items when editing completed records
+	// with same qty. (status = 'c'). If status=C & k.qty - k.old_val !== 0 then updatehistorytable
+	let skipHistoryUpdate = false;
 	var today = new Date();
 
 	today = currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY HH:mm:ss');
 
-	// if purchase details id is missing its new else update
+	// if sale details id is missing its new else update
 	let sale_det_id = k.sale_det_id === '' ? vSale_det_id : k.sale_det_id;
 	let txn_qty = k.sale_det_id === '' ? k.qty : k.qty - k.old_val;
 	let actn_type = 'Sold';
 	let sale_id = vSale_id === '' ? k.sale_id : vSale_id;
 
+	console.log('dinesh k.qty >> ' + k.qty);
+	console.log('dinesh k.old_val >> ' + k.old_val);
+	console.log('dinesh >> ' + cloneReq.revision);
+
+	// revision '0' is Status 'C' new record
 	if (cloneReq.revision === 0 && txn_qty === 0) {
 		txn_qty = k.qty;
 	}
 
 	//txn -ve means subtract from qty
 	if (txn_qty < 0) {
-		actn_type = 'ADD';
+		actn_type = 'Edited';
+	}
+
+	if (cloneReq.revision > 0 && txn_qty === 0) {
+		skipHistoryUpdate = true;
 	}
 
 	// convert -ve to positive number
 	//~ bitwise operator. Bitwise does not negate a number exactly. eg:  ~1000 is -1001, not -1000 (a = ~a + 1)
 	txn_qty = ~txn_qty + 1;
 
-	if (txn_qty !== 0) {
+	if (txn_qty !== 0 && !skipHistoryUpdate) {
 		let query2 = `
 			insert into item_history (center_id, module, product_ref_id, sale_id, sale_det_id, actn, actn_type, txn_qty, stock_level, txn_date)
 			values ('${cloneReq.center_id}', 'Sale', '${k.product_id}', '${sale_id}', '${sale_det_id}', 'SAL', '${actn_type}', '${txn_qty}', 

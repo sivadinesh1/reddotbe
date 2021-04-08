@@ -453,20 +453,27 @@ adminRoute.get('/customer-discount/:centerid/:customerid', (req, res) => {
 });
 
 // get customer discount values
-adminRoute.get('/all-customer-default-discounts/:centerid', (req, res) => {
-	getAllCustomerDefaultDiscounts(`${req.params.centerid}`, (err, rows) => {
-		if (err)
-			return handleError(
-				new ErrorHandler(
-					'500',
-					`/all-customer-default-discounts/:centerid ${req.params.centerid}`,
-					err
-				),
-				res
-			);
-		return res.json(rows);
-	});
-});
+adminRoute.get(
+	'/all-customer-default-discounts/:centerid/:customerid',
+	(req, res) => {
+		getAllCustomerDefaultDiscounts(
+			`${req.params.centerid}`,
+			`${req.params.customerid}`,
+			(err, rows) => {
+				if (err)
+					return handleError(
+						new ErrorHandler(
+							'500',
+							`/all-customer-default-discounts/:centerid ${req.params.centerid} ${req.params.customerid}`,
+							err
+						),
+						res
+					);
+				return res.json(rows);
+			}
+		);
+	}
+);
 
 // get customer discount values BY CUSTOMER
 adminRoute.get('/discounts-customer/:centerid/:customerid', (req, res) => {

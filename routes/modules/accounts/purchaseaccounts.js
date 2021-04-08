@@ -194,7 +194,7 @@ const getPurchaseInvoiceByCenter = (
 		bal_amount
 	from purchase p, vendor v
 	where
-		p.center_id = '${center_id}' and
+		p.center_id = '${center_id}' and p.status = 'C' and
 		p.vendor_id = v.id 
 	
 	`;

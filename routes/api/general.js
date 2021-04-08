@@ -290,16 +290,21 @@ router.get('/brand-exists/:name/:center_id', (req, res) => {
 	});
 });
 
-router.get('/customer-exists/:name', (req, res) => {
+router.get('/customer-exists/:name/:centerid', (req, res) => {
 	let name = req.params.name;
+	let center_id = req.params.centerid;
 
 	let sql = `select * from customer c where 
-	c.name = '${name}' `;
+	c.name = '${name}' and center_id = ${center_id} `;
 
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(
-				new ErrorHandler('500', `/customer-exists/:name ${name}`, err),
+				new ErrorHandler(
+					'500',
+					`/customer-exists/:name ${name} ${center_id}`,
+					err
+				),
 				res
 			);
 		} else {

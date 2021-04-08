@@ -130,7 +130,7 @@ const getCustomerDiscount = (centerid, customerid, callback) => {
 };
 
 // fetch rows for default (brandid as zero) customer discounts from discount tbl
-const getAllCustomerDefaultDiscounts = (centerid, callback) => {
+const getAllCustomerDefaultDiscounts = (centerid, customer_id, callback) => {
 	let query = ` 
 	SELECT 
 	c.name, 'default' as 'brand_name',   d.type, d.brand_id as brand_id, 
@@ -146,8 +146,14 @@ FROM
     where 
     d.brand_id = 0 and
 		d.center_id = ? and
-    c.id = d.customer_id
-    
+    c.id = d.customer_id `;
+
+	if (customer_id !== '') {
+		query = query + ` and c.id = ${customer_id} `;
+	}
+	query =
+		query +
+		` 
     group by 
     c.name, d.type, d.brand_id, c.id, d.startdate   
     order by
