@@ -69,12 +69,13 @@ adminRoute.get('/view-product-info/:centerid/:productid', (req, res) => {
 	let center_id = req.params.centerid;
 	let product_id = req.params.productid;
 
-	let sql = `select p.*, v.name as vendor_name, v.id as vendar_id  
+	let sql = `
+	select p.*, b.name as brand_name, b.id as brand_id  
 	from 
 	product p,
-	vendor v 
+	brand b 
 	where
-	p.vendor_id = v.id and
+	p.brand_id = b.id and
 	p.id = '${product_id}' and
 	p.center_id = '${center_id}' `;
 

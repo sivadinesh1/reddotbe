@@ -92,3 +92,11 @@ reportsRouter.post('/item-wise-sale', async (req, res) => {
 });
 
 module.exports = reportsRouter;
+
+// select str_to_date(txn_date,'%d-%m-%Y'), stock_level from item_history
+// where
+// product_ref_id = '65663'
+// -- and txn_date = '08-04-2021 09:41:07'
+// and str_to_date(txn_date,'%d-%m-%Y')
+// 	between str_to_date('08-04-2021', '%d-%m-%Y') and str_to_date('08-04-2021', '%d-%m-%Y')
+// 	order by txn_date desc limit 1
