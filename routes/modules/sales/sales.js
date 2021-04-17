@@ -214,7 +214,7 @@ const insertAuditTblforDeleteSaleDetailsRecAsync = (element, sale_id) => {
 	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 
 	let query = `
-	INSERT INTO audit_tbl (module, module_ref_id, module_ref_det_id, actn, old_value, new_value, audit_date)
+	INSERT INTO audit_tbl (module, module_ref_id, module_ref_det_id, actn, old_value, new_value, audit_date, center_id)
 	VALUES
 		('Sales', '${sale_id}', '${element.id}', 'delete', 
 		(SELECT CONCAT('[{', result, '}]') as final
@@ -225,7 +225,7 @@ const insertAuditTblforDeleteSaleDetailsRecAsync = (element, sale_id) => {
 				FROM sale_detail where id = '${element.id}'
 			) t1
 		) t2)
-		, '', '${today}'
+		, '', '${today}', (select center_id from sale where id = '${sale_id}')
 		) `;
 
 	return new Promise(function (resolve, reject) {
@@ -295,6 +295,45 @@ values ('${center_id}', '${module}', '${product_id}', '${sale_id}', '${sale_det_
 	});
 };
 
+const updateLegerCustomerChange = (
+	center_id,
+	sale_id,
+	customer_id,
+
+	old_customer_id
+) => {
+	let today = currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY HH:mm:ss');
+
+	let query = `delete from ledger where customer_id =  '${old_customer_id}'
+	and invoice_ref_id = '${sale_id}'  and center_id = '${center_id}' `;
+	console.log('dinesh ' + query);
+	return new Promise(function (resolve, reject) {
+		pool.query(query, function (err, data) {
+			if (err) {
+				reject(err); // failure
+			}
+
+			let query2 = ` INSERT INTO audit_tbl (module, module_ref_id, module_ref_det_id, actn,
+											old_value, new_value, audit_date, center_id)
+											VALUES
+											('Leger', '${sale_id}', '${sale_id}', 'Customer Updated',  '${old_customer_id}',
+											'${customer_id}', '${today}', '${center_id}' ) `;
+
+			console.log('dinesh2 ' + query2);
+
+			return new Promise(function (resolve, reject) {
+				pool.query(query2, function (err, data) {
+					if (err) {
+						reject(err); // failure
+					}
+					// success
+					resolve(data);
+				});
+			});
+		});
+	});
+};
+
 module.exports = {
 	getSalesMaster,
 	getSalesDetails,
@@ -308,4 +347,5 @@ module.exports = {
 	deleteSaleDetailsRecAsync,
 	updateStockWhileDeleteAsync,
 	updateItemHistoryTable,
+	updateLegerCustomerChange,
 };

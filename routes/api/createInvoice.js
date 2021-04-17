@@ -131,11 +131,15 @@ function generateHeader(doc, centerdata, print_type) {
 		.text('GSTIN : ' + centerdata.gst, { align: 'center', lineGap: 1.5 })
 		.text('Email: ' + centerdata.email, { align: 'center', lineGap: 1.5 })
 
-		.text('Phone : ' + centerdata.phone + ' & ' + centerdata.mobile, 410, 92)
+		.text('Phone : ' + centerdata.phone + ' & ' + centerdata.mobile, 410, 92);
 
-		.image('swaraj.png', 475, 62, { width: 80 })
+	if (centerdata.id === 3) {
+		doc.image('sonalika.png', 475, 62, { width: 80 });
+	} else {
+		doc.image('swaraj.png', 475, 62, { width: 80 });
+	}
 
-		.moveDown();
+	doc.moveDown();
 }
 
 function generateCustomerInformation(
@@ -192,11 +196,8 @@ function generateCustomerInformation(
 			.font('Helvetica-Bold')
 			.text(salemasterdata.retail_customer_name, 40, customerInformationTop)
 			.font('Helvetica')
-			.text(
-				customerdata.address1 + salemasterdata.retail_customer_address,
-				40,
-				151
-			);
+			.text(salemasterdata.retail_customer_address, 40, 151)
+			.text(salemasterdata.retail_customer_phone, 40, 171);
 	} else {
 		if (print_ship_to) {
 			doc
@@ -291,11 +292,8 @@ function generateShippingInformation(doc, customerdata, salemasterdata) {
 			.font('Helvetica-Bold')
 			.text(salemasterdata.retail_customer_name, 40, customerInformationTop)
 			.font('Helvetica')
-			.text(
-				customerdata.csa_address1 + salemasterdata.retail_customer_address,
-				40,
-				151
-			);
+			.text(salemasterdata.retail_customer_address, 40, 151)
+			.text(salemasterdata.retail_customer_phone, 40, 171);
 	} else {
 		doc
 			.fillColor('#000000')
@@ -308,7 +306,7 @@ function generateShippingInformation(doc, customerdata, salemasterdata) {
 
 	if (customerdata.csa_district !== '') {
 		doc.text(
-			customerdata.csa_address2 + ', District: ' + customerdata.cas_district,
+			customerdata.csa_address2 + ', District: ' + customerdata.csa_district,
 			40,
 			166
 		);

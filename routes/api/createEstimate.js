@@ -97,17 +97,32 @@ function generateCustomerInformation(doc, customerdata, salemasterdata) {
 
 	const customerInformationTop = 70;
 
-	doc
-		.fillColor('#000000')
-		.fontSize(10)
-		.text('NAME:' + customerdata.name, 40, customerInformationTop)
-		.text('PLACE:', 40, 85); // fetch from FE
+	if (customerdata.name === 'Walk In') {
+		doc
+			.fillColor('#000000')
+			.fontSize(10)
+			.font('Helvetica-Bold')
+			.text(
+				'NAME:' + salemasterdata.retail_customer_name,
+				40,
+				customerInformationTop
+			)
+			.font('Helvetica')
+			.text('PLACE:' + salemasterdata.retail_customer_address, 40, 85)
+			.text('PHONE:' + salemasterdata.retail_customer_phone, 40, 100);
+	} else {
+		doc
+			.fillColor('#000000')
+			.fontSize(10)
+			.text('NAME:' + customerdata.name, 40, customerInformationTop)
+			.text('PLACE:' + customerdata.address1, 40, 85); // fetch from FE
 
-	doc
-		.fillColor('#000000')
+		doc
+			.fillColor('#000000')
 
-		.text('Phone: ' + customerdata.mobile, 40, 100)
-		.moveDown();
+			.text('Phone: ' + customerdata.mobile, 40, 100)
+			.moveDown();
+	}
 
 	// line end of customer section
 	generateHr(doc, line_x_start, line_x_end, 115);
@@ -1506,7 +1521,7 @@ function generateSummaryRightTableRow(
 		.text('TOTAL', 480, y, { width: 70, align: 'left' })
 
 		.text(
-			roundOffFn(finalSumTotal, 'rounding').toLocaleString('en-IN'),
+			roundOffFn(finalSumTotal, 'rounding').toLocaleString('en-IN') + '.00',
 			500,
 			y,
 			{

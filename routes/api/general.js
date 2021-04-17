@@ -111,7 +111,7 @@ router.post('/search-product', (req, res) => {
 	sql = `select a.product_code as product_code, a.description, b.mrp, a.taxrate, b.available_stock,
 		a.packetsize, a.unit_price, a.purchase_price as purchase_price, a.id as product_id, b.id as stock_pk, a.packetsize as qty, a.rackno, bd.name,
 		bd.id as brand_id, a.unit as uom, a.hsncode as hsncode, a.minqty as minqty, a.avgpurprice as avgpurprice,
-		a.unit_price as unit_price, a.salesprice as salesprice,  a.maxdiscount as maxdiscount
+		a.unit_price as unit_price, a.salesprice as salesprice,  a.maxdiscount as maxdiscount, a.currentstock as currentstock
 		from 
 		brand bd,
 		product a

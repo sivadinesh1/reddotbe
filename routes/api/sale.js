@@ -18,6 +18,7 @@ const {
 	deleteSaleDetailsRecAsync,
 	updateStockWhileDeleteAsync,
 	updateItemHistoryTable,
+	updateLegerCustomerChange,
 } = require('../modules/sales/sales.js');
 
 const {
@@ -63,7 +64,7 @@ saleRouter.post('/delete-sales-details', async (req, res) => {
 		let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 
 		let auditQuery = `
-		INSERT INTO audit_tbl (module, module_ref_id, module_ref_det_id, actn, old_value, new_value, audit_date)
+		INSERT INTO audit_tbl (module, module_ref_id, module_ref_det_id, actn, old_value, new_value, audit_date, center_id)
 		VALUES
 			('Sales', '${sales_id}', '${id}', 'delete', 
 			(SELECT CONCAT('[{', result, '}]') as final
@@ -74,7 +75,7 @@ saleRouter.post('/delete-sales-details', async (req, res) => {
 					FROM sale_detail where id = '${id}'
 				) t1
 			) t2)
-			, '', '${today}'
+			, '', '${today}', '${center_id}'
 			) `;
 
 		// step 1
@@ -158,6 +159,7 @@ where product_id = '${product_id}' and id = '${stock_id}'  `;
 // 2. Insert records in sale master, if sale is via enquiry, then update enq table with saleid
 // 3. Insert records in sale details
 // 4. update Stock table & then update product table with current stock details
+// 5. finally check if hasCustomerChange is true, if yes, update ledger, payment (log in audit)
 saleRouter.post('/insert-sale-details', async (req, res) => {
 	const cloneReq = { ...req.body };
 
@@ -183,7 +185,10 @@ saleRouter.post('/insert-sale-details', async (req, res) => {
 		invNo = await getSequenceNo(cloneReq);
 	} else if (cloneReq.status === 'D') {
 		if (cloneReq.invoiceno !== undefined && cloneReq.invoiceno !== null) {
-			if (cloneReq.invoiceno.startsWith('D')) {
+			if (
+				cloneReq.invoiceno.startsWith('D') ||
+				cloneReq.invoiceno.startsWith('SI')
+			) {
 				invNo = cloneReq.invoiceno;
 			} else {
 				invNo = await getSequenceNo(cloneReq);
@@ -219,6 +224,17 @@ saleRouter.post('/insert-sale-details', async (req, res) => {
 
 				await addReverseSaleLedgerRecord(cloneReq, newPK);
 				await addSaleLedgerAfterReversalRecord(cloneReq, newPK);
+
+				// check if customer has changed
+				if (cloneReq.hasCustomerChange) {
+					updateLegerCustomerChange(
+						cloneReq.center_id,
+						cloneReq.salesid,
+						cloneReq.customerctrl.id,
+						cloneReq.old_customer_id
+					);
+				}
+
 				res.json({ result: 'success', id: newPK, invoiceno: invNo });
 			} else {
 				// draft scenario
@@ -374,7 +390,7 @@ function saleMasterEntry(cloneReq, invNo) {
 			INSERT INTO sale (center_id, customer_id, invoice_no, invoice_date, order_no, order_date, 
 			lr_no, lr_date, sale_type,  total_qty, no_of_items, taxable_value, cgst, sgst, igst, 
 			total_value, net_total, transport_charges, unloading_charges, misc_charges, status, 
-			sale_datetime, roundoff, revision, retail_customer_name, retail_customer_address)
+			sale_datetime, roundoff, revision, retail_customer_name, retail_customer_address,retail_customer_phone )
 			VALUES
 			('${cloneReq.center_id}', '${cloneReq.customerctrl.id}', 
 			'${invNo}',
@@ -392,7 +408,7 @@ function saleMasterEntry(cloneReq, invNo) {
 		cloneReq.roundoff
 	}', '${revisionCnt}', '${cloneReq.retail_customer_name}', '${
 		cloneReq.retail_customer_address
-	}'
+	}', '${cloneReq.retail_customer_phone}'
 			)`;
 
 	let upQry = `
@@ -421,7 +437,8 @@ function saleMasterEntry(cloneReq, invNo) {
 				'DD-MM-YYYY HH:mm:ss'
 			)}', revision = '${revisionCnt}', roundoff = '${cloneReq.roundoff}', 
 			retail_customer_name = '${cloneReq.retail_customer_name}',
-			retail_customer_address = '${cloneReq.retail_customer_address}'
+			retail_customer_address = '${cloneReq.retail_customer_address}',
+			retail_customer_phone = '${cloneReq.retail_customer_phone}'
 			where id= '${cloneReq.salesid}' `;
 
 	return new Promise(function (resolve, reject) {

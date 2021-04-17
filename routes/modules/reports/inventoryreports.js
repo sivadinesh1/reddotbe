@@ -2,6 +2,8 @@ var pool = require('../../helpers/db');
 const moment = require('moment');
 const logger = require('./../../helpers/log4js');
 
+const { handleError, ErrorHandler } = require('./../../helpers/error');
+
 const getProductInventoryReport = (center_id, product_code, callback) => {
 	let query = ` select ih.id, module, p.id as product_id, p.product_code as product_code, p.description as product_description,
   b.name as brand_name,  ih.module,
@@ -42,6 +44,37 @@ const getProductInventoryReport = (center_id, product_code, callback) => {
 	});
 };
 
+const fullStockReport = (center_id) => {
+	let query = `
+	select b.name, p.product_code, p.description,
+s.product_id, s.mrp, s.available_stock,
+p.unit, p.packetsize, p.hsncode, 
+ p.mrp, p.purchase_price,
+p.rackno, p.taxrate
+from 
+product p,
+brand b,
+stock s
+where 
+s.product_id = p.id and
+p.brand_id = b.id and
+p.center_id = ${center_id}
+group by
+s.product_id, s.mrp, s.available_stock `;
+
+	console.log('dinesh sql ' + query);
+
+	return new Promise(function (resolve, reject) {
+		pool.query(query, function (err, data) {
+			if (err) {
+				new ErrorHandler('500', 'fullStockReport', err), reject(err);
+			}
+			resolve(data);
+		});
+	});
+};
+
 module.exports = {
 	getProductInventoryReport,
+	fullStockReport,
 };

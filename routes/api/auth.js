@@ -17,9 +17,19 @@ const e = require('express');
 
 authRoute.post('/login', async (req, res) => {
 	const [username, password] = Object.values(req.body);
-
+	console.log('dinesh ' + username + 'pass' + password);
 	let user = await checkUsernameExists(username);
-
+	console.log('dinesh ' + user);
+	if (user == '') {
+		return handleError(
+			new ErrorHandler(
+				'601',
+				'User not found',
+				`invalid credentials: ${username} ${password}`
+			),
+			res
+		);
+	}
 	if (user != null) {
 		// check password
 		if (await bcrypt.compare(password, user[0].userpass)) {

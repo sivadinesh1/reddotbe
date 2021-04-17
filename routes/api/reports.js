@@ -6,10 +6,9 @@ const moment = require('moment');
 const logger = require('../../routes/helpers/log4js');
 const { toTimeZone, toTimeZoneFrmt } = require('./../helpers/utils');
 
-const { handleError, ErrorHandler } = require('./../helpers/error');
-
 const {
 	getProductInventoryReport,
+	fullStockReport,
 } = require('../modules/reports/inventoryreports.js');
 const {
 	getProductSummaryReport,
@@ -20,6 +19,25 @@ const {
 	getItemWiseSale,
 } = require('../modules/reports/statementreports');
 var pool = require('./../helpers/db');
+
+reportsRouter.post('/full-inventory-report', async (req, res) => {
+	const [center_id] = Object.values(req.body);
+
+	let data = await fullStockReport(center_id);
+	return res.status(200).json(data);
+
+	// fullStockReport(center_id, (err, data) => {
+	// 	if (err) {
+	// 		console.log('dinesh ' + JSON.stringify(err));
+	// 		return handleError(
+	// 			new ErrorHandler('500', 'full-inventory-report', err),
+	// 			res
+	// 		);
+	// 	} else {
+	// 		return res.status(200).json(data);
+	// 	}
+	// });
+});
 
 reportsRouter.post('/inventory-report', (req, res) => {
 	const [center_id, product_code] = Object.values(req.body);

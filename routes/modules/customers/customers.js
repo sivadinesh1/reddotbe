@@ -65,8 +65,8 @@ const insertCustomer = (insertValues, callback) => {
 			});
 
 			let query1 = `
-	INSERT INTO customer_shipping_address (customer_id, address1, address2, address3, district, state_id, pin, def_address)
-	VALUES (?, ?, ?, ?, ?, ?, ?, 'Y' ) `;
+	INSERT INTO customer_shipping_address (customer_id, address1, address2, address3, district, state_id, pin, def_address, is_active)
+	VALUES (?, ?, ?, ?, ?, ?, ?, 'Y', 'Y' ) `;
 			let values1 = [
 				data.insertId,
 
@@ -459,7 +459,7 @@ from
 customer_shipping_address csa,
 state s 
 where 
-csa.state_id = s.id and
+csa.state_id = s.id and csa.is_active = 'A' and 
 customer_id = ? order by id desc `;
 
 	let values = [customerid];
@@ -482,8 +482,8 @@ const insertCustomerShippingAddress = (insertValues, callback) => {
 	}
 
 	let query1 = `
-	INSERT INTO customer_shipping_address (customer_id, address1, address2, address3, district, state_id, pin, def_address)
-	VALUES (?, ?, ?, ?, ?, ?, ?, ? ) `;
+	INSERT INTO customer_shipping_address (customer_id, address1, address2, address3, district, state_id, pin, def_address, is_active)
+	VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'A' ) `;
 	let values1 = [
 		insertValues.customer_id,
 
@@ -550,6 +550,23 @@ const updateCustomerShippingAddress = (updateValues, id, callback) => {
 	}
 };
 
+const inactivateCSA = (id) => {
+	let query = `
+  update customer_shipping_address
+set is_active = 'I' where
+id = ${id}
+  `;
+
+	return new Promise(function (resolve, reject) {
+		pool.query(query, function (err, data) {
+			if (err) {
+				reject(err);
+			}
+			resolve('UPDATED');
+		});
+	});
+};
+
 module.exports = {
 	getCustomerDiscount,
 	insertCustomerDiscount,
@@ -568,4 +585,5 @@ module.exports = {
 	updateCustomerShippingAddress,
 	insertCustomerShippingAddress,
 	getCustomerShippingAddress,
+	inactivateCSA,
 };

@@ -405,7 +405,12 @@ enquiryRoute.post('/insert-enquiry-details', (req, res) => {
 		}
 	});
 });
-
+// askqty: 2
+// center_id: 2
+// enquiry_id: "115"
+// notes: "Kit- O Ring For Response Valve"
+// product_code: "P000302"
+// status: "O"
 enquiryRoute.post('/add-more-enquiry-details', (req, res) => {
 	let jsonObj = req.body;
 
@@ -413,67 +418,25 @@ enquiryRoute.post('/add-more-enquiry-details', (req, res) => {
 
 	today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 
-	const prodArr = jsonObj['productarr'];
+	let query1 = `INSERT INTO enquiry_detail ( enquiry_id, product_id, askqty, product_code, notes, status)
+							values ( '${jsonObj.enquiry_id}', 
+							(select id from product where product_code='${jsonObj.product_code}' 
+							and center_id = '${jsonObj.center_id}'), 
+							'${jsonObj.askqty}', '${jsonObj.product_code}', '${jsonObj.notes}', 'O')`;
 
-	let newProdArr = [];
+	console.log('dinesh ' + query1);
 
-	prodArr.forEach(function (k) {
-		let query1 = `INSERT INTO enquiry_detail ( enquiry_id, product_id, askqty, product_code, notes, status)
-							values ( '${req.body.enquiry_id}', (select id from product where product_code='${k.product_code}' and center_id = '${jsonObj.centerid}'), '${k.quantity}', '${k.product_code}', '${k.notes}', 'O')`;
-
-		pool.query(query1, function (err, data) {
-			if (err) {
-				return handleError(
-					new ErrorHandler('500', '/add-more-enquiry-details', err),
-					res
-				);
-			} else {
-				let tmpid = data.insertId;
-				newProdArr.push(tmpid);
-
-				if (newProdArr.length === prodArr.length) {
-					newProdArr = [];
-
-					let sql = `
-				select orig.*, s.available_stock, s.id as stock_pk
-				from
-				(select ed.*, c.id as customer_id, c.name, c.address1, c.address2, c.district, c.pin, c.gst, c.mobile2, e.remarks, e.estatus,
-					p.id as pid, p.center_id, p.brand_id, p.product_code as pcode, p.description as pdesc, p.unit, p.packetsize, p.hsncode,
-					p.currentstock, p.unit_price, p.mrp, p.purchase_price,
-					p.salesprice, p.rackno, p.location, p.maxdiscount, p.taxrate,
-					p.minqty, p.itemdiscount, p.reorderqty, p.avgpurprice,
-					p.avgsaleprice, p.margin
-					from
-					enquiry e,
-					customer c,
-					enquiry_detail ed
-					LEFT outer JOIN product p
-					ON p.id = ed.product_id where
-					e.id = ed.enquiry_id and
-					e.customer_id = c.id and ed.id =  ${tmpid}) as orig
-					LEFT outer JOIN stock s
-					ON orig.product_id = s.product_id and
-					s.mrp = orig.mrp `;
-
-					pool.query(sql, function (err, data) {
-						if (err) {
-							return handleError(
-								new ErrorHandler('500', '/add-more-enquiry-details LOOP', err),
-								res
-							);
-						} else {
-							newProdArr.push(data[0]);
-
-							if (newProdArr.length === prodArr.length) {
-								res.json({
-									result: newProdArr,
-								});
-							}
-						}
-					});
-				}
-			}
-		});
+	pool.query(query1, function (err, data) {
+		if (err) {
+			return handleError(
+				new ErrorHandler('500', '/add-more-enquiry-details', err),
+				res
+			);
+		} else {
+			res.json({
+				result: data.insertId,
+			});
+		}
 	});
 });
 
@@ -668,7 +631,7 @@ discount.brand_id = 0 )
 	ed.giveqty != 0 and
 	e.id = ${enqid}
 	`;
-
+		console.log('dinesh ' + sql);
 		pool.query(sql, function (err, data) {
 			if (err) {
 				return handleError(
@@ -805,11 +768,13 @@ enquiryRoute.post('/delete-enquiry-details', async (req, res) => {
 	let id = req.body.id;
 	let enq_id = req.body.enquiry_id;
 
+	console.log('dinesh delete enq details ' + JSON.stringify(req.body));
+
 	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 
 	// step 1
 	let auditQuery = `
-	INSERT INTO audit_tbl (module, module_ref_id, module_ref_det_id, actn, old_value, new_value, audit_date)
+	INSERT INTO audit_tbl (module, module_ref_id, module_ref_det_id, actn, old_value, new_value, audit_date, center_id)
 	VALUES
 		('Enquiry', '${enq_id}', '${id}', 'delete', 
 		(SELECT CONCAT('[{', result, '}]') as final
@@ -820,7 +785,7 @@ enquiryRoute.post('/delete-enquiry-details', async (req, res) => {
 				FROM enquiry_detail where id = '${id}'
 			) t1
 		) t2)
-		, '', '${today}'
+		, '', '${today}', (select center_id from enquiry where id = '${enq_id}')
 		) `;
 
 	// step 1

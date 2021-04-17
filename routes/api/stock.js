@@ -262,6 +262,26 @@ stockRouter.post('/delete-sale-details', (req, res) => {
 	});
 });
 
+stockRouter.get('/delete-item-history/:saleid', (req, res) => {
+	let sale_id = req.params.saleid;
+
+	let query = `
+	delete from item_history where sale_id = '${sale_id}' `;
+
+	pool.query(query, function (err, data) {
+		if (err) {
+			return handleError(
+				new ErrorHandler('500', '/delete-item-history', err),
+				res
+			);
+		} else {
+			return res.json({
+				result: 'success',
+			});
+		}
+	});
+});
+
 stockRouter.get('/purchase-details/:id', (req, res) => {
 	let purchase_id = req.params.id;
 
@@ -319,7 +339,7 @@ stockRouter.post('/delete-purchase-details', async (req, res) => {
 	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 
 	let auditQuery = `
-	INSERT INTO audit_tbl (module, module_ref_id, module_ref_det_id, actn, old_value, new_value, audit_date)
+	INSERT INTO audit_tbl (module, module_ref_id, module_ref_det_id, actn, old_value, new_value, audit_date, center_id)
 	VALUES
 		('Purchase', '${purchase_id}', '${id}', 'delete', 
 		(SELECT CONCAT('[{', result, '}]') as final
@@ -330,7 +350,7 @@ stockRouter.post('/delete-purchase-details', async (req, res) => {
 				FROM purchase_detail where id = '${id}'
 			) t1
 		) t2)
-		, '', '${today}'
+		, '', '${today}', '${center_id}'
 		) `;
 
 	// step 1
@@ -385,7 +405,7 @@ where product_id = '${product_id}' and id = '${stock_id}'  `;
 
 	// step 4 , reverse item history table entries.
 
-	let insertItemHistoryTable = await insertItemHistoryTable(
+	let itemHistory = await insertItemHistoryTable(
 		center_id,
 		'Purchase',
 		product_id,
@@ -463,7 +483,7 @@ function deletePurchaseDetailsRecs(purchaseDetails, purchase_id) {
 		let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 
 		let auditQuery = `
-		INSERT INTO audit_tbl (module, module_ref_id, module_ref_det_id, actn, old_value, new_value, audit_date)
+		INSERT INTO audit_tbl (module, module_ref_id, module_ref_det_id, actn, old_value, new_value, audit_date, center_id)
 		VALUES
 			('Purchase', '${purchase_id}', '${element.id}', 'delete', 
 			(SELECT CONCAT('[{', result, '}]') as final
@@ -474,7 +494,7 @@ function deletePurchaseDetailsRecs(purchaseDetails, purchase_id) {
 					FROM purchase_detail where id = '${element.id}'
 				) t1
 			) t2)
-			, '', '${today}'
+			, '', '${today}', (select center_id from sale where id = '${sale_id}')
 			) `;
 
 		// step 1

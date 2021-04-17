@@ -19,6 +19,14 @@ const fs = require('fs');
 // 	ca: fs.readFileSync('/etc/letsencrypt/live/demo.squapl.com/chain.pem'),
 // };
 
+// var options = {
+// 	key: fs.readFileSync(
+// 		'/etc/letsencrypt/live/launchpad.squapl.com/privkey.pem'
+// 	),
+// 	cert: fs.readFileSync('/etc/letsencrypt/live/launchpad.squapl.com/cert.pem'),
+// 	ca: fs.readFileSync('/etc/letsencrypt/live/launchpad.squapl.com/chain.pem'),
+// };
+
 const app = express();
 
 app.use(express.static('public'));
@@ -92,5 +100,5 @@ const PORT = process.env.PORT || 5050;
 
 // app.listen(PORT);
 http.createServer(app).listen(5050);
-// https.createServer(options, app).listen(8440);
+//https.createServer(options, app).listen(8440);
 // https.createServer(options, app).listen(8441);

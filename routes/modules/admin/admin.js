@@ -6,6 +6,30 @@ const { toTimeZone, currentTimeInTimeZone } = require('./../../helpers/utils');
 const { encryptPassword } = require('../../helpers/utils');
 const bcrypt = require('bcrypt');
 
+const isUserExist = async (insertValues) => {
+	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
+	let hashed_password = await encryptPassword(insertValues.password);
+
+	let sql = ` select * from users where 
+	  username = ${insertValues.username} `;
+
+	return new Promise(function (resolve, reject) {
+		pool.query(sql, function (err, data) {
+			// todo dinesh err Error: ER_DUP_ENTRY: Duplicate entry '9999999993' for key 'username_UNIQUE'
+
+			if (err) {
+				reject(err);
+			}
+
+			if (data.length > 0) {
+				resolve('DUP_USERNAME');
+			} else {
+				resolve('');
+			}
+		});
+	});
+};
+
 const insertUser = async (insertValues) => {
 	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 	let hashed_password = await encryptPassword(insertValues.password);
@@ -22,10 +46,11 @@ const insertUser = async (insertValues) => {
 
 	return new Promise(function (resolve, reject) {
 		pool.query(query, values, function (err, data) {
+			// todo dinesh err Error: ER_DUP_ENTRY: Duplicate entry '9999999993' for key 'username_UNIQUE'
+
 			if (err) {
 				reject(err);
 			}
-
 			resolve(data.insertId);
 		});
 	});
@@ -35,9 +60,11 @@ const insertUserRole = (insertValues) => {
 	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 
 	let query = `  insert into user_role (role_id, user_id ) VALUES (?, ?)`;
+	console.log('dineshrole_id ' + insertValues.role_id);
+	console.log('dineshuser_id ' + insertValues.user_id);
 
 	let values = [insertValues.role_id, insertValues.user_id];
-
+	console.log('dinesh ' + values);
 	return new Promise(function (resolve, reject) {
 		pool.query(query, values, function (err, data) {
 			if (err) {
@@ -107,4 +134,5 @@ module.exports = {
 	insertUserRole,
 	getUsers,
 	getOutstandingBalance,
+	isUserExist,
 };

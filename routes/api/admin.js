@@ -14,6 +14,7 @@ const {
 	insertUserRole,
 	getUsers,
 	getOutstandingBalance,
+	isUserExist,
 } = require('../modules/admin/admin');
 
 const {
@@ -30,6 +31,7 @@ const {
 	updateCustomerShippingAddress,
 	insertCustomerShippingAddress,
 	getCustomerShippingAddress,
+	inactivateCSA,
 } = require('../modules/customers/customers.js');
 
 const {
@@ -163,7 +165,7 @@ adminRoute.get('/get-vendor-details/:centerid/:vendorid', (req, res) => {
 });
 
 adminRoute.get('/get-states', (req, res) => {
-	let sql = `select * from state `;
+	let sql = `select * from state order by description`;
 
 	pool.query(sql, function (err, data) {
 		if (err) {
@@ -358,11 +360,12 @@ adminRoute.post('/update-center', (req, res) => {
 
 module.exports = adminRoute;
 
-adminRoute.get('/prod-exists/:pcode', (req, res) => {
+adminRoute.get('/prod-exists/:pcode/:centerid', (req, res) => {
 	let pcode = req.params.pcode;
+	let center_id = req.params.centerid;
 
 	let sql = `select * from product p where 
-	p.product_code = '${pcode}' `;
+	p.product_code = '${pcode}' and center_id = ${center_id} `;
 
 	pool.query(sql, function (err, data) {
 		if (err) {
@@ -429,6 +432,18 @@ adminRoute.put('/update-customer-shipping-address/:id', (req, res) => {
 			);
 		return res.json(rows);
 	});
+});
+
+// get customer discount values BY CUSTOMER
+adminRoute.post('/inactivate-csa', async (req, res) => {
+	let jsonObj = req.body;
+	let result = await inactivateCSA(jsonObj.id);
+
+	if (result === 'UPDATED') {
+		return res.status(200).json({ message: 'Address Deleted.' });
+	} else {
+		return res.status(200).json({ message: 'Address Deletion Failed.' });
+	}
 });
 
 // ALL DISCOUNTS RELATED FUNCTIONS //
@@ -569,16 +584,24 @@ adminRoute.post('/add-discounts-brand', (req, res) => {
 adminRoute.post('/add-user', async (req, res, next) => {
 	let jsonObj = req.body;
 
-	let id = await insertUser(jsonObj);
-
-	if (id !== null || id !== '' || id !== undefined) {
-		let userrole = await insertUserRole({
-			user_id: id,
-			role_id: req.body.role_id,
-		});
-		return res.status(200).json({ message: 'User Inserted' });
+	let check = await isUserExist(jsonObj);
+	if (check === 'DUP_USERNAME') {
+		return res.status(200).json({ message: 'DUP_USERNAME' });
 	} else {
-		return res.status(200).json({ message: 'User Insert Failed' });
+		let id = await insertUser(jsonObj);
+		console.log('dinesh Y ' + id);
+
+		if (id !== null || id !== '' || id !== undefined) {
+			console.log('dinesh 11');
+
+			let userrole = await insertUserRole({
+				user_id: id,
+				role_id: req.body.role_id,
+			});
+
+			console.log('dinesh USR' + userrole);
+			return res.status(200).json({ message: 'User Inserted' });
+		}
 	}
 });
 
