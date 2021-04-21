@@ -34,8 +34,8 @@ module.exports = {
 	logger: log4js.getLogger('app_log'),
 	express: log4js.connectLogger(log4js.getLogger('access'), {
 		level: log4js.levels.DEBUG,
-		format: (req, res, format) =>
-			format(`:remote-addr :method :url ${JSON.stringify(req.body)}`),
+		// 	format: (req, res, format) =>
+		// 		format(`:remote-addr :method :url ${JSON.stringify(req.body)}`),
 	}),
 };
 

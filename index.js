@@ -20,9 +20,7 @@ const fs = require('fs');
 // };
 
 // var options = {
-// 	key: fs.readFileSync(
-// 		'/etc/letsencrypt/live/launchpad.squapl.com/privkey.pem'
-// 	),
+// 	key: fs.readFileSync('/etc/letsencrypt/live/launchpad.squapl.com/privkey.pem'),
 // 	cert: fs.readFileSync('/etc/letsencrypt/live/launchpad.squapl.com/cert.pem'),
 // 	ca: fs.readFileSync('/etc/letsencrypt/live/launchpad.squapl.com/chain.pem'),
 // };
@@ -43,10 +41,7 @@ app.use(logger.express);
 
 app.use(function (req, res, next) {
 	res.header('Access-Control-Allow-Origin', '*');
-	res.header(
-		'Access-Control-Allow-Headers',
-		'Origin, X-Requested-With, Content-Type, Accept'
-	);
+	res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
 	next();
 });
 

@@ -175,7 +175,7 @@ async function processItems(cloneReq, newPK) {
 		await new Promise(function (resolve, reject) {
 			pool.query(
 				k.pur_det_id === '' ? insQuery1 : updQuery1,
-				function (err, data) {
+				async function (err, data) {
 					if (err) {
 						return reject(
 							new ErrorHandler('500', 'Error Purchase process items.', err),
@@ -193,19 +193,23 @@ async function processItems(cloneReq, newPK) {
 								k.pur_det_id === '' ? data.insertId : k.pur_det_id;
 
 							// if mrp flag is true the insert new record to stocks
-							insertStock(k, pdetailid);
+							let stockid = await insertStock(k);
+							let isupdated = await updatePurchaseDetail(pdetailid, stockid);
+							insertItemHistory(k, newPK, data.insertId, cloneReq);
 						} else {
 							// else update the stock tbl, only of the status is "C - completed", draft should be ignored
 
 							//	if (cloneReq.status === "C") {
 							// update stock for both status C & D (Completed & Draft)
-							updateStock(k);
+							let isupdated = await updateStock(k);
+							insertItemHistory(k, newPK, data.insertId, cloneReq);
+
 							//		}
 						}
 
-						if (cloneReq.status === 'C') {
-							insertItemHistory(k, newPK, data.insertId, cloneReq);
-						}
+						// if (cloneReq.status === 'C') {
+						// 	insertItemHistory(k, newPK, data.insertId, cloneReq);
+						// }
 
 						resolve(true);
 					}
@@ -215,28 +219,70 @@ async function processItems(cloneReq, newPK) {
 	}
 }
 
-function insertStock(k, pdetailid) {
+function insertStock(k) {
 	todayYYMMDD = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD');
 	let query2 = `
 	insert into stock (product_id, mrp, available_stock, open_stock, updateddate)
 	values ('${k.product_id}', '${k.mrp}', '${k.qty}', 0, '${todayYYMMDD}')`;
 
-	pool.query(query2, function (err, data) {
-		if (err) {
-		} else {
-			let query3 = `
-
-			update purchase_detail set stock_id =  '${data.insertId}'
-			where id  = '${pdetailid}' `;
-
-			pool.query(query3, function (err, data) {
-				if (err) {
-				} else {
-				}
-			});
-		}
+	return new Promise(function (resolve, reject) {
+		pool.query(query2, function (err, data) {
+			if (err) {
+				return reject(
+					new ErrorHandler('500', 'Error insertStock in Purchasejs.', err),
+					res
+				);
+			} else {
+				resolve(data.insertId);
+			}
+		});
 	});
 }
+
+function updatePurchaseDetail(purchaseDetailId, stockid) {
+	todayYYMMDD = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD');
+
+	let query3 = `
+
+			update purchase_detail set stock_id =  '${stockid}'
+			where id  = '${purchaseDetailId}' `;
+
+	return new Promise(function (resolve, reject) {
+		pool.query(query3, function (err, data) {
+			if (err) {
+				return reject(
+					new ErrorHandler('500', 'Error updateStock in Purchasejs.', err),
+					res
+				);
+			} else {
+				resolve('purchase_detail_updated');
+			}
+		});
+	});
+}
+
+// function insertStock(k, pdetailid) {
+// 	todayYYMMDD = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD');
+// 	let query2 = `
+// 	insert into stock (product_id, mrp, available_stock, open_stock, updateddate)
+// 	values ('${k.product_id}', '${k.mrp}', '${k.qty}', 0, '${todayYYMMDD}')`;
+
+// 	pool.query(query2, function (err, data) {
+// 		if (err) {
+// 		} else {
+// 			let query3 = `
+
+// 			update purchase_detail set stock_id =  '${data.insertId}'
+// 			where id  = '${pdetailid}' `;
+
+// 			pool.query(query3, function (err, data) {
+// 				if (err) {
+// 				} else {
+// 				}
+// 			});
+// 		}
+// 	});
+// }
 
 function updateStock(k) {
 	let qty_to_update = k.qty - k.old_val;
@@ -246,10 +292,16 @@ function updateStock(k) {
 update stock set available_stock =  available_stock + '${qty_to_update}'
 where product_id = '${k.product_id}' and id = '${k.stock_pk}' `;
 
-	pool.query(query2, function (err, data) {
-		if (err) {
-		} else {
-		}
+	return new Promise(function (resolve, reject) {
+		pool.query(query2, function (err, data) {
+			if (err) {
+				return reject(
+					new ErrorHandler('500', 'Error updateStock in Purchasejs.', err),
+					res
+				);
+			}
+			return resolve('updated');
+		});
 	});
 }
 

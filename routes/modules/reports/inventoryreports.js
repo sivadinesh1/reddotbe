@@ -29,7 +29,7 @@ const getProductInventoryReport = (center_id, product_code, callback) => {
   where 
   b.id = p.brand_id and
   p.id = ih.product_ref_id and
-  p.product_code like '%${product_code}%' and
+  p.product_code = '${product_code}' and
   ih.center_id = '${center_id}'
   order by ih.id desc
   
@@ -61,8 +61,6 @@ p.brand_id = b.id and
 p.center_id = ${center_id}
 group by
 s.product_id, s.mrp, s.available_stock `;
-
-	console.log('dinesh sql ' + query);
 
 	return new Promise(function (resolve, reject) {
 		pool.query(query, function (err, data) {

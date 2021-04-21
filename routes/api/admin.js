@@ -98,26 +98,16 @@ adminRoute.get('/view-product-info/:centerid/:productid', (req, res) => {
 });
 
 // Add Product, product master
-adminRoute.post('/add-product', (req, res, next) => {
+adminRoute.post('/add-product', async (req, res, next) => {
 	let jsonObj = req.body;
 
-	insertProduct(jsonObj, (err, data) => {
-		if (err) {
-			let errTxt = err.message;
+	let returnResponse = await insertProduct(jsonObj, res);
 
-			if (errTxt.indexOf('pcode_center_fk') > -1) {
-				return handleError(
-					new ErrorHandler('555', 'Duplicate product code', err),
-					res
-				);
-			}
-		} else {
-			//	let newPK = data.insertId;
-			return res.status(200).json({
-				result: 'success',
-			});
-		}
-	});
+	if (returnResponse === 'success') {
+		return res.status(200).json({
+			result: 'success',
+		});
+	}
 });
 
 // update product master
@@ -589,17 +579,13 @@ adminRoute.post('/add-user', async (req, res, next) => {
 		return res.status(200).json({ message: 'DUP_USERNAME' });
 	} else {
 		let id = await insertUser(jsonObj);
-		console.log('dinesh Y ' + id);
 
 		if (id !== null || id !== '' || id !== undefined) {
-			console.log('dinesh 11');
-
 			let userrole = await insertUserRole({
 				user_id: id,
 				role_id: req.body.role_id,
 			});
 
-			console.log('dinesh USR' + userrole);
 			return res.status(200).json({ message: 'User Inserted' });
 		}
 	}

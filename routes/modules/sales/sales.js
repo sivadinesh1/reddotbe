@@ -144,10 +144,6 @@ const insertItemHistoryAsync = (k, vSale_id, vSale_det_id, cloneReq) => {
 	let actn_type = 'Sold';
 	let sale_id = vSale_id === '' ? k.sale_id : vSale_id;
 
-	console.log('dinesh k.qty >> ' + k.qty);
-	console.log('dinesh k.old_val >> ' + k.old_val);
-	console.log('dinesh >> ' + cloneReq.revision);
-
 	// revision '0' is Status 'C' new record
 	if (cloneReq.revision === 0 && txn_qty === 0) {
 		txn_qty = k.qty;
@@ -306,7 +302,7 @@ const updateLegerCustomerChange = (
 
 	let query = `delete from ledger where customer_id =  '${old_customer_id}'
 	and invoice_ref_id = '${sale_id}'  and center_id = '${center_id}' `;
-	console.log('dinesh ' + query);
+
 	return new Promise(function (resolve, reject) {
 		pool.query(query, function (err, data) {
 			if (err) {
@@ -318,8 +314,6 @@ const updateLegerCustomerChange = (
 											VALUES
 											('Leger', '${sale_id}', '${sale_id}', 'Customer Updated',  '${old_customer_id}',
 											'${customer_id}', '${today}', '${center_id}' ) `;
-
-			console.log('dinesh2 ' + query2);
 
 			return new Promise(function (resolve, reject) {
 				pool.query(query2, function (err, data) {

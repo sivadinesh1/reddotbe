@@ -424,8 +424,6 @@ enquiryRoute.post('/add-more-enquiry-details', (req, res) => {
 							and center_id = '${jsonObj.center_id}'), 
 							'${jsonObj.askqty}', '${jsonObj.product_code}', '${jsonObj.notes}', 'O')`;
 
-	console.log('dinesh ' + query1);
-
 	pool.query(query1, function (err, data) {
 		if (err) {
 			return handleError(
@@ -631,7 +629,7 @@ discount.brand_id = 0 )
 	ed.giveqty != 0 and
 	e.id = ${enqid}
 	`;
-		console.log('dinesh ' + sql);
+
 		pool.query(sql, function (err, data) {
 			if (err) {
 				return handleError(
@@ -767,8 +765,6 @@ enquiryRoute.post('/search-enquiries', (req, res) => {
 enquiryRoute.post('/delete-enquiry-details', async (req, res) => {
 	let id = req.body.id;
 	let enq_id = req.body.enquiry_id;
-
-	console.log('dinesh delete enq details ' + JSON.stringify(req.body));
 
 	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 

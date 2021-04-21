@@ -60,11 +60,9 @@ const insertUserRole = (insertValues) => {
 	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 
 	let query = `  insert into user_role (role_id, user_id ) VALUES (?, ?)`;
-	console.log('dineshrole_id ' + insertValues.role_id);
-	console.log('dineshuser_id ' + insertValues.user_id);
 
 	let values = [insertValues.role_id, insertValues.user_id];
-	console.log('dinesh ' + values);
+
 	return new Promise(function (resolve, reject) {
 		pool.query(query, values, function (err, data) {
 			if (err) {
