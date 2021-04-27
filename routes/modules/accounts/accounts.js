@@ -19,21 +19,14 @@ VALUES
     LIMIT 1) a), 0) + '${insertValues.net_total}', '${today}'
   ) `;
 
-	let values = [
-		insertValues.center_id,
-		insertValues.customerctrl.id,
-		invoice_ref_id,
-		insertValues.net_total,
-	];
+	let values = [insertValues.center_id, insertValues.customerctrl.id, invoice_ref_id, insertValues.net_total];
 
 	return new Promise(function (resolve, reject) {
 		pool.query(query, values, async function (err, data) {
 			if (err) {
 				reject(err);
 			}
-			let updateCustomerBalance = await updateCustomerBalanceAmount(
-				insertValues.customerctrl.id
-			);
+			let updateCustomerBalance = await updateCustomerBalanceAmount(insertValues.customerctrl.id);
 			resolve(data);
 		});
 	});
@@ -78,20 +71,14 @@ VALUES
 		), '${today}'
   ) `;
 
-	let values = [
-		insertValues.center_id,
-		insertValues.customerctrl.id,
-		invoice_ref_id,
-	];
+	let values = [insertValues.center_id, insertValues.customerctrl.id, invoice_ref_id];
 
 	return new Promise(function (resolve, reject) {
 		pool.query(query, values, async function (err, data) {
 			if (err) {
 				return reject(err);
 			}
-			let updateCustomerBalance = await updateCustomerBalanceAmount(
-				insertValues.customerctrl.id
-			);
+			let updateCustomerBalance = await updateCustomerBalanceAmount(insertValues.customerctrl.id);
 			return resolve(data);
 		});
 	});
@@ -111,33 +98,20 @@ VALUES
     LIMIT 1) a), 0)), '${today}'
   ) `;
 
-	let values = [
-		insertValues.center_id,
-		insertValues.customerctrl.id,
-		invoice_ref_id,
-		insertValues.net_total,
-	];
+	let values = [insertValues.center_id, insertValues.customerctrl.id, invoice_ref_id, insertValues.net_total];
 
 	return new Promise(function (resolve, reject) {
 		pool.query(query, values, async function (err, data) {
 			if (err) {
 				return reject(err);
 			}
-			let updateCustomerBalance = await updateCustomerBalanceAmount(
-				insertValues.customerctrl.id
-			);
+			let updateCustomerBalance = await updateCustomerBalanceAmount(insertValues.customerctrl.id);
 			return resolve(data);
 		});
 	});
 };
 
-const addPaymentLedgerRecord = (
-	insertValues,
-	payment_ref_id,
-	receivedamount,
-	sale_ref_id,
-	callback
-) => {
+const addPaymentLedgerRecord = (insertValues, payment_ref_id, receivedamount, sale_ref_id, callback) => {
 	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 
 	let query = `
@@ -150,20 +124,13 @@ const addPaymentLedgerRecord = (
 			LIMIT 1) a), 0) - '${receivedamount}', '${today}'
 		) `;
 
-	let values = [
-		insertValues.customer.center_id,
-		insertValues.customer.id,
-		payment_ref_id,
-		receivedamount,
-	];
+	let values = [insertValues.customer.center_id, insertValues.customer.id, payment_ref_id, receivedamount];
 
 	pool.query(query, values, async function (err, data) {
 		if (err) {
 			return callback(err);
 		}
-		let updateCustomerBalance = await updateCustomerBalanceAmount(
-			insertValues.customer.id
-		);
+		let updateCustomerBalance = await updateCustomerBalanceAmount(insertValues.customer.id);
 		return callback(null, data);
 	});
 };
@@ -195,10 +162,7 @@ const addPaymentMaster = async (cloneReq, pymtNo, insertValues, callback) => {
 				return reject(callback(err));
 			}
 
-			await updateCustomerLastPaidDate(
-				cloneReq.customer.id,
-				insertValues.receiveddate
-			);
+			await updateCustomerLastPaidDate(cloneReq.customer.id, insertValues.receiveddate);
 			return resolve(callback(null, data));
 		});
 	});
@@ -225,9 +189,7 @@ const updatePymtSequenceGenerator = (center_id) => {
 const getPymtSequenceNo = (cloneReq) => {
 	let pymtNoQry = '';
 
-	pymtNoQry = ` select concat('${moment(cloneReq.pymt_date).format(
-		'YY'
-	)}', "/", '${moment(cloneReq.pymt_date).format(
+	pymtNoQry = ` select concat('${moment(cloneReq.pymt_date).format('YY')}', "/", '${moment(cloneReq.pymt_date).format(
 		'MM'
 	)}', "/", lpad(pymt_seq, 5, "0")) as pymtNo from financialyear 
 				where 
@@ -244,15 +206,7 @@ const getPymtSequenceNo = (cloneReq) => {
 	});
 };
 
-const getPaymentsByCustomers = (
-	center_id,
-	customer_id,
-	from_date,
-	to_date,
-	searchtype,
-	invoiceno,
-	callback
-) => {
+const getPaymentsByCustomers = (center_id, customer_id, from_date, to_date, searchtype, invoiceno, callback) => {
 	let query = ` select p.*, pd.applied_amount as applied_amount, s.invoice_no as invoice_no, 
 	s.invoice_date as invoice_date, s.net_total as invoice_amount,  pm.pymt_mode_name as pymt_mode from 
         payment p,
@@ -273,11 +227,7 @@ const getPaymentsByCustomers = (
 					str_to_date('${to_date}', '%d-%m-%YYYY')`;
 	}
 
-	if (
-		customer_id !== undefined &&
-		customer_id !== 'all' &&
-		searchtype === 'all'
-	) {
+	if (customer_id !== undefined && customer_id !== 'all' && searchtype === 'all') {
 		query = query + ` and	p.customer_id = '${customer_id}' `;
 	}
 
@@ -328,15 +278,7 @@ const getPymtTransactionByCustomers = (center_id, customer_id, callback) => {
 	});
 };
 
-const getPaymentsByCenter = (
-	center_id,
-	from_date,
-	to_date,
-	customer_id,
-	searchtype,
-	invoiceno,
-	callback
-) => {
+const getPaymentsByCenter = (center_id, from_date, to_date, customer_id, searchtype, invoiceno, callback) => {
 	let query = `
 	select 
 	c.name as customer_name,
@@ -374,11 +316,7 @@ const getPaymentsByCenter = (
 		str_to_date('${to_date}', '%d-%m-%YYYY')`;
 	}
 
-	if (
-		customer_id !== undefined &&
-		customer_id !== 'all' &&
-		searchtype === 'all'
-	) {
+	if (customer_id !== undefined && customer_id !== 'all' && searchtype === 'all') {
 		query = query + ` and	p.customer_id = '${customer_id}' `;
 	}
 
@@ -435,7 +373,7 @@ const getLedgerByCustomers = (center_id, customer_id, callback) => {
 	(select p.payment_no from payment p where p.id = l.payment_ref_id) as payment_ref_id
 	 from ledger l
 	 where 
-	 l.center_id =  '${center_id}' and l.customer_id = '${customer_id}' order by l.id desc  `;
+	 l.center_id =  '${center_id}' and l.customer_id = '${customer_id}' 	 and ledger_detail != 'Invoice Reversal' order by l.id desc  `;
 
 	pool.query(query, function (err, data) {
 		if (err) {
@@ -445,15 +383,7 @@ const getLedgerByCustomers = (center_id, customer_id, callback) => {
 	});
 };
 
-const getSaleInvoiceByCustomers = (
-	center_id,
-	customer_id,
-	from_date,
-	to_date,
-	searchtype,
-	invoiceno,
-	callback
-) => {
+const getSaleInvoiceByCustomers = (center_id, customer_id, from_date, to_date, searchtype, invoiceno, callback) => {
 	let query = `	select s.id as sale_id, s.center_id as center_id, s.customer_id as customer_id, s.invoice_no as invoice_no, 
 	s.invoice_date as invoice_date, 
 	abs(datediff(STR_TO_DATE(s.invoice_date,'%d-%m-%Y'), CURDATE())) as aging_days,
@@ -492,11 +422,7 @@ const getSaleInvoiceByCustomers = (
 		str_to_date('${to_date}', '%d-%m-%YYYY')`;
 	}
 
-	if (
-		customer_id !== undefined &&
-		customer_id !== 'all' &&
-		searchtype === 'all'
-	) {
+	if (customer_id !== undefined && customer_id !== 'all' && searchtype === 'all') {
 		query = query + ` and	s.customer_id = '${customer_id}' `;
 	}
 
@@ -513,15 +439,7 @@ const getSaleInvoiceByCustomers = (
 	});
 };
 
-const getSaleInvoiceByCenter = (
-	center_id,
-	from_date,
-	to_date,
-	customer_id,
-	searchtype,
-	invoiceno,
-	callback
-) => {
+const getSaleInvoiceByCenter = (center_id, from_date, to_date, customer_id, searchtype, invoiceno, callback) => {
 	let query = `	select s.id as sale_id, s.center_id as center_id, s.customer_id as customer_id, 
 	s.invoice_no as invoice_no, s.invoice_date as invoice_date, 
 	abs(datediff(STR_TO_DATE(s.invoice_date,'%d-%m-%Y'), CURDATE())) as aging_days,
@@ -560,11 +478,7 @@ const getSaleInvoiceByCenter = (
 		str_to_date('${to_date}', '%d-%m-%YYYY')`;
 	}
 
-	if (
-		customer_id !== undefined &&
-		customer_id !== 'all' &&
-		searchtype === 'all'
-	) {
+	if (customer_id !== undefined && customer_id !== 'all' && searchtype === 'all') {
 		query = query + ` and	s.customer_id = '${customer_id}' `;
 	}
 
@@ -602,11 +516,7 @@ const updateCustomerCredit = (balanceamount, center_id, customer_id) => {
 	});
 };
 
-const updateCustomerCreditMinus = (
-	creditusedamount,
-	center_id,
-	customer_id
-) => {
+const updateCustomerCreditMinus = (creditusedamount, center_id, customer_id) => {
 	let qryUpdateSqnc = '';
 
 	qryUpdateSqnc = `

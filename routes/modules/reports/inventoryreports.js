@@ -4,8 +4,9 @@ const logger = require('./../../helpers/log4js');
 
 const { handleError, ErrorHandler } = require('./../../helpers/error');
 
-const getProductInventoryReport = (center_id, product_code, callback) => {
+const getProductInventoryReport = (center_id, product_code, product_id, callback) => {
 	let query = ` select ih.id, module, p.id as product_id, p.product_code as product_code, p.description as product_description,
+  p.mrp as mrp,
   b.name as brand_name,  ih.module,
 
   IFNULL((select invoice_no from purchase where id = ih.purchase_id), (select invoice_no from sale where id = ih.sale_id)) as invoice_no,
@@ -29,7 +30,7 @@ const getProductInventoryReport = (center_id, product_code, callback) => {
   where 
   b.id = p.brand_id and
   p.id = ih.product_ref_id and
-  p.product_code = '${product_code}' and
+  p.id = '${product_id}' and
   ih.center_id = '${center_id}'
   order by ih.id desc
   

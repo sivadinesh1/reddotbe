@@ -7,13 +7,7 @@ const { toTimeZone, currentTimeInTimeZone } = require('./../../helpers/utils');
 const insertProduct = async (insertValues, res) => {
 	let productId = await insertToProduct(insertValues, res);
 	let stockInsertRes = await insertToStock(productId, insertValues, res);
-	let historyAddRes = await newProductEntryToHistory(
-		insertValues.center_id,
-		productId,
-		insertValues.currentstock,
-		insertValues.mrp,
-		res
-	);
+	let historyAddRes = await newProductEntryToHistory(insertValues.center_id, productId, insertValues.currentstock, insertValues.mrp, res);
 
 	return historyAddRes;
 };
@@ -25,9 +19,9 @@ function insertToProduct(insertValues, res) {
 		product 
 			(center_id, brand_id, product_code, description, unit, packetsize, hsncode, currentstock, unit_price, mrp, 
 				purchase_price, salesprice, rackno, location, maxdiscount, alternatecode, taxrate, 
-				minqty, itemdiscount, reorderqty, avgpurprice, avgsaleprice, margin)
+				minqty, itemdiscount, reorderqty, avgpurprice, avgsaleprice, margin, createdon)
 		VALUES
-			( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ) `;
+			( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '${today}' ) `;
 
 	let values = [
 		insertValues.center_id,
@@ -58,10 +52,7 @@ function insertToProduct(insertValues, res) {
 	return new Promise(function (resolve, reject) {
 		pool.query(query, values, function (err, data) {
 			if (err) {
-				return handleError(
-					new ErrorHandler('500', 'Error insertToProduct in Productjs', err),
-					res
-				);
+				return handleError(new ErrorHandler('500', 'Error insertToProduct in Productjs', err), res);
 			} else {
 				resolve(data.insertId);
 			}
@@ -79,10 +70,7 @@ function insertToStock(productId, insertValues, res) {
 	return new Promise(function (resolve, reject) {
 		pool.query(query2, function (err, data1) {
 			if (err) {
-				return handleError(
-					new ErrorHandler('500', 'Error insertToStock in Productjs', err),
-					res
-				);
+				return handleError(new ErrorHandler('500', 'Error insertToStock in Productjs', err), res);
 			} else {
 				resolve(data1);
 			}
@@ -101,14 +89,7 @@ function newProductEntryToHistory(center_id, productId, txn_qty, mrp, res) {
 	return new Promise(function (resolve, reject) {
 		pool.query(query2, function (err, data1) {
 			if (err) {
-				return handleError(
-					new ErrorHandler(
-						'500',
-						'Error newProductEntryToHistory in Productjs',
-						err
-					),
-					res
-				);
+				return handleError(new ErrorHandler('500', 'Error newProductEntryToHistory in Productjs', err), res);
 			}
 			resolve('success');
 		});
@@ -127,7 +108,7 @@ const updateProduct = (updateValues, callback) => {
 			maxdiscount = '${updateValues.maxdiscount}', alternatecode = '${updateValues.alternatecode}',taxrate = '${updateValues.taxrate}',
 			minqty = '${updateValues.minqty}', itemdiscount = '${updateValues.itemdiscount}',reorderqty = '${updateValues.reorderqty}',
 			avgpurprice = '${updateValues.avgpurprice}', avgsaleprice = '${updateValues.avgsaleprice}',margin = '${updateValues.margin}',
-			rackno = '${updateValues.rackno}'
+			rackno = '${updateValues.rackno}', updatedon = '${today}'
 			where
 			id = '${updateValues.product_id}'
 	`;

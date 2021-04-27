@@ -36,13 +36,7 @@ const insertUser = async (insertValues) => {
 
 	let query = `  insert into users (centerid, username, userpass, firstname, mobilenumber, createddatetime, status ) VALUES (?, ?, ?, ?, ?, '${today}', 'A')`;
 
-	let values = [
-		insertValues.center_id,
-		insertValues.username,
-		hashed_password,
-		insertValues.firstname,
-		insertValues.username,
-	];
+	let values = [insertValues.center_id, insertValues.username, hashed_password, insertValues.firstname, insertValues.username];
 
 	return new Promise(function (resolve, reject) {
 		pool.query(query, values, function (err, data) {
@@ -114,7 +108,13 @@ u.centerid = '${center_id}' and status = '${status}'
 };
 
 const getOutstandingBalance = (center_id, limit) => {
-	let query = ` select * from customer where center_id = '${center_id}' order by balance_amt desc limit ${limit} `;
+	let query = ` select * from customer where center_id = '${center_id}' 
+	and balance_amt != 0 
+	order by balance_amt desc `;
+
+	if (limit !== 0) {
+		query = query + ` limit ${limit}`;
+	}
 
 	return new Promise(function (resolve, reject) {
 		pool.query(query, function (err, data) {
