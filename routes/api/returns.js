@@ -47,13 +47,11 @@ returnsRouter.post('/search-sale-return', (req, res) => {
 
 	if (search_type === 'all') {
 		if (from_date !== '') {
-			from_date =
-				moment(new Date(req.body.fromdate)).format('DD-MM-YYYY') + ' 00:00:00';
+			from_date = moment(new Date(req.body.fromdate)).format('DD-MM-YYYY') + ' 00:00:00';
 		}
 
 		if (to_date !== '') {
-			to_date =
-				moment(new Date(req.body.todate)).format('DD-MM-YYYY') + ' 23:59:00';
+			to_date = moment(new Date(req.body.todate)).format('DD-MM-YYYY') + ' 23:59:00';
 		}
 
 		let custsql = `and s.customer_id = '${customer_id}' `;
@@ -144,35 +142,26 @@ returnsRouter.post('/search-sale-return', (req, res) => {
 		sr.center_id = '${center_id}' and `;
 
 		if (search_type === 'byinvoice') {
-			query =
-				query +
-				` s.invoice_no = '${search_by.trim()}' order by sr.return_date desc `;
+			query = query + ` s.invoice_no = '${search_by.trim()}' order by sr.return_date desc `;
 		} else if (search_type === 'bycreditnote') {
-			query =
-				query +
-				` cn.credit_note_no = '${search_by.trim()}' order by sr.return_date desc `;
+			query = query + ` cn.credit_note_no = '${search_by.trim()}' order by sr.return_date desc `;
 		}
 	}
 
 	pool.query(search_type === 'all' ? sql : query, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', 'Error fetching search-sale-return', err),
-				res
-			);
+			return handleError(new ErrorHandler('500', 'Error fetching search-sale-return', err), res);
 		} else {
 			return res.json(data);
 		}
 	});
 });
 
-returnsRouter.get(
-	'/get-sale-return-details/:center_id/:salre_return_id',
-	(req, res) => {
-		let center_id = req.params.center_id;
-		let sale_return_id = req.params.salre_return_id;
+returnsRouter.get('/get-sale-return-details/:center_id/:salre_return_id', (req, res) => {
+	let center_id = req.params.center_id;
+	let sale_return_id = req.params.salre_return_id;
 
-		let sql = ` select p.id, p.product_code, p.description, srd.* from 
+	let sql = ` select p.id, p.product_code, p.description, srd.* from 
 	sale_return_detail srd,
 	product p,
 	sale_detail sd
@@ -182,22 +171,14 @@ returnsRouter.get(
 	srd.sale_return_id = ${sale_return_id}
 		`;
 
-		pool.query(sql, function (err, data) {
-			if (err) {
-				return handleError(
-					new ErrorHandler(
-						'500',
-						`/get-sale-return-details/:center_id/:salre_return_id ${center_id} ${sale_return_id}`,
-						err
-					),
-					res
-				);
-			} else {
-				return res.json(data);
-			}
-		});
-	}
-);
+	pool.query(sql, function (err, data) {
+		if (err) {
+			return handleError(new ErrorHandler('500', `/get-sale-return-details/:center_id/:salre_return_id ${center_id} ${sale_return_id}`, err), res);
+		} else {
+			return res.json(data);
+		}
+	});
+});
 
 returnsRouter.post('/update-sale-returns-received', (req, res) => {
 	let returnArr = req.body;
@@ -219,14 +200,7 @@ returnsRouter.post('/update-sale-returns-received', (req, res) => {
 
 		pool.query(query, function (err, data) {
 			if (err) {
-				return handleError(
-					new ErrorHandler(
-						'500',
-						'Error updating update-sale-returns-received',
-						err
-					),
-					res
-				);
+				return handleError(new ErrorHandler('500', 'Error updating update-sale-returns-received', err), res);
 			} else {
 			}
 		});
@@ -241,34 +215,24 @@ returnsRouter.post('/update-sale-returns-received', (req, res) => {
 });
 
 // get sale master to display in sale invoice component
-returnsRouter.get(
-	'/show-receive-button/:center_id/:sale_return_id',
-	async (req, res) => {
-		let center_id = req.params.center_id;
-		let sale_return_id = req.params.sale_return_id;
+returnsRouter.get('/show-receive-button/:center_id/:sale_return_id', async (req, res) => {
+	let center_id = req.params.center_id;
+	let sale_return_id = req.params.sale_return_id;
 
-		let query = `
+	let query = `
 			select count(*) as cnt from sale_return_detail 
 			where
-			return_qty > received_qty and
+			return_qty > received_qty and 
 			sale_return_id = ${sale_return_id} `;
 
-		pool.query(query, function (err, data) {
-			if (err) {
-				return handleError(
-					new ErrorHandler(
-						'500',
-						`Error /show-receive-button/:center_id/:sale_return_id ${center_id} ${sale_return_id} `,
-						err
-					),
-					res
-				);
-			} else {
-				return res.json(data);
-			}
-		});
-	}
-);
+	pool.query(query, function (err, data) {
+		if (err) {
+			return handleError(new ErrorHandler('500', `Error /show-receive-button/:center_id/:sale_return_id ${center_id} ${sale_return_id} `, err), res);
+		} else {
+			return res.json(data);
+		}
+	});
+});
 
 /*
 Sale return & Create Credit Note + update credit_amt in customer table
@@ -291,24 +255,11 @@ returnsRouter.post('/add-sale-return', async (req, res) => {
 	updateCRSequenceGenerator(smd.center_id);
 	let fetchCRNoteNo = await getSequenceCrNote(smd.center_id);
 
-	let cr_note_id_created = await createCreditNote(
-		fetchCRNoteNo,
-		smd.to_return_amount,
-		'R'
-	);
+	let cr_note_id_created = await createCreditNote(fetchCRNoteNo, smd.to_return_amount, 'R');
 	updateCrNoteIdInSaleReturnTable(cr_note_id_created, sale_return_id);
-	let cr_note_updated = await updateCRAmntToCustomer(
-		smd.sale_id,
-		smd.to_return_amount
-	);
+	let cr_note_updated = await updateCRAmntToCustomer(smd.sale_id, smd.to_return_amount);
 
-	Promise.all([
-		sale_return_id,
-		job_completed,
-		fetchCRNoteNo,
-		cr_note_id_created,
-		cr_note_updated,
-	]).then((result) => {
+	Promise.all([sale_return_id, job_completed, fetchCRNoteNo, cr_note_id_created, cr_note_updated]).then((result) => {
 		return res.json('success');
 	});
 });
