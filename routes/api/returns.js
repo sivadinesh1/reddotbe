@@ -222,7 +222,7 @@ returnsRouter.get('/show-receive-button/:center_id/:sale_return_id', async (req,
 	let query = `
 			select count(*) as cnt from sale_return_detail 
 			where
-			return_qty > received_qty and 
+			return_qty > received_qty and  
 			sale_return_id = ${sale_return_id} `;
 
 	pool.query(query, function (err, data) {
