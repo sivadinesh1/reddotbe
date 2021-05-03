@@ -1,13 +1,12 @@
-var pool = require("../../helpers/db");
-const moment = require("moment");
-const logger = require("./../../helpers/log4js");
-const { toTimeZone, currentTimeInTimeZone, toTimeZoneFrmt } = require("./../../helpers/utils");
+var pool = require('../../helpers/db');
+const moment = require('moment');
+const logger = require('./../../helpers/log4js');
+const { toTimeZone, currentTimeInTimeZone, toTimeZoneFrmt } = require('./../../helpers/utils');
 
 // param: smd : sale_master_data
 // NR: Not Received, A: Approved
 const insertSaleReturns = (smd) => {
-	
-	let today = currentTimeInTimeZone("Asia/Kolkata", "DD-MM-YYYY");
+	let today = currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY');
 
 	return new Promise((resolve, reject) => {
 		let query = ` insert into sale_return (sale_id, return_date, center_id, to_return_amount,
@@ -17,7 +16,7 @@ const insertSaleReturns = (smd) => {
 
 		pool.query(query, function (err, data) {
 			if (err) {
-				reject("Error inserting sale returns");
+				reject('Error inserting sale returns');
 			} else {
 				resolve(data.insertId);
 			}
@@ -35,7 +34,7 @@ const insertSaleReturnDetail = async (srd, sale_return_id, smd) => {
 			let updateSaleDetailFlag = await updateSaleDetail(k);
 			let updateStockAfterReturnFlag = await updateStockAfterReturn(k.product_id, k.mrp, k.received_now);
 		}
-		resolve("done");
+		resolve('done');
 	});
 };
 
@@ -52,7 +51,7 @@ const insertSaleDetailReturn = (srd, sale_return_id, smd) => {
 	return new Promise((resolve, reject) => {
 		pool.query(sql, function (err, data) {
 			if (err) {
-				reject("Error while inserting sale details return table");
+				reject('Error while inserting sale details return table');
 			} else {
 				resolve(data.insertId);
 			}
@@ -66,9 +65,9 @@ const updateSaleDetail = (smd) => {
 	return new Promise((resolve, reject) => {
 		pool.query(sql, function (err, data) {
 			if (err) {
-				reject("Error while updating sale details with returns");
+				reject('Error while updating sale details with returns' + JSON.stringify(err));
 			} else {
-				resolve("success");
+				resolve('success');
 			}
 		});
 	});
@@ -81,9 +80,9 @@ const updateStockAfterReturn = (product_id, mrp, received_now) => {
 	return new Promise((resolve, reject) => {
 		pool.query(sql, function (err, data) {
 			if (err) {
-				reject("Error while updating sale details with returns");
+				reject('Error while updating sale details with returns' + JSON.stringify(err));
 			} else {
-				resolve("success");
+				resolve('success');
 			}
 		});
 	});
@@ -97,7 +96,7 @@ const createCreditNote = (credit_note_no, credit_note_total_amount, refund_statu
 	return new Promise((resolve, reject) => {
 		pool.query(sql, function (err, data) {
 			if (err) {
-				reject("Error while inserting createCreditNote ");
+				reject('Error while inserting createCreditNote ');
 			} else {
 				resolve(data.insertId);
 			}
@@ -107,11 +106,11 @@ const createCreditNote = (credit_note_no, credit_note_total_amount, refund_statu
 
 // format and send sequence #
 function getSequenceCrNote(center_id) {
-	let invNoQry = "";
+	let invNoQry = '';
 
-	invNoQry = ` select concat('${currentTimeInTimeZone("Asia/Kolkata", "YY")}', "/", '${currentTimeInTimeZone(
-		"Asia/Kolkata",
-		"MM",
+	invNoQry = ` select concat('${currentTimeInTimeZone('Asia/Kolkata', 'YY')}', "/", '${currentTimeInTimeZone(
+		'Asia/Kolkata',
+		'MM'
 	)}', "/", lpad(cr_note_seq, 5, "0")) as crNoteNo from financialyear 
 				where 
 				center_id = '${center_id}' and  
@@ -129,7 +128,7 @@ function getSequenceCrNote(center_id) {
 
 // Update Sequence in financial Year tbl when its fresh sale insert
 function updateCRSequenceGenerator(center_id) {
-	let qryUpdateSqnc = "";
+	let qryUpdateSqnc = '';
 
 	qryUpdateSqnc = `
 		update financialyear set cr_note_seq = cr_note_seq + 1 where 

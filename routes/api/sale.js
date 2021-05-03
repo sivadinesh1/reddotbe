@@ -21,31 +21,20 @@ const {
 	updateLegerCustomerChange,
 } = require('../modules/sales/sales.js');
 
-const {
-	addSaleLedgerRecord,
-	addReverseSaleLedgerRecord,
-	addSaleLedgerAfterReversalRecord,
-} = require('../modules/accounts/accounts.js');
+const { addSaleLedgerRecord, addReverseSaleLedgerRecord, addSaleLedgerAfterReversalRecord } = require('../modules/accounts/accounts.js');
 
 var pool = require('../helpers/db');
-const {
-	toTimeZone,
-	currentTimeInTimeZone,
-	toTimeZoneFrmt,
-} = require('./../helpers/utils');
+const { toTimeZone, currentTimeInTimeZone, toTimeZoneFrmt } = require('./../helpers/utils');
 
 // Get Possible Next Sale Invoice # (ReadOnly)
-saleRouter.get(
-	'/get-next-sale-invoice-no/:centerid/:invoicetype',
-	(req, res) => {
-		let center_id = req.params.centerid;
-		let invoicetype = req.params.invoicetype;
+saleRouter.get('/get-next-sale-invoice-no/:centerid/:invoicetype', (req, res) => {
+	let center_id = req.params.centerid;
+	let invoicetype = req.params.invoicetype;
 
-		getNextSaleInvoiceNoAsync(center_id, invoicetype).then((result) => {
-			return res.json(result);
-		});
-	}
-);
+	getNextSaleInvoiceNoAsync(center_id, invoicetype).then((result) => {
+		return res.json(result);
+	});
+});
 
 // delete sale details records based on sale details id
 // if audit is true, form a json string data and store in audit table
@@ -82,12 +71,7 @@ saleRouter.post('/delete-sales-details', async (req, res) => {
 		let auditPromise = await new Promise(function (resolve, reject) {
 			pool.query(auditQuery, function (err, data) {
 				if (err) {
-					return reject(
-						handleError(
-							new ErrorHandler('500', 'Error adding sale audit.', err),
-							res
-						)
-					);
+					return reject(handleError(new ErrorHandler('500', 'Error adding sale audit.', err), res));
 				}
 				resolve(data);
 			});
@@ -101,12 +85,7 @@ saleRouter.post('/delete-sales-details', async (req, res) => {
 
 		pool.query(query, function (err, data) {
 			if (err) {
-				return reject(
-					handleError(
-						new ErrorHandler('500', 'Error deleting sale details', err),
-						res
-					)
-				);
+				return reject(handleError(new ErrorHandler('500', 'Error deleting sale details', err), res));
 			}
 			resolve(data);
 		});
@@ -121,9 +100,7 @@ where product_id = '${product_id}' and id = '${stock_id}'  `;
 
 		pool.query(stockUpdateQuery, function (err, data) {
 			if (err) {
-				return reject(
-					handleError(new ErrorHandler('500', 'Error update stock ', err), res)
-				);
+				return reject(handleError(new ErrorHandler('500', 'Error update stock ', err), res));
 			}
 			resolve(data);
 		});
@@ -132,17 +109,7 @@ where product_id = '${product_id}' and id = '${stock_id}'  `;
 	if (stockUpdatePromise.affectedRows === 1) {
 		// step 4 - update item history table. as items are deleted, items has to be reversed
 
-		let updateitemhistorytbl = await updateItemHistoryTable(
-			center_id,
-			'Sale',
-			product_id,
-			sales_id,
-			id,
-			'SAL',
-			'Mod/Del',
-			qty,
-			mrp
-		);
+		let updateitemhistorytbl = await updateItemHistoryTable(center_id, 'Sale', product_id, sales_id, id, 'SAL', 'Mod/Del', qty, mrp);
 
 		return res.json({
 			result: 'success',
@@ -168,10 +135,7 @@ saleRouter.post('/insert-sale-details', async (req, res) => {
 		await updateSequenceGenerator(cloneReq);
 	} else if (cloneReq.status === 'D') {
 		if (cloneReq.invoiceno !== undefined && cloneReq.invoiceno !== null) {
-			if (
-				cloneReq.invoiceno.startsWith('D') ||
-				cloneReq.invoiceno.startsWith('SI')
-			) {
+			if (cloneReq.invoiceno.startsWith('D') || cloneReq.invoiceno.startsWith('SI')) {
 				// do nothing
 			} else {
 				await updateDraftSequenceGenerator(cloneReq);
@@ -185,10 +149,7 @@ saleRouter.post('/insert-sale-details', async (req, res) => {
 		invNo = await getSequenceNo(cloneReq);
 	} else if (cloneReq.status === 'D') {
 		if (cloneReq.invoiceno !== undefined && cloneReq.invoiceno !== null) {
-			if (
-				cloneReq.invoiceno.startsWith('D') ||
-				cloneReq.invoiceno.startsWith('SI')
-			) {
+			if (cloneReq.invoiceno.startsWith('D') || cloneReq.invoiceno.startsWith('SI')) {
 				invNo = cloneReq.invoiceno;
 			} else {
 				invNo = await getSequenceNo(cloneReq);
@@ -227,12 +188,7 @@ saleRouter.post('/insert-sale-details', async (req, res) => {
 
 				// check if customer has changed
 				if (cloneReq.hasCustomerChange) {
-					updateLegerCustomerChange(
-						cloneReq.center_id,
-						cloneReq.salesid,
-						cloneReq.customerctrl.id,
-						cloneReq.old_customer_id
-					);
+					updateLegerCustomerChange(cloneReq.center_id, cloneReq.salesid, cloneReq.customerctrl.id, cloneReq.old_customer_id);
 				}
 
 				res.json({ result: 'success', id: newPK, invoiceno: invNo });
@@ -243,10 +199,7 @@ saleRouter.post('/insert-sale-details', async (req, res) => {
 			// });
 		})
 		.catch((err) => {
-			return handleError(
-				new ErrorHandler('500', 'Error saleMasterEntry > ', err),
-				res
-			);
+			return handleError(new ErrorHandler('500', 'Error saleMasterEntry > ', err), res);
 		});
 });
 
@@ -313,32 +266,20 @@ function getSequenceNo(cloneReq) {
 	if (cloneReq.invoicetype === 'gstinvoice' && cloneReq.status !== 'D') {
 		invNoQry = ` select 
 		concat('${currentTimeInTimeZone('Asia/Kolkata', 'YY')}', "/", 
-		'${currentTimeInTimeZone(
-			'Asia/Kolkata',
-			'MM'
-		)}', "/", lpad(invseq, 5, "0")) as invNo from financialyear 
+		'${currentTimeInTimeZone('Asia/Kolkata', 'MM')}', "/", lpad(invseq, 5, "0")) as invNo from financialyear 
 				where 
 				center_id = '${cloneReq.center_id}' and  
 				CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
 	} else if (cloneReq.invoicetype === 'gstinvoice' && cloneReq.status === 'D') {
 		invNoQry = ` select concat("D/", 
 		'${currentTimeInTimeZone('Asia/Kolkata', 'YY')}', "/", 
-		'${currentTimeInTimeZone(
-			'Asia/Kolkata',
-			'MM'
-		)}', "/", lpad(draft_inv_seq, 5, "0")) as invNo from financialyear 
+		'${currentTimeInTimeZone('Asia/Kolkata', 'MM')}', "/", lpad(draft_inv_seq, 5, "0")) as invNo from financialyear 
 							where 
 							center_id = '${cloneReq.center_id}' and  
 							CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
 	} else if (cloneReq.invoicetype === 'stockissue') {
-		invNoQry = ` select concat('SI',"-",'${currentTimeInTimeZone(
-			'Asia/Kolkata',
-			'YY'
-		)}', "/", 
-		'${currentTimeInTimeZone(
-			'Asia/Kolkata',
-			'MM'
-		)}', "/", lpad(stock_issue_seq, 5, "0")) as invNo from financialyear 
+		invNoQry = ` select concat('SI',"-",'${currentTimeInTimeZone('Asia/Kolkata', 'YY')}', "/", 
+		'${currentTimeInTimeZone('Asia/Kolkata', 'MM')}', "/", lpad(stock_issue_seq, 5, "0")) as invNo from financialyear 
 				where 
 				center_id = '${cloneReq.center_id}' and  
 				CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
@@ -361,11 +302,7 @@ function saleMasterEntry(cloneReq, invNo) {
 	let invoicedate = toTimeZone(cloneReq.invoicedate, 'Asia/Kolkata');
 
 	// if inv # starts with 'D' (eg:invno: "D/21/04/00024") + status: "C" + revision: 0
-	if (
-		cloneReq.invoiceno.startsWith('D') &&
-		cloneReq.status === 'C' &&
-		cloneReq.revision === 0
-	) {
+	if (cloneReq.invoiceno.startsWith('D') && cloneReq.status === 'C' && cloneReq.revision === 0) {
 		invoicedate = currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY');
 	}
 
@@ -376,14 +313,8 @@ function saleMasterEntry(cloneReq, invNo) {
 		revisionCnt = cloneReq.revision + 1;
 	}
 
-	let orderdate =
-		cloneReq.orderdate !== '' && cloneReq.orderdate !== null
-			? toTimeZone(cloneReq.orderdate, 'Asia/Kolkata')
-			: '';
-	let lrdate =
-		cloneReq.lrdate !== '' && cloneReq.lrdate !== null
-			? toTimeZone(cloneReq.lrdate, 'Asia/Kolkata')
-			: '';
+	let orderdate = cloneReq.orderdate !== '' && cloneReq.orderdate !== null ? toTimeZone(cloneReq.orderdate, 'Asia/Kolkata') : '';
+	let lrdate = cloneReq.lrdate !== '' && cloneReq.lrdate !== null ? toTimeZone(cloneReq.lrdate, 'Asia/Kolkata') : '';
 
 	// create a invoice number and save in sale master
 	let insQry = `
@@ -394,48 +325,25 @@ function saleMasterEntry(cloneReq, invNo) {
 			VALUES
 			('${cloneReq.center_id}', '${cloneReq.customerctrl.id}', 
 			'${invNo}',
-			'${toTimeZone(cloneReq.invoicedate, 'Asia/Kolkata')}', '${
-		cloneReq.orderno
-	}', '${orderdate}', '${cloneReq.lrno}', '${cloneReq.lrdate}',
+			'${invoicedate}', '${cloneReq.orderno}', '${orderdate}', '${cloneReq.lrno}', '${cloneReq.lrdate}',
 	 '${cloneReq.invoicetype}','${cloneReq.totalqty}', 
-			'${cloneReq.noofitems}', '${cloneReq.taxable_value}', '${cloneReq.cgst}', '${
-		cloneReq.sgst
-	}', '${cloneReq.igst}', '${cloneReq.totalvalue}', 
-			'${cloneReq.net_total}', '${cloneReq.transport_charges}', '${
-		cloneReq.unloading_charges
-	}', '${cloneReq.misc_charges}', '${cloneReq.status}',
-			'${currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY HH:mm:ss')}', '${
-		cloneReq.roundoff
-	}', '${revisionCnt}', '${cloneReq.retail_customer_name}', '${
+			'${cloneReq.noofitems}', '${cloneReq.taxable_value}', '${cloneReq.cgst}', '${cloneReq.sgst}', '${cloneReq.igst}', '${cloneReq.totalvalue}', 
+			'${cloneReq.net_total}', '${cloneReq.transport_charges}', '${cloneReq.unloading_charges}', '${cloneReq.misc_charges}', '${cloneReq.status}',
+			'${currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY HH:mm:ss')}', '${cloneReq.roundoff}', '${revisionCnt}', '${cloneReq.retail_customer_name}', '${
 		cloneReq.retail_customer_address
 	}', '${cloneReq.retail_customer_phone}'
 			)`;
 
 	let upQry = `
-			UPDATE sale set center_id = '${cloneReq.center_id}', customer_id = '${
-		cloneReq.customerctrl.id
-	}', 
+			UPDATE sale set center_id = '${cloneReq.center_id}', customer_id = '${cloneReq.customerctrl.id}', 
 			invoice_no = '${invNo}',
-			invoice_date = 	'${toTimeZone(cloneReq.invoicedate, 'Asia/Kolkata')}', 
-			order_date = '${orderdate}', lr_no = '${cloneReq.lrno}', sale_type = '${
-		cloneReq.invoicetype
-	}',
-			lr_date = '${cloneReq.lrdate}', total_qty = '${
-		cloneReq.totalqty
-	}', no_of_items = '${cloneReq.noofitems}',
-			taxable_value = '${cloneReq.taxable_value}', cgst = '${
-		cloneReq.cgst
-	}', sgst = '${cloneReq.sgst}', igst = '${cloneReq.igst}',
-			total_value = '${cloneReq.totalvalue}', net_total = '${
-		cloneReq.net_total
-	}', transport_charges = '${cloneReq.transport_charges}', 
-			unloading_charges = '${cloneReq.unloading_charges}', misc_charges = '${
-		cloneReq.misc_charges
-	}', status = '${cloneReq.status}',
-			sale_datetime = 	'${currentTimeInTimeZone(
-				'Asia/Kolkata',
-				'DD-MM-YYYY HH:mm:ss'
-			)}', revision = '${revisionCnt}', roundoff = '${cloneReq.roundoff}', 
+			invoice_date = 	'${invoicedate}', 
+			order_date = '${orderdate}', lr_no = '${cloneReq.lrno}', sale_type = '${cloneReq.invoicetype}',
+			lr_date = '${cloneReq.lrdate}', total_qty = '${cloneReq.totalqty}', no_of_items = '${cloneReq.noofitems}',
+			taxable_value = '${cloneReq.taxable_value}', cgst = '${cloneReq.cgst}', sgst = '${cloneReq.sgst}', igst = '${cloneReq.igst}',
+			total_value = '${cloneReq.totalvalue}', net_total = '${cloneReq.net_total}', transport_charges = '${cloneReq.transport_charges}', 
+			unloading_charges = '${cloneReq.unloading_charges}', misc_charges = '${cloneReq.misc_charges}', status = '${cloneReq.status}',
+			sale_datetime = 	'${currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY HH:mm:ss')}', revision = '${revisionCnt}', roundoff = '${cloneReq.roundoff}', 
 			retail_customer_name = '${cloneReq.retail_customer_name}',
 			retail_customer_address = '${cloneReq.retail_customer_address}',
 			retail_customer_phone = '${cloneReq.retail_customer_phone}'
@@ -480,10 +388,7 @@ async function processItems(cloneReq, newPK) {
 
 		// its a hack to avoid data.insertid fix it
 		if (p_data != null || p_data != undefined) {
-			if (
-				cloneReq.status === 'C' ||
-				(cloneReq.status === 'D' && cloneReq.invoicetype === 'stockissue')
-			) {
+			if (cloneReq.status === 'C' || (cloneReq.status === 'D' && cloneReq.invoicetype === 'stockissue')) {
 				p_data3 = insertItemHistoryAsync(k, newPK, p_data.insertId, cloneReq); // returns promise
 			}
 		}
@@ -526,14 +431,7 @@ saleRouter.post('/convert-sale', async (req, res) => {
 
 	pool.query(sql, async function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler(
-					'500',
-					'Error update sale coverting to sale invoice.',
-					err
-				),
-				res
-			);
+			return handleError(new ErrorHandler('500', 'Error update sale coverting to sale invoice.', err), res);
 		} else {
 			await addSaleLedgerRecord(
 				{
@@ -578,10 +476,7 @@ saleRouter.get('/delete-sale-master/:id', async (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', `/delete-sale-master/:id ${sale_id}`, err),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/delete-sale-master/:id ${sale_id}`, err), res);
 		} else {
 			return res.json({
 				result: 'success',
@@ -597,10 +492,7 @@ function deleteSaleDetailsRecs(saleDetails, sale_id) {
 		idx = index + 1;
 
 		// step 1
-		let p_audit = await insertAuditTblforDeleteSaleDetailsRecAsync(
-			element,
-			sale_id
-		);
+		let p_audit = await insertAuditTblforDeleteSaleDetailsRecAsync(element, sale_id);
 
 		// step 2
 		let p_delete = await deleteSaleDetailsRecAsync(element);
