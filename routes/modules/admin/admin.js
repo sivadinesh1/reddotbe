@@ -126,6 +126,31 @@ const getOutstandingBalance = (center_id, limit) => {
 	});
 };
 
+const updateLogo = (center_id, logo_name, logo_url, position) => {
+	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
+	console.log('dinesh **' + position + '**');
+	let query = '';
+
+	if (position === 'main') {
+		query = ` update center set logo_name = '${logo_name}', logo_url = '${logo_url}' 
+		where id = ${center_id} `;
+	} else if (position === 'side') {
+		query = ` update center set side_logo_name = '${logo_name}', side_logo_url = '${logo_url}' 
+		where id = ${center_id} `;
+	}
+
+	return new Promise(function (resolve, reject) {
+		pool.query(query, function (err, data) {
+			if (err) {
+				console.log('dinesh err ' + JSON.stringify(err));
+				reject(err);
+			}
+
+			resolve('success');
+		});
+	});
+};
+
 module.exports = {
 	insertUser,
 	updateUserStatus,
@@ -133,4 +158,5 @@ module.exports = {
 	getUsers,
 	getOutstandingBalance,
 	isUserExist,
+	updateLogo,
 };

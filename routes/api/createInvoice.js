@@ -12,16 +12,7 @@ const { number2text } = require('./../helpers/utils');
 let line_x_start = 24;
 let line_x_end = 571;
 
-function createInvoice(
-	saleMaster,
-	saleDetails,
-	customerDetails,
-	centerDetails,
-	path,
-	res,
-	print_type,
-	print_ship_to
-) {
+function createInvoice(saleMaster, saleDetails, customerDetails, centerDetails, path, res, print_type, print_ship_to) {
 	let centerdata = centerDetails[0];
 	let customerdata = customerDetails[0];
 	let salemasterdata = saleMaster[0];
@@ -43,26 +34,13 @@ function createInvoice(
 			doc.addPage();
 			doc.font('Helvetica');
 			generateHeader(doc, centerdata, e);
-			generateCustomerInformation(
-				doc,
-				customerdata,
-				salemasterdata,
-				print_ship_to
-			);
+			generateCustomerInformation(doc, customerdata, salemasterdata, print_ship_to);
 
 			if (print_ship_to) {
 				generateShippingInformation(doc, customerdata, salemasterdata);
 			}
 
-			generateInvoiceTable(
-				doc,
-				salemasterdata,
-				saledetailsdata,
-				centerdata,
-				e,
-				customerdata,
-				print_ship_to
-			);
+			generateInvoiceTable(doc, salemasterdata, saledetailsdata, centerdata, e, customerdata, print_ship_to);
 			generateFooterSummary(doc, centerdata);
 
 			//		doc[counter].pipe(fs.createWriteStream(path));
@@ -89,13 +67,11 @@ function createInvoice(
 }
 
 function generateHeader(doc, centerdata, print_type) {
-	doc.image('tractor.png', 24, 24, { width: 70 }).fillColor('darkblue');
+	// doc.image('tractor.png', 24, 24, { width: 70 }).fillColor('darkblue');
 
-	doc
-		.font('Helvetica')
-		.fontSize(10)
-		.text(print_type, 400, 20, { align: 'right' })
-		.font('Helvetica');
+	doc.image('upload/' + centerdata.logo_name, 24, 24, { width: 70 }).fillColor('darkblue');
+
+	doc.font('Helvetica').fontSize(10).text(print_type, 400, 20, { align: 'right' }).font('Helvetica');
 
 	doc.fillColor('#000000');
 	doc
@@ -114,24 +90,17 @@ function generateHeader(doc, centerdata, print_type) {
 			lineGap: 1.5,
 			characterSpacing: 1,
 		})
-		.text(
-			centerdata.address1 +
-				',' +
-				centerdata.address2 +
-				', ' +
-				centerdata.district +
-				'-' +
-				centerdata.pin,
-			{
-				align: 'center',
-				lineGap: 1.5,
-			}
-		)
+		.text(centerdata.address1 + ',' + centerdata.address2 + ', ' + centerdata.district + '-' + centerdata.pin, {
+			align: 'center',
+			lineGap: 1.5,
+		})
 
 		.text('GSTIN : ' + centerdata.gst, { align: 'center', lineGap: 1.5 })
 		.text('Email: ' + centerdata.email, { align: 'center', lineGap: 1.5 })
 
 		.text('Phone : ' + centerdata.phone + ' & ' + centerdata.mobile, 410, 92);
+
+	// doc.image('upload/' + centerdata.logo_name, 475, 62, { width: 80 });
 
 	if (centerdata.id === 3) {
 		doc.image('sonalika.png', 475, 62, { width: 80 });
@@ -142,33 +111,19 @@ function generateHeader(doc, centerdata, print_type) {
 	doc.moveDown();
 }
 
-function generateCustomerInformation(
-	doc,
-	customerdata,
-	salemasterdata,
-	print_ship_to
-) {
+function generateCustomerInformation(doc, customerdata, salemasterdata, print_ship_to) {
 	// first line before customer section
 	generateHr(doc, line_x_start, line_x_end, 109);
 
 	if (print_ship_to) {
 		doc.fillColor('#000000').fontSize(13).text('Registered Office', 260, 117);
 	} else {
-		doc
-			.fillColor('#000000')
-			.fontSize(13)
-			.font('Helvetica-Bold')
-			.text('To', 34, 117)
-			.font('Helvetica');
+		doc.fillColor('#000000').fontSize(13).font('Helvetica-Bold').text('To', 34, 117).font('Helvetica');
 	}
 
-	let invoice_type =
-		salemasterdata.sale_type === 'gstinvoice' ? 'GST INVOICE' : 'STOCK ISSUE';
+	let invoice_type = salemasterdata.sale_type === 'gstinvoice' ? 'GST INVOICE' : 'STOCK ISSUE';
 
-	doc
-		.fillColor('#000000')
-		.fontSize(12)
-		.text(invoice_type, 440, 119, { align: 'center' });
+	doc.fillColor('#000000').fontSize(12).text(invoice_type, 440, 119, { align: 'center' });
 	doc.fillColor('#000000');
 	doc
 		.strokeColor('#000000')
@@ -220,17 +175,9 @@ function generateCustomerInformation(
 
 	if (customerdata.district !== '') {
 		if (print_ship_to) {
-			doc.text(
-				customerdata.address2 + ', District: ' + customerdata.district,
-				270,
-				166
-			);
+			doc.text(customerdata.address2 + ', District: ' + customerdata.district, 270, 166);
 		} else {
-			doc.text(
-				customerdata.address2 + ', District: ' + customerdata.district,
-				40,
-				166
-			);
+			doc.text(customerdata.address2 + ', District: ' + customerdata.district, 40, 166);
 		}
 	} else {
 		if (print_ship_to) {
@@ -242,33 +189,17 @@ function generateCustomerInformation(
 	if (print_ship_to) {
 		doc
 			.fillColor('#000000')
-			.text(
-				'State: ' + customerdata.code + '-' + customerdata.description,
-				270,
-				181
-			)
+			.text('State: ' + customerdata.code + '-' + customerdata.description, 270, 181)
 			.font('Helvetica-Bold')
-			.text(
-				'Phone: ' + customerdata.mobile + ' GSTIN: ' + customerdata.gst,
-				270,
-				196
-			)
+			.text('Phone: ' + customerdata.mobile + ' GSTIN: ' + customerdata.gst, 270, 196)
 			.font('Helvetica')
 			.moveDown();
 	} else {
 		doc
 			.fillColor('#000000')
-			.text(
-				'State: ' + customerdata.code + '-' + customerdata.description,
-				40,
-				181
-			)
+			.text('State: ' + customerdata.code + '-' + customerdata.description, 40, 181)
 			.font('Helvetica-Bold')
-			.text(
-				'Phone: ' + customerdata.mobile + ' GSTIN: ' + customerdata.gst,
-				40,
-				196
-			)
+			.text('Phone: ' + customerdata.mobile + ' GSTIN: ' + customerdata.gst, 40, 196)
 			.font('Helvetica')
 			.moveDown();
 	}
@@ -305,28 +236,16 @@ function generateShippingInformation(doc, customerdata, salemasterdata) {
 	}
 
 	if (customerdata.csa_district !== '') {
-		doc.text(
-			customerdata.csa_address2 + ', District: ' + customerdata.csa_district,
-			40,
-			166
-		);
+		doc.text(customerdata.csa_address2 + ', District: ' + customerdata.csa_district, 40, 166);
 	} else {
 		doc.text(customerdata.csa_address2, 40, 166);
 	}
 
 	doc
 		.fillColor('#000000')
-		.text(
-			'State: ' + customerdata.csa_code + '-' + customerdata.csa_description,
-			40,
-			181
-		)
+		.text('State: ' + customerdata.csa_code + '-' + customerdata.csa_description, 40, 181)
 		.font('Helvetica-Bold')
-		.text(
-			'Phone: ' + customerdata.mobile + ' GSTIN: ' + customerdata.gst,
-			40,
-			196
-		)
+		.text('Phone: ' + customerdata.mobile + ' GSTIN: ' + customerdata.gst, 40, 196)
 		.font('Helvetica')
 		.moveDown();
 
@@ -334,15 +253,7 @@ function generateShippingInformation(doc, customerdata, salemasterdata) {
 	generateHr(doc, line_x_start, line_x_end, 210);
 }
 
-function generateInvoiceTable(
-	doc,
-	salemasterdata,
-	saledetailsdata,
-	centerdata,
-	print_type,
-	customerdata,
-	print_ship_to
-) {
+function generateInvoiceTable(doc, salemasterdata, saledetailsdata, centerdata, print_type, customerdata, print_ship_to) {
 	let i;
 	let invoiceTableTop = 216;
 	let x_start = 24;
@@ -425,135 +336,45 @@ function generateInvoiceTable(
 	// // qty
 	doc
 		.strokeColor('#000000')
-		.moveTo(
-			x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + (hsnw + 1) + qtyw,
-			210
-		)
+		.moveTo(x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + (hsnw + 1) + qtyw, 210)
 		.lineWidth(1)
-		.lineTo(
-			x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + (hsnw + 1) + qtyw,
-			229
-		)
+		.lineTo(x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + (hsnw + 1) + qtyw, 229)
 
 		.stroke();
 
 	// // UOM
 	doc
 		.strokeColor('#000000')
-		.moveTo(
-			x_start +
-				(snow + 1) +
-				(pcodew + 1) +
-				(pdescw + 1) +
-				(hsnw + 1) +
-				(qtyw + 1) +
-				uomw,
-			210
-		)
+		.moveTo(x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + (hsnw + 1) + (qtyw + 1) + uomw, 210)
 		.lineWidth(1)
-		.lineTo(
-			x_start +
-				(snow + 1) +
-				(pcodew + 1) +
-				(pdescw + 1) +
-				(hsnw + 1) +
-				(qtyw + 1) +
-				uomw,
-			229
-		)
+		.lineTo(x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + (hsnw + 1) + (qtyw + 1) + uomw, 229)
 
 		.stroke();
 
 	// // MRP
 	doc
 		.strokeColor('#000000')
-		.moveTo(
-			x_start +
-				(snow + 1) +
-				(pcodew + 1) +
-				(pdescw + 1) +
-				(hsnw + 1) +
-				(qtyw + 1) +
-				(uomw + 1) +
-				mrpw,
-			210
-		)
+		.moveTo(x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + (hsnw + 1) + (qtyw + 1) + (uomw + 1) + mrpw, 210)
 		.lineWidth(1)
-		.lineTo(
-			x_start +
-				(snow + 1) +
-				(pcodew + 1) +
-				(pdescw + 1) +
-				(hsnw + 1) +
-				(qtyw + 1) +
-				(uomw + 1) +
-				mrpw,
-			229
-		)
+		.lineTo(x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + (hsnw + 1) + (qtyw + 1) + (uomw + 1) + mrpw, 229)
 
 		.stroke();
 
 	// // Disc %
 	doc
 		.strokeColor('#000000')
-		.moveTo(
-			x_start +
-				(snow + 1) +
-				(pcodew + 1) +
-				(pdescw + 1) +
-				(hsnw + 1) +
-				(qtyw + 1) +
-				(uomw + 1) +
-				(mrpw + 1) +
-				discpw,
-			210
-		)
+		.moveTo(x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + (hsnw + 1) + (qtyw + 1) + (uomw + 1) + (mrpw + 1) + discpw, 210)
 		.lineWidth(1)
-		.lineTo(
-			x_start +
-				(snow + 1) +
-				(pcodew + 1) +
-				(pdescw + 1) +
-				(hsnw + 1) +
-				(qtyw + 1) +
-				(uomw + 1) +
-				(mrpw + 1) +
-				discpw,
-			229
-		)
+		.lineTo(x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + (hsnw + 1) + (qtyw + 1) + (uomw + 1) + (mrpw + 1) + discpw, 229)
 
 		.stroke();
 
 	// // Taxable Amount
 	doc
 		.strokeColor('#000000')
-		.moveTo(
-			x_start +
-				(snow + 1) +
-				(pcodew + 1) +
-				(pdescw + 1) +
-				(hsnw + 1) +
-				(qtyw + 1) +
-				(uomw + 1) +
-				(mrpw + 1) +
-				(discpw + 1) +
-				amountw,
-			210
-		)
+		.moveTo(x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + (hsnw + 1) + (qtyw + 1) + (uomw + 1) + (mrpw + 1) + (discpw + 1) + amountw, 210)
 		.lineWidth(1)
-		.lineTo(
-			x_start +
-				(snow + 1) +
-				(pcodew + 1) +
-				(pdescw + 1) +
-				(hsnw + 1) +
-				(qtyw + 1) +
-				(uomw + 1) +
-				(mrpw + 1) +
-				(discpw + 1) +
-				amountw,
-			229
-		)
+		.lineTo(x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + (hsnw + 1) + (qtyw + 1) + (uomw + 1) + (mrpw + 1) + (discpw + 1) + amountw, 229)
 
 		.stroke();
 
@@ -562,32 +383,12 @@ function generateInvoiceTable(
 		doc
 			.strokeColor('#000000')
 			.moveTo(
-				x_start +
-					(snow + 1) +
-					(pcodew + 1) +
-					(pdescw + 1) +
-					(hsnw + 1) +
-					(qtyw + 1) +
-					(uomw + 1) +
-					(mrpw + 1) +
-					(discpw + 1) +
-					(amountw + 1) +
-					sgstw,
+				x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + (hsnw + 1) + (qtyw + 1) + (uomw + 1) + (mrpw + 1) + (discpw + 1) + (amountw + 1) + sgstw,
 				210
 			)
 			.lineWidth(1)
 			.lineTo(
-				x_start +
-					(snow + 1) +
-					(pcodew + 1) +
-					(pdescw + 1) +
-					(hsnw + 1) +
-					(qtyw + 1) +
-					(uomw + 1) +
-					(mrpw + 1) +
-					(discpw + 1) +
-					(amountw + 1) +
-					sgstw,
+				x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + (hsnw + 1) + (qtyw + 1) + (uomw + 1) + (mrpw + 1) + (discpw + 1) + (amountw + 1) + sgstw,
 				229
 			)
 
@@ -634,32 +435,12 @@ function generateInvoiceTable(
 		doc
 			.strokeColor('#000000')
 			.moveTo(
-				x_start +
-					(snow + 1) +
-					(pcodew + 1) +
-					(pdescw + 1) +
-					(hsnw + 1) +
-					(qtyw + 1) +
-					(uomw + 1) +
-					(mrpw + 1) +
-					(discpw + 1) +
-					(amountw + 1) +
-					igstw,
+				x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + (hsnw + 1) + (qtyw + 1) + (uomw + 1) + (mrpw + 1) + (discpw + 1) + (amountw + 1) + igstw,
 				210
 			)
 			.lineWidth(1)
 			.lineTo(
-				x_start +
-					(snow + 1) +
-					(pcodew + 1) +
-					(pdescw + 1) +
-					(hsnw + 1) +
-					(qtyw + 1) +
-					(uomw + 1) +
-					(mrpw + 1) +
-					(discpw + 1) +
-					(amountw + 1) +
-					igstw,
+				x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + (hsnw + 1) + (qtyw + 1) + (uomw + 1) + (mrpw + 1) + (discpw + 1) + (amountw + 1) + igstw,
 				229
 			)
 
@@ -705,12 +486,7 @@ function generateInvoiceTable(
 			// for each new page this adds the center and customer data
 			generateHeader(doc, centerdata, print_type);
 			generateHr(doc, line_x_start, line_x_end, 107);
-			generateCustomerInformation(
-				doc,
-				customerdata,
-				salemasterdata,
-				print_ship_to
-			);
+			generateCustomerInformation(doc, customerdata, salemasterdata, print_ship_to);
 
 			if (print_ship_to) {
 				generateShippingInformation(doc, customerdata, salemasterdata);
@@ -766,10 +542,7 @@ function generateInvoiceTable(
 		// // hsncode
 		doc
 			.strokeColor('#000000')
-			.moveTo(
-				x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + hsnw,
-				invoiceTableTop - 8
-			)
+			.moveTo(x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + hsnw, invoiceTableTop - 8)
 			.lineWidth(1)
 			.lineTo(x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + hsnw, 540)
 
@@ -778,102 +551,36 @@ function generateInvoiceTable(
 		// // qty
 		doc
 			.strokeColor('#000000')
-			.moveTo(
-				x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + (hsnw + 1) + qtyw,
-				invoiceTableTop - 8
-			)
+			.moveTo(x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + (hsnw + 1) + qtyw, invoiceTableTop - 8)
 			.lineWidth(1)
-			.lineTo(
-				x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + (hsnw + 1) + qtyw,
-				540
-			)
+			.lineTo(x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + (hsnw + 1) + qtyw, 540)
 
 			.stroke();
 
 		// // UOM
 		doc
 			.strokeColor('#000000')
-			.moveTo(
-				x_start +
-					(snow + 1) +
-					(pcodew + 1) +
-					(pdescw + 1) +
-					(hsnw + 1) +
-					(qtyw + 1) +
-					uomw,
-				invoiceTableTop - 8
-			)
+			.moveTo(x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + (hsnw + 1) + (qtyw + 1) + uomw, invoiceTableTop - 8)
 			.lineWidth(1)
-			.lineTo(
-				x_start +
-					(snow + 1) +
-					(pcodew + 1) +
-					(pdescw + 1) +
-					(hsnw + 1) +
-					(qtyw + 1) +
-					uomw,
-				540
-			)
+			.lineTo(x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + (hsnw + 1) + (qtyw + 1) + uomw, 540)
 
 			.stroke();
 
 		//MRP
 		doc
 			.strokeColor('#000000')
-			.moveTo(
-				x_start +
-					(snow + 1) +
-					(pcodew + 1) +
-					(pdescw + 1) +
-					(hsnw + 1) +
-					(qtyw + 1) +
-					(uomw + 1) +
-					mrpw,
-				invoiceTableTop - 8
-			)
+			.moveTo(x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + (hsnw + 1) + (qtyw + 1) + (uomw + 1) + mrpw, invoiceTableTop - 8)
 			.lineWidth(1)
-			.lineTo(
-				x_start +
-					(snow + 1) +
-					(pcodew + 1) +
-					(pdescw + 1) +
-					(hsnw + 1) +
-					(qtyw + 1) +
-					(uomw + 1) +
-					mrpw,
-				540
-			)
+			.lineTo(x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + (hsnw + 1) + (qtyw + 1) + (uomw + 1) + mrpw, 540)
 
 			.stroke();
 
 		// disc
 		doc
 			.strokeColor('#000000')
-			.moveTo(
-				x_start +
-					(snow + 1) +
-					(pcodew + 1) +
-					(pdescw + 1) +
-					(hsnw + 1) +
-					(qtyw + 1) +
-					(uomw + 1) +
-					(mrpw + 1) +
-					discpw,
-				invoiceTableTop - 8
-			)
+			.moveTo(x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + (hsnw + 1) + (qtyw + 1) + (uomw + 1) + (mrpw + 1) + discpw, invoiceTableTop - 8)
 			.lineWidth(1)
-			.lineTo(
-				x_start +
-					(snow + 1) +
-					(pcodew + 1) +
-					(pdescw + 1) +
-					(hsnw + 1) +
-					(qtyw + 1) +
-					(uomw + 1) +
-					(mrpw + 1) +
-					discpw,
-				540
-			)
+			.lineTo(x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + (hsnw + 1) + (qtyw + 1) + (uomw + 1) + (mrpw + 1) + discpw, 540)
 
 			.stroke();
 
@@ -881,32 +588,11 @@ function generateInvoiceTable(
 		doc
 			.strokeColor('#000000')
 			.moveTo(
-				x_start +
-					(snow + 1) +
-					(pcodew + 1) +
-					(pdescw + 1) +
-					(hsnw + 1) +
-					(qtyw + 1) +
-					(uomw + 1) +
-					(mrpw + 1) +
-					(discpw + 1) +
-					amountw,
+				x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + (hsnw + 1) + (qtyw + 1) + (uomw + 1) + (mrpw + 1) + (discpw + 1) + amountw,
 				invoiceTableTop - 8
 			)
 			.lineWidth(1)
-			.lineTo(
-				x_start +
-					(snow + 1) +
-					(pcodew + 1) +
-					(pdescw + 1) +
-					(hsnw + 1) +
-					(qtyw + 1) +
-					(uomw + 1) +
-					(mrpw + 1) +
-					(discpw + 1) +
-					amountw,
-				540
-			)
+			.lineTo(x_start + (snow + 1) + (pcodew + 1) + (pdescw + 1) + (hsnw + 1) + (qtyw + 1) + (uomw + 1) + (mrpw + 1) + (discpw + 1) + amountw, 540)
 
 			.stroke();
 		if (!isIGST) {
@@ -1022,85 +708,25 @@ function generateInvoiceTable(
 }
 
 function generateSummaryLeft(doc, saledetailsdata, isIGST, salemasterdata) {
-	let sum_SGST_0 = getSumByTaxtypeAndTaxPercent(
-		saledetailsdata,
-		'SGST',
-		0
-	).toFixed(2);
-	let sum_CGST_0 = getSumByTaxtypeAndTaxPercent(
-		saledetailsdata,
-		'CGST',
-		0
-	).toFixed(2);
-	let sum_IGST_0 = getSumByTaxtypeAndTaxPercent(
-		saledetailsdata,
-		'IGST',
-		0
-	).toFixed(2);
+	let sum_SGST_0 = getSumByTaxtypeAndTaxPercent(saledetailsdata, 'SGST', 0).toFixed(2);
+	let sum_CGST_0 = getSumByTaxtypeAndTaxPercent(saledetailsdata, 'CGST', 0).toFixed(2);
+	let sum_IGST_0 = getSumByTaxtypeAndTaxPercent(saledetailsdata, 'IGST', 0).toFixed(2);
 
-	let sum_SGST_5 = getSumByTaxtypeAndTaxPercent(
-		saledetailsdata,
-		'SGST',
-		5
-	).toFixed(2);
-	let sum_CGST_5 = getSumByTaxtypeAndTaxPercent(
-		saledetailsdata,
-		'CGST',
-		5
-	).toFixed(2);
-	let sum_IGST_5 = getSumByTaxtypeAndTaxPercent(
-		saledetailsdata,
-		'IGST',
-		5
-	).toFixed(2);
+	let sum_SGST_5 = getSumByTaxtypeAndTaxPercent(saledetailsdata, 'SGST', 5).toFixed(2);
+	let sum_CGST_5 = getSumByTaxtypeAndTaxPercent(saledetailsdata, 'CGST', 5).toFixed(2);
+	let sum_IGST_5 = getSumByTaxtypeAndTaxPercent(saledetailsdata, 'IGST', 5).toFixed(2);
 
-	let sum_SGST_12 = getSumByTaxtypeAndTaxPercent(
-		saledetailsdata,
-		'SGST',
-		12
-	).toFixed(2);
-	let sum_CGST_12 = getSumByTaxtypeAndTaxPercent(
-		saledetailsdata,
-		'CGST',
-		12
-	).toFixed(2);
-	let sum_IGST_12 = getSumByTaxtypeAndTaxPercent(
-		saledetailsdata,
-		'IGST',
-		12
-	).toFixed(2);
+	let sum_SGST_12 = getSumByTaxtypeAndTaxPercent(saledetailsdata, 'SGST', 12).toFixed(2);
+	let sum_CGST_12 = getSumByTaxtypeAndTaxPercent(saledetailsdata, 'CGST', 12).toFixed(2);
+	let sum_IGST_12 = getSumByTaxtypeAndTaxPercent(saledetailsdata, 'IGST', 12).toFixed(2);
 
-	let sum_SGST_18 = getSumByTaxtypeAndTaxPercent(
-		saledetailsdata,
-		'SGST',
-		18
-	).toFixed(2);
-	let sum_CGST_18 = getSumByTaxtypeAndTaxPercent(
-		saledetailsdata,
-		'CGST',
-		18
-	).toFixed(2);
-	let sum_IGST_18 = getSumByTaxtypeAndTaxPercent(
-		saledetailsdata,
-		'IGST',
-		18
-	).toFixed(2);
+	let sum_SGST_18 = getSumByTaxtypeAndTaxPercent(saledetailsdata, 'SGST', 18).toFixed(2);
+	let sum_CGST_18 = getSumByTaxtypeAndTaxPercent(saledetailsdata, 'CGST', 18).toFixed(2);
+	let sum_IGST_18 = getSumByTaxtypeAndTaxPercent(saledetailsdata, 'IGST', 18).toFixed(2);
 
-	let sum_SGST_28 = getSumByTaxtypeAndTaxPercent(
-		saledetailsdata,
-		'SGST',
-		28
-	).toFixed(2);
-	let sum_CGST_28 = getSumByTaxtypeAndTaxPercent(
-		saledetailsdata,
-		'CGST',
-		28
-	).toFixed(2);
-	let sum_IGST_28 = getSumByTaxtypeAndTaxPercent(
-		saledetailsdata,
-		'IGST',
-		28
-	).toFixed(2);
+	let sum_SGST_28 = getSumByTaxtypeAndTaxPercent(saledetailsdata, 'SGST', 28).toFixed(2);
+	let sum_CGST_28 = getSumByTaxtypeAndTaxPercent(saledetailsdata, 'CGST', 28).toFixed(2);
+	let sum_IGST_28 = getSumByTaxtypeAndTaxPercent(saledetailsdata, 'IGST', 28).toFixed(2);
 
 	let GST_0 = +sum_SGST_0 / 2 + +sum_CGST_0 / 2 + +sum_IGST_0;
 	let GST_5 = +sum_SGST_5 / 2 + +sum_CGST_5 / 2 + +sum_IGST_5;
@@ -1108,139 +734,45 @@ function generateSummaryLeft(doc, saledetailsdata, isIGST, salemasterdata) {
 	let GST_18 = +sum_SGST_18 / 2 + +sum_CGST_18 / 2 + +sum_IGST_18;
 	let GST_28 = +sum_SGST_28 / 2 + +sum_CGST_28 / 2 + +sum_IGST_28;
 
-	let sumDiscountPercent_0 = getSumByDiscountPercent(
-		saledetailsdata,
-		0
-	).toFixed(2);
-	let sumDiscountPercent_5 = getSumByDiscountPercent(
-		saledetailsdata,
-		5
-	).toFixed(2);
-	let sumDiscountPercent_12 = getSumByDiscountPercent(
-		saledetailsdata,
-		12
-	).toFixed(2);
-	let sumDiscountPercent_18 = getSumByDiscountPercent(
-		saledetailsdata,
-		18
-	).toFixed(2);
-	let sumDiscountPercent_28 = getSumByDiscountPercent(
-		saledetailsdata,
-		28
-	).toFixed(2);
+	let sumDiscountPercent_0 = getSumByDiscountPercent(saledetailsdata, 0).toFixed(2);
+	let sumDiscountPercent_5 = getSumByDiscountPercent(saledetailsdata, 5).toFixed(2);
+	let sumDiscountPercent_12 = getSumByDiscountPercent(saledetailsdata, 12).toFixed(2);
+	let sumDiscountPercent_18 = getSumByDiscountPercent(saledetailsdata, 18).toFixed(2);
+	let sumDiscountPercent_28 = getSumByDiscountPercent(saledetailsdata, 28).toFixed(2);
 
-	let sumTaxablePercent_0 = getSumByTaxableByPercent(
-		saledetailsdata,
-		0
-	).toFixed(2);
-	let sumTaxablePercent_5 = getSumByTaxableByPercent(
-		saledetailsdata,
-		5
-	).toFixed(2);
-	let sumTaxablePercent_12 = getSumByTaxableByPercent(
-		saledetailsdata,
-		12
-	).toFixed(2);
-	let sumTaxablePercent_18 = getSumByTaxableByPercent(
-		saledetailsdata,
-		18
-	).toFixed(2);
-	let sumTaxablePercent_28 = getSumByTaxableByPercent(
-		saledetailsdata,
-		28
-	).toFixed(2);
+	let sumTaxablePercent_0 = getSumByTaxableByPercent(saledetailsdata, 0).toFixed(2);
+	let sumTaxablePercent_5 = getSumByTaxableByPercent(saledetailsdata, 5).toFixed(2);
+	let sumTaxablePercent_12 = getSumByTaxableByPercent(saledetailsdata, 12).toFixed(2);
+	let sumTaxablePercent_18 = getSumByTaxableByPercent(saledetailsdata, 18).toFixed(2);
+	let sumTaxablePercent_28 = getSumByTaxableByPercent(saledetailsdata, 28).toFixed(2);
 
 	let sumTotalPercent_0 = getSumByTotalByPercent(saledetailsdata, 0).toFixed(2);
 	let sumTotalPercent_5 = getSumByTotalByPercent(saledetailsdata, 5).toFixed(2);
-	let sumTotalPercent_12 = getSumByTotalByPercent(saledetailsdata, 12).toFixed(
-		2
-	);
-	let sumTotalPercent_18 = getSumByTotalByPercent(saledetailsdata, 18).toFixed(
-		2
-	);
-	let sumTotalPercent_28 = getSumByTotalByPercent(saledetailsdata, 28).toFixed(
-		2
-	);
+	let sumTotalPercent_12 = getSumByTotalByPercent(saledetailsdata, 12).toFixed(2);
+	let sumTotalPercent_18 = getSumByTotalByPercent(saledetailsdata, 18).toFixed(2);
+	let sumTotalPercent_28 = getSumByTotalByPercent(saledetailsdata, 28).toFixed(2);
 
-	let total_0 =
-		+GST_0 + +sumDiscountPercent_0 + +sumTaxablePercent_0 + +sumTotalPercent_0;
-	let total_5 =
-		+GST_5 + +sumDiscountPercent_5 + +sumTaxablePercent_5 + +sumTotalPercent_5;
-	let total_12 =
-		+GST_12 +
-		+sumDiscountPercent_12 +
-		+sumTaxablePercent_12 +
-		+sumTotalPercent_12;
-	let total_18 =
-		+GST_18 +
-		+sumDiscountPercent_18 +
-		+sumTaxablePercent_18 +
-		+sumTotalPercent_18;
-	let total_28 =
-		+GST_28 +
-		+sumDiscountPercent_28 +
-		+sumTaxablePercent_28 +
-		+sumTotalPercent_28;
+	let total_0 = +GST_0 + +sumDiscountPercent_0 + +sumTaxablePercent_0 + +sumTotalPercent_0;
+	let total_5 = +GST_5 + +sumDiscountPercent_5 + +sumTaxablePercent_5 + +sumTotalPercent_5;
+	let total_12 = +GST_12 + +sumDiscountPercent_12 + +sumTaxablePercent_12 + +sumTotalPercent_12;
+	let total_18 = +GST_18 + +sumDiscountPercent_18 + +sumTaxablePercent_18 + +sumTotalPercent_18;
+	let total_28 = +GST_28 + +sumDiscountPercent_28 + +sumTaxablePercent_28 + +sumTotalPercent_28;
 
-	let subtotalAllTax =
-		+sumTaxablePercent_0 +
-		+sumTaxablePercent_5 +
-		+sumTaxablePercent_12 +
-		+sumTaxablePercent_18 +
-		+sumTaxablePercent_28;
-	let discountAllTax =
-		+sumDiscountPercent_0 +
-		+sumDiscountPercent_5 +
-		+sumDiscountPercent_12 +
-		+sumDiscountPercent_18 +
-		+sumDiscountPercent_28;
-	let totalAllTax =
-		+sumTotalPercent_0 +
-		+sumTotalPercent_5 +
-		+sumTotalPercent_12 +
-		+sumTotalPercent_18 +
-		+sumTotalPercent_28;
+	let subtotalAllTax = +sumTaxablePercent_0 + +sumTaxablePercent_5 + +sumTaxablePercent_12 + +sumTaxablePercent_18 + +sumTaxablePercent_28;
+	let discountAllTax = +sumDiscountPercent_0 + +sumDiscountPercent_5 + +sumDiscountPercent_12 + +sumDiscountPercent_18 + +sumDiscountPercent_28;
+	let totalAllTax = +sumTotalPercent_0 + +sumTotalPercent_5 + +sumTotalPercent_12 + +sumTotalPercent_18 + +sumTotalPercent_28;
 
-	let SGSTAllTax =
-		+sum_SGST_0 / 2 +
-		+sum_SGST_5 / 2 +
-		+sum_SGST_12 / 2 +
-		+sum_SGST_18 / 2 +
-		+sum_SGST_28 / 2;
-	let CGSTAllTax =
-		+sum_CGST_0 / 2 +
-		+sum_CGST_5 / 2 +
-		+sum_CGST_12 / 2 +
-		+sum_CGST_18 / 2 +
-		+sum_CGST_28 / 2;
-	let IGSTAllTax =
-		+sum_IGST_0 + +sum_IGST_5 + +sum_IGST_12 + +sum_IGST_18 + +sum_IGST_28;
+	let SGSTAllTax = +sum_SGST_0 / 2 + +sum_SGST_5 / 2 + +sum_SGST_12 / 2 + +sum_SGST_18 / 2 + +sum_SGST_28 / 2;
+	let CGSTAllTax = +sum_CGST_0 / 2 + +sum_CGST_5 / 2 + +sum_CGST_12 / 2 + +sum_CGST_18 / 2 + +sum_CGST_28 / 2;
+	let IGSTAllTax = +sum_IGST_0 + +sum_IGST_5 + +sum_IGST_12 + +sum_IGST_18 + +sum_IGST_28;
 
-	let finalTotalAllTax =
-		+sumTotalPercent_0 +
-		+sumTotalPercent_5 +
-		+sumTotalPercent_12 +
-		+sumTotalPercent_18 +
-		+sumTotalPercent_28;
+	let finalTotalAllTax = +sumTotalPercent_0 + +sumTotalPercent_5 + +sumTotalPercent_12 + +sumTotalPercent_18 + +sumTotalPercent_28;
 
 	// adjusting footer section 1 height
 	let start = 539;
 	generateHr(doc, line_x_start, line_x_end, start);
 	doc.font('Helvetica-Bold');
-	generateSummaryLeftTableRow(
-		doc,
-		start + 10,
-		'CLASS',
-		'SUB TOTAL',
-		'DISC',
-		'AMOUNT',
-		'SGST',
-		'CGST',
-		'GST',
-		'TOTAL',
-		isIGST,
-		'IGST'
-	);
+	generateSummaryLeftTableRow(doc, start + 10, 'CLASS', 'SUB TOTAL', 'DISC', 'AMOUNT', 'SGST', 'CGST', 'GST', 'TOTAL', isIGST, 'IGST');
 	doc.font('Helvetica');
 	generateSummaryLeftTableRow(
 		doc,
@@ -1352,31 +884,17 @@ function generateSummaryLeft(doc, saledetailsdata, isIGST, salemasterdata) {
 
 function numberToText(doc, finalTotalAllTax, start) {
 	doc.font('Helvetica-Bold');
-	doc
-		.fontSize(9)
-		.text(
-			number2text(roundOffFn(finalTotalAllTax, 'rounding')),
-			24,
-			start + 125,
-			{
-				align: 'left',
-			}
-		);
+	doc.fontSize(9).text(number2text(roundOffFn(finalTotalAllTax, 'rounding')), 24, start + 125, {
+		align: 'left',
+	});
 	doc.font('Helvetica');
 }
 
 function generateFooter(doc) {
-	doc
-		.fontSize(10)
-		.text(
-			'Payment is due within 15 days. Thank you for your business.',
-			50,
-			780,
-			{
-				align: 'center',
-				width: 500,
-			}
-		);
+	doc.fontSize(10).text('Payment is due within 15 days. Thank you for your business.', 50, 780, {
+		align: 'center',
+		width: 500,
+	});
 }
 
 function generateToBlock(doc, customerdata) {
@@ -1408,18 +926,8 @@ function generateFooterSummary(doc, centerdata) {
 
 	doc
 		.fontSize(8)
-		.text(
-			'Certified that the particulars given above are true and correct',
-			24,
-			start + 60,
-			{ lineGap: 1.8 }
-		)
-		.text(
-			'and the amount indicated represents the price actually charged.',
-			24,
-			start + 70,
-			{ lineGap: 1.8 }
-		);
+		.text('Certified that the particulars given above are true and correct', 24, start + 60, { lineGap: 1.8 })
+		.text('and the amount indicated represents the price actually charged.', 24, start + 70, { lineGap: 1.8 });
 
 	doc
 		.fontSize(8)
@@ -1434,14 +942,7 @@ function generateFooterSummary(doc, centerdata) {
 			lineGap: 1.8,
 		});
 	doc.font('Times-BoldItalic');
-	doc
-		.fontSize(6)
-		.text(
-			`Plz pay Cash/Cheque/DD in favour of '${centerdata.accountname}'.`,
-			320,
-			start + 30,
-			{ lineGap: 1.4 }
-		);
+	doc.fontSize(6).text(`Plz pay Cash/Cheque/DD in favour of '${centerdata.accountname}'.`, 320, start + 30, { lineGap: 1.4 });
 
 	doc.fontSize(7).text('For    ' + centerdata.accountname, 400, start + 40);
 	doc.fontSize(7).text('Authorised signatory', 400, start + 75);
@@ -1510,9 +1011,7 @@ function generateTableRow(
 
 	if (product_description !== 'PRODUCT NAME') {
 		doc.text(
-			product_description.length > 33
-				? product_description.substr(0, 29) + '...'
-				: product_description,
+			product_description.length > 33 ? product_description.substr(0, 29) + '...' : product_description,
 			x_start + (snow + 2) + (pcodew + 3),
 			y,
 			{
@@ -1542,144 +1041,47 @@ function generateTableRow(
 	}
 
 	if (qty === ' QTY ') {
-		doc.text(
-			qty,
-			x_start + (snow + 2) + (pcodew + 2) + (pdescw + 2) + (hsnw + 2),
-			y,
-			{ width: qtyw - 1, align: 'right' }
-		);
+		doc.text(qty, x_start + (snow + 2) + (pcodew + 2) + (pdescw + 2) + (hsnw + 2), y, { width: qtyw - 1, align: 'right' });
 	} else {
-		doc.text(
-			qty,
-			x_start + (snow + 2) + (pcodew + 2) + (pdescw + 2) + (hsnw + 2),
-			y,
-			{ width: qtyw - 3, align: 'right' }
-		); // ADJUST FROM RIGHT
+		doc.text(qty, x_start + (snow + 2) + (pcodew + 2) + (pdescw + 2) + (hsnw + 2), y, { width: qtyw - 3, align: 'right' }); // ADJUST FROM RIGHT
 	}
 
 	if (uom === ' UOM ') {
-		doc.text(
-			uom,
-			x_start +
-				(snow + 2) +
-				(pcodew + 2) +
-				(pdescw + 2) +
-				(hsnw + 2) +
-				(qtyw + 2),
-			y,
-			{ width: uomw, align: 'center' }
-		);
+		doc.text(uom, x_start + (snow + 2) + (pcodew + 2) + (pdescw + 2) + (hsnw + 2) + (qtyw + 2), y, { width: uomw, align: 'center' });
 	} else {
-		doc.text(
-			uom,
-			x_start +
-				(snow + 2) +
-				(pcodew + 2) +
-				(pdescw + 2) +
-				(hsnw + 2) +
-				(qtyw + 2),
-			y,
-			{ width: uomw, align: 'center' }
-		);
+		doc.text(uom, x_start + (snow + 2) + (pcodew + 2) + (pdescw + 2) + (hsnw + 2) + (qtyw + 2), y, { width: uomw, align: 'center' });
 	}
 
 	if (mrp === ' MRP ') {
-		doc.text(
-			mrp,
-			x_start +
-				(snow + 2) +
-				(pcodew + 2) +
-				(pdescw + 2) +
-				(hsnw + 2) +
-				(qtyw + 2) +
-				(uomw + 2),
-			y,
-			{ width: mrpw - 1, align: 'center' }
-		);
+		doc.text(mrp, x_start + (snow + 2) + (pcodew + 2) + (pdescw + 2) + (hsnw + 2) + (qtyw + 2) + (uomw + 2), y, { width: mrpw - 1, align: 'center' });
 	} else {
-		doc.text(
-			(+mrp).toFixed(2),
-			x_start +
-				(snow + 2) +
-				(pcodew + 2) +
-				(pdescw + 2) +
-				(hsnw + 2) +
-				(qtyw + 2) +
-				(uomw + 2),
-			y,
-			{
-				width: mrpw - 3,
-				align: 'right',
-			}
-		);
+		doc.text((+mrp).toFixed(2), x_start + (snow + 2) + (pcodew + 2) + (pdescw + 2) + (hsnw + 2) + (qtyw + 2) + (uomw + 2), y, {
+			width: mrpw - 3,
+			align: 'right',
+		});
 	}
 
 	if (disc_percent === 'DIS%') {
-		doc.text(
-			disc_percent,
-			x_start +
-				(snow + 2) +
-				(pcodew + 2) +
-				(pdescw + 2) +
-				(hsnw + 2) +
-				(qtyw + 2) +
-				(uomw + 2) +
-				(mrpw + 2),
-			y,
-			{
-				width: discpw,
-				align: 'center',
-			}
-		);
+		doc.text(disc_percent, x_start + (snow + 2) + (pcodew + 2) + (pdescw + 2) + (hsnw + 2) + (qtyw + 2) + (uomw + 2) + (mrpw + 2), y, {
+			width: discpw,
+			align: 'center',
+		});
 	} else {
-		doc.text(
-			disc_percent.toFixed(2),
-			x_start +
-				(snow + 2) +
-				(pcodew + 2) +
-				(pdescw + 2) +
-				(hsnw + 2) +
-				(qtyw + 2) +
-				(uomw + 2) +
-				(mrpw + 2),
-			y,
-			{
-				width: discpw - 2,
-				align: 'right',
-			}
-		);
+		doc.text(disc_percent.toFixed(2), x_start + (snow + 2) + (pcodew + 2) + (pdescw + 2) + (hsnw + 2) + (qtyw + 2) + (uomw + 2) + (mrpw + 2), y, {
+			width: discpw - 2,
+			align: 'right',
+		});
 	}
 
 	if (amount === ' AMOUNT ') {
-		doc.text(
-			amount,
-			x_start +
-				(snow + 2) +
-				(pcodew + 2) +
-				(pdescw + 2) +
-				(hsnw + 2) +
-				(qtyw + 2) +
-				(uomw + 2) +
-				(mrpw + 2) +
-				(discpw + 2),
-			y,
-			{
-				width: amountw - 3,
-				align: 'right',
-			}
-		);
+		doc.text(amount, x_start + (snow + 2) + (pcodew + 2) + (pdescw + 2) + (hsnw + 2) + (qtyw + 2) + (uomw + 2) + (mrpw + 2) + (discpw + 2), y, {
+			width: amountw - 3,
+			align: 'right',
+		});
 	} else {
 		doc.text(
 			amount.toFixed(2),
-			x_start +
-				(snow + 2) +
-				(pcodew + 2) +
-				(pdescw + 2) +
-				(hsnw + 2) +
-				(qtyw + 2) +
-				(uomw + 2) +
-				(mrpw + 2) +
-				(discpw + 2),
+			x_start + (snow + 2) + (pcodew + 2) + (pdescw + 2) + (hsnw + 2) + (qtyw + 2) + (uomw + 2) + (mrpw + 2) + (discpw + 2),
 			y,
 			{
 				width: amountw - 3,
@@ -1691,32 +1093,14 @@ function generateTableRow(
 	if (sgst === 'SGST' && !isIGST) {
 		doc.text(
 			sgst,
-			x_start +
-				(snow + 2) +
-				(pcodew + 2) +
-				(pdescw + 2) +
-				(hsnw + 2) +
-				(qtyw + 2) +
-				(uomw + 2) +
-				(mrpw + 2) +
-				(discpw + 2) +
-				(amountw + 2),
+			x_start + (snow + 2) + (pcodew + 2) + (pdescw + 2) + (hsnw + 2) + (qtyw + 2) + (uomw + 2) + (mrpw + 2) + (discpw + 2) + (amountw + 2),
 			y,
 			{ width: sgstw, align: 'center' }
 		);
 	} else if (!isIGST) {
 		doc.text(
 			sgst.toFixed(2),
-			x_start +
-				(snow + 2) +
-				(pcodew + 2) +
-				(pdescw + 2) +
-				(hsnw + 2) +
-				(qtyw + 2) +
-				(uomw + 2) +
-				(mrpw + 2) +
-				(discpw + 2) +
-				(amountw + 2),
+			x_start + (snow + 2) + (pcodew + 2) + (pdescw + 2) + (hsnw + 2) + (qtyw + 2) + (uomw + 2) + (mrpw + 2) + (discpw + 2) + (amountw + 2),
 			y,
 			{ width: sgstw - 3, align: 'right' }
 		);
@@ -1762,16 +1146,7 @@ function generateTableRow(
 		doc.text(
 			igst,
 
-			x_start +
-				(snow + 2) +
-				(pcodew + 2) +
-				(pdescw + 2) +
-				(hsnw + 2) +
-				(qtyw + 2) +
-				(uomw + 2) +
-				(mrpw + 2) +
-				(discpw + 2) +
-				(amountw + 2),
+			x_start + (snow + 2) + (pcodew + 2) + (pdescw + 2) + (hsnw + 2) + (qtyw + 2) + (uomw + 2) + (mrpw + 2) + (discpw + 2) + (amountw + 2),
 			y,
 			{ width: igstw, align: 'center' }
 		);
@@ -1779,16 +1154,7 @@ function generateTableRow(
 		doc.text(
 			igst.toFixed(2),
 
-			x_start +
-				(snow + 2) +
-				(pcodew + 2) +
-				(pdescw + 2) +
-				(hsnw + 2) +
-				(qtyw + 2) +
-				(uomw + 2) +
-				(mrpw + 2) +
-				(discpw + 2) +
-				(amountw + 2),
+			x_start + (snow + 2) + (pcodew + 2) + (pdescw + 2) + (hsnw + 2) + (qtyw + 2) + (uomw + 2) + (mrpw + 2) + (discpw + 2) + (amountw + 2),
 			y,
 			{ width: igstw - 20, align: 'right' }
 		);
@@ -1872,20 +1238,7 @@ function generateTableRow(
 }
 
 // FINAL SUMMARY TOTAL LEFT
-function generateSummaryLeftTableRow(
-	doc,
-	y,
-	classhead,
-	subtotal,
-	disc,
-	amount,
-	sgst,
-	cgst,
-	gst,
-	total,
-	isIGST,
-	igst
-) {
+function generateSummaryLeftTableRow(doc, y, classhead, subtotal, disc, amount, sgst, cgst, gst, total, isIGST, igst) {
 	doc.fillColor('#000000');
 	doc.fontSize(9).text(classhead, 24, y, { width: 40, align: 'left' });
 	if (subtotal === 'SUB TOTAL') {
@@ -1952,18 +1305,7 @@ function generateSummaryLeftTableRow(
 	}
 }
 //Final SUMMARY TOTAL RIGHT BOX
-function generateSummaryRightTableRow(
-	doc,
-	y,
-	subtotal,
-	discount,
-	sgst,
-	cgst,
-	finalTotalAllTax,
-	isIGST,
-	igst,
-	salemasterdata
-) {
+function generateSummaryRightTableRow(doc, y, subtotal, discount, sgst, cgst, finalTotalAllTax, isIGST, igst, salemasterdata) {
 	doc.fillColor('#000000');
 	doc
 		.fontSize(9)
@@ -1998,66 +1340,34 @@ function generateSummaryRightTableRow(
 	doc
 		.text('Misc.', 450, y + 60, { width: 70, align: 'left' })
 
-		.text(
-			(+(
-				+salemasterdata.transport_charges +
-				+salemasterdata.unloading_charges +
-				+salemasterdata.misc_charges
-			)).toFixed(2),
-			500,
-			y + 60,
-			{
-				width: 70,
-				align: 'right',
-			}
-		);
+		.text((+(+salemasterdata.transport_charges + +salemasterdata.unloading_charges + +salemasterdata.misc_charges)).toFixed(2), 500, y + 60, {
+			width: 70,
+			align: 'right',
+		});
 
-	let finalSumTotal = +(
-		+finalTotalAllTax +
-		+salemasterdata.transport_charges +
-		+salemasterdata.unloading_charges +
-		+salemasterdata.misc_charges
-	);
+	let finalSumTotal = +(+finalTotalAllTax + +salemasterdata.transport_charges + +salemasterdata.unloading_charges + +salemasterdata.misc_charges);
 
 	doc
 		.text('ROUNDED OFF', 450, y + 75, { width: 70, align: 'left' })
 
-		.text(
-			(
-				roundOffFn(finalSumTotal, 'rounding') -
-				roundOffFn(finalSumTotal, 'withoutrounding')
-			).toFixed(2),
-			500,
-			y + 75,
-			{
-				width: 70,
-				align: 'right',
-			}
-		);
+		.text((roundOffFn(finalSumTotal, 'rounding') - roundOffFn(finalSumTotal, 'withoutrounding')).toFixed(2), 500, y + 75, {
+			width: 70,
+			align: 'right',
+		});
 
 	doc.font('Helvetica-Bold');
 	doc
 		.text('TOTAL', 450, y + 95, { width: 70, align: 'left' })
 
-		.text(
-			roundOffFn(finalSumTotal, 'rounding').toLocaleString('en-IN') + '.00',
-			500,
-			y + 95,
-			{
-				width: 70,
-				align: 'right',
-			}
-		)
+		.text(roundOffFn(finalSumTotal, 'rounding').toLocaleString('en-IN') + '.00', 500, y + 95, {
+			width: 70,
+			align: 'right',
+		})
 		.font('Helvetica');
 }
 
 function generateHr(doc, line_x_start, line_x_end, y) {
-	doc
-		.strokeColor('#000000')
-		.lineWidth(1)
-		.moveTo(line_x_start, y)
-		.lineTo(line_x_end, y)
-		.stroke();
+	doc.strokeColor('#000000').lineWidth(1).moveTo(line_x_start, y).lineTo(line_x_end, y).stroke();
 }
 
 function formatCurrency(cents) {

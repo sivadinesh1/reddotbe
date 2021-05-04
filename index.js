@@ -28,6 +28,7 @@ var options = {
 const app = express();
 
 app.use(express.static('public'));
+app.use(express.static('upload'));
 
 seqnce = 0;
 
@@ -72,6 +73,7 @@ app.use('/api/purchaseaccounts', require('./routes/api/purchaseaccounts'));
 app.use('/api/reports', require('./routes/api/reports'));
 app.use('/api/dashboard', require('./routes/api/dashboard'));
 app.use('/api/returns', require('./routes/api/returns'));
+app.use('/api/upload', require('./routes/api/upload'));
 
 app.get('/openCV/:id/:filename', function (req, res) {
 	var dir = process.env.UPLOAD_PATH;
@@ -95,7 +97,7 @@ const PORT = process.env.PORT || 5050;
 
 // app.listen(PORT);
 //devlopment env
-//http.createServer(app).listen(5050);
+// http.createServer(app).listen(5050);
 //demo
 // https.createServer(options, app).listen(8440);
 // prod
