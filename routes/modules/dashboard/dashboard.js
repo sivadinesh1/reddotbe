@@ -132,7 +132,8 @@ const getPaymentsByCustomers = (center_id, from_date, to_date, callback) => {
 
 const topClients = (center_id, limit) => {
 	let query = `
-		select c.name as customer_name, s.customer_id as id, sum(net_total) as sum_total
+		select c.name as customer_name, s.customer_id as id, sum(net_total) as sum_total,
+		count(s.id) as inv_count
 		from 
 			sale s,
 			customer c

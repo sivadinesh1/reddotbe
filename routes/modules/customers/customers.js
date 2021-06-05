@@ -56,11 +56,7 @@ const insertCustomer = (insertValues, callback) => {
 				};
 
 				insertCustomerDiscount(formObj, (err, rows) => {
-					if (err)
-						return handleError(
-							new ErrorHandler('500', 'Error insertCustomerDiscount', err),
-							res
-						);
+					if (err) return handleError(new ErrorHandler('500', 'Error insertCustomerDiscount', err), res);
 				});
 			});
 
@@ -298,7 +294,7 @@ const insertCustomerDiscount = (insertValues, callback) => {
 // update rows in discount tbl // check
 const updateCustomerDiscount = (updateValues, callback) => {
 	updateValues.forEach((element) => {
-		let stdate = moment(element.startdate).format('DD-MM-YYYY');
+		let stdate = toTimeZoneFrmt(element.startdate, 'Asia/Kolkata', 'DD-MM-YYYY');
 
 		let query = ` update discount set type = '${element.type}', value = '${element.value}', 
                   gst_slab = '${element.gst_slab}', startdate = '${stdate}', enddate = '${element.enddate}' 
@@ -364,13 +360,6 @@ const getCustomerDetails = (centerid, customerid) => {
 	
 	c.id = '${customerid}' and
 	c.center_id = '${centerid}' `;
-
-	let values = [centerid, customerid];
-
-	// pool.query(query, values, function (err, data) {
-	// 	if (err) return callback(err);
-	// 	return callback(null, data);
-	// });
 
 	return new Promise(function (resolve, reject) {
 		pool.query(query, function (err, data) {
@@ -441,11 +430,7 @@ const insertDiscountsByBrands = (insertValues, callback) => {
 		};
 
 		insertCustomerDiscount(formObj, (err, rows) => {
-			if (err)
-				return handleError(
-					new ErrorHandler('500', 'Error insertDiscountsByBrands ', err),
-					res
-				);
+			if (err) return handleError(new ErrorHandler('500', 'Error insertDiscountsByBrands ', err), res);
 		});
 	});
 	return callback(null, '1');
@@ -470,17 +455,23 @@ customer_id = ? order by id desc `;
 	});
 };
 
-const insertCustomerShippingAddress = (insertValues, callback) => {
+const insertCustomerShippingAddress = async (insertValues, res, callback) => {
 	let def_address = insertValues.def_address === true ? 'Y' : 'N';
+	let result = '';
 
 	if (def_address === 'Y') {
-		let sql = `update customer_shipping_address set def_address = 'N' where customer_id = '${insertValues.customer_id}' `;
+		await updateAllAddress(insertValues, res);
+		result = await addCustomerShippingAddress(insertValues, def_address, res);
 
-		pool.query(sql, function (err, data1) {
-			if (err) return callback(err);
-		});
+		return callback(null, { id: result });
+	} else {
+		result = await addCustomerShippingAddress(insertValues, def_address, res);
+
+		return callback(null, { id: result });
 	}
+};
 
+const addCustomerShippingAddress = (insertValues, def_address, res) => {
 	let query1 = `
 	INSERT INTO customer_shipping_address (customer_id, address1, address2, address3, district, state_id, pin, def_address, is_active)
 	VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'A' ) `;
@@ -495,13 +486,29 @@ const insertCustomerShippingAddress = (insertValues, callback) => {
 		insertValues.pin,
 		def_address,
 	];
+	return new Promise(function (resolve, reject) {
+		pool.query(query1, values1, function (err, data) {
+			if (err) {
+				return handleError(new ErrorHandler('500', 'Error addCustomerShippingAddress in Customerjs', err), res);
+			} else {
+				return resolve(data.insertId);
+				// return resolve(null, { id: data.insertId });
+			}
+		});
+	});
+};
 
-	pool.query(query1, values1, function (err, data) {
-		if (err) {
-			return callback(err);
-		} else {
-			return callback(null, { id: data.insertId });
-		}
+const updateAllAddress = (insertValues, res) => {
+	let sql = `update customer_shipping_address set def_address = 'N' where customer_id = '${insertValues.customer_id}' `;
+
+	return new Promise(function (resolve, reject) {
+		pool.query(sql, function (err, data1) {
+			if (err) {
+				return handleError(new ErrorHandler('500', 'Error updateAllAddress in Customerjs', err), res);
+			} else {
+				resolve('updated');
+			}
+		});
 	});
 };
 
@@ -516,9 +523,7 @@ const updateCustomerShippingAddress = (updateValues, id, callback) => {
 			let query = `
 			update customer_shipping_address set
 			address1 = '${updateValues.address1}',address2 = '${updateValues.address2}',
-			district = '${updateValues.district}', state_id = '${
-				updateValues.state_id
-			}', pin = '${updateValues.pin}', def_address = '${
+			district = '${updateValues.district}', state_id = '${updateValues.state_id}', pin = '${updateValues.pin}', def_address = '${
 				updateValues.def_address === true ? 'Y' : 'N'
 			}'
 			where
@@ -534,9 +539,7 @@ const updateCustomerShippingAddress = (updateValues, id, callback) => {
 		let query = `
 		update customer_shipping_address set
 		address1 = '${updateValues.address1}',address2 = '${updateValues.address2}',
-		district = '${updateValues.district}', state_id = '${
-			updateValues.state_id
-		}', pin = '${updateValues.pin}', def_address = '${
+		district = '${updateValues.district}', state_id = '${updateValues.state_id}', pin = '${updateValues.pin}', def_address = '${
 			updateValues.def_address === true ? 'Y' : 'N'
 		}'
 		where

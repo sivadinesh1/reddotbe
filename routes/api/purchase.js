@@ -9,6 +9,8 @@ const { handleError, ErrorHandler } = require('../helpers/error');
 var pool = require('../helpers/db');
 const { toTimeZone, currentTimeInTimeZone } = require('./../helpers/utils');
 
+const { insertItemHistoryTable, updateStock, isStockIdExist } = require('./../modules/stock/stock.js');
+
 const {
 	addPurchaseLedgerRecord,
 	addReversePurchaseLedgerRecord,
@@ -19,12 +21,10 @@ const {
 purchaseRouter.post('/insert-purchase-details', async (req, res) => {
 	const cloneReq = { ...req.body };
 
-	//	let today = currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY');
-
 	let newPK = await purchaseMasterEntry(cloneReq);
 
 	try {
-		let processItemsPromise = processItems(cloneReq, newPK);
+		let processItemsPromise = processItems(cloneReq, newPK, res);
 
 		// ledger entry should NOT be done if status is draft ("D")
 		if (cloneReq.status === 'C' && cloneReq.purchaseid === '') {
@@ -94,7 +94,11 @@ function purchaseMasterEntry(cloneReq) {
 	return new Promise(function (resolve, reject) {
 		pool.query(cloneReq.purchaseid === '' ? insQry : updQry, function (err, data) {
 			if (err) {
-				return reject(new ErrorHandler('500', 'Error Purchase master entry.', err), res);
+				if (cloneReq.purchaseid === '') {
+					return reject(new ErrorHandler('500', `Error Purchase master entry INSERT QRY. ${insQry}`, err), res);
+				} else {
+					return reject(new ErrorHandler('500', `Error Purchase master entry UPDATE QRY. ${updQry}`, err), res);
+				}
 			}
 			if (cloneReq.purchaseid === '') {
 				newPK = data.insertId;
@@ -107,14 +111,17 @@ function purchaseMasterEntry(cloneReq) {
 	});
 }
 
-async function processItems(cloneReq, newPK) {
+async function processItems(cloneReq, newPK, res) {
 	for (const k of cloneReq.productarr) {
 		let insQuery1 = ` INSERT INTO purchase_detail(purchase_id, product_id, qty, purchase_price, mrp, batchdate, tax,
 			igst, cgst, sgst, taxable_value, total_value, stock_id) VALUES
 			( '${newPK}', '${k.product_id}', '${k.qty}', '${k.purchase_price}', '${k.mrp}', 
 			'${currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY')}',
 			'${k.taxrate}', '${k.igst}', 
-			'${k.cgst}', '${k.sgst}', '${k.taxable_value}', '${k.total_value}', '${k.stock_pk}') `;
+			'${k.cgst}', '${k.sgst}', '${k.taxable_value}', '${k.total_value}', 
+			
+			(select id from stock where product_id = '${k.product_id}' and mrp = '${k.mrp}' order by id desc limit 1	)
+			)`;
 
 		let updQuery1 = ` update purchase_detail set purchase_id = '${k.purchase_id}', product_id = '${k.product_id}', 
 			qty = '${k.qty}', purchase_price = '${k.purchase_price}', mrp = '${k.mrp}', 
@@ -126,16 +133,23 @@ async function processItems(cloneReq, newPK) {
 		await new Promise(function (resolve, reject) {
 			pool.query(k.pur_det_id === '' ? insQuery1 : updQuery1, async function (err, data) {
 				if (err) {
-					return reject(new ErrorHandler('500', 'Error Purchase process items.', err), res);
+					if (k.pur_det_id === '') {
+						return reject(new ErrorHandler('500', `Error Purchase process items (update purchase_detail) INSERT QRY. ${insQuery1}`, err), res);
+					} else {
+						return reject(new ErrorHandler('500', `Error Purchase process items (update purchase_detail) UPDATE QRY. ${updQuery1}`, err), res);
+					}
 				} else {
 					updateLatestPurchasePrice(k);
 
-					if (`${k.mrp_change_flag}` === 'Y') {
+					let pdetailid = k.pur_det_id === '' ? data.insertId : k.pur_det_id;
+
+					// check if productId + mrp exist, if exists (count ===1) then update stock else create new stock
+					let stockidExist = await isStockIdExist(k, res);
+
+					if (`${k.mrp_change_flag}` === 'Y' && stockidExist === 0) {
 						// get pur_det_id for both insert and update - check
 						// if insert its: data.insertId
 						// for update its k.k.pur_det_id
-
-						let pdetailid = k.pur_det_id === '' ? data.insertId : k.pur_det_id;
 
 						// if mrp flag is true the insert new record to stocks
 						let stockid = await insertStock(k);
@@ -146,7 +160,8 @@ async function processItems(cloneReq, newPK) {
 
 						//	if (cloneReq.status === "C") {
 						// update stock for both status C & D (Completed & Draft)
-						let isupdated = await updateStock(k);
+						let qty_to_update = k.qty - k.old_val;
+						let isupdated = await updateStock(qty_to_update, k.product_id, k.mrp, 'add', res);
 						insertItemHistory(k, newPK, data.insertId, cloneReq);
 
 						//		}
@@ -172,7 +187,7 @@ function insertStock(k) {
 	return new Promise(function (resolve, reject) {
 		pool.query(query2, function (err, data) {
 			if (err) {
-				return reject(new ErrorHandler('500', 'Error insertStock in Purchasejs.', err), res);
+				return reject(new ErrorHandler('500', `Error insertStock in Purchasejs. ${query2}`, err), res);
 			} else {
 				resolve(data.insertId);
 			}
@@ -191,7 +206,7 @@ function updatePurchaseDetail(purchaseDetailId, stockid) {
 	return new Promise(function (resolve, reject) {
 		pool.query(query3, function (err, data) {
 			if (err) {
-				return reject(new ErrorHandler('500', 'Error updateStock in Purchasejs.', err), res);
+				return reject(new ErrorHandler('500', 'Error updatePurchaseDetail in Purchasejs.', err), res);
 			} else {
 				resolve('purchase_detail_updated');
 			}
@@ -222,41 +237,25 @@ function updatePurchaseDetail(purchaseDetailId, stockid) {
 // 	});
 // }
 
-function updateStock(k) {
-	let qty_to_update = k.qty - k.old_val;
-
+// UPDATE PRODUCT TABLE when purchasing, for company both unit_price (use in sales screen reports) & purchase_price are same
+const updateLatestPurchasePrice = (k) => {
 	let query2 = `
 
-update stock set available_stock =  available_stock + '${qty_to_update}'
-where product_id = '${k.product_id}' and id = '${k.stock_pk}' `;
-
-	return new Promise(function (resolve, reject) {
-		pool.query(query2, function (err, data) {
-			if (err) {
-				return reject(new ErrorHandler('500', 'Error updateStock in Purchasejs.', err), res);
-			}
-			return resolve('updated');
-		});
-	});
-}
-
-// when purchasing, for company both unit_price (use in sales screen reports) & purchase_price are same
-function updateLatestPurchasePrice(k) {
-	let query2 = `
-
-update product set purchase_price = '${k.purchase_price}', unit_price = '${k.purchase_price}'
+update product set purchase_price = '${k.purchase_price}', unit_price = '${k.purchase_price}', mrp = '${k.mrp}'
 where id = '${k.product_id}'  `;
 
 	pool.query(query2, function (err, data) {
 		if (err) {
+			console.log('error while inserting updateLatestPurchasePrice ' + JSON.stringify(err));
 		} else {
+			console.log('updated mrp/purchase price in product table');
 		}
 	});
-}
+};
 
 //vPurchase_id - purchase_id && vPurchase_det_id - new purchase_detail id
 // k - looped purchase details array
-function insertItemHistory(k, vPurchase_id, vPurchase_det_id, cloneReq) {
+const insertItemHistory = async (k, vPurchase_id, vPurchase_det_id, cloneReq, res) => {
 	let today = currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY HH:mm:ss');
 
 	// if purchase details id is missing its new else update
@@ -282,17 +281,20 @@ function insertItemHistory(k, vPurchase_id, vPurchase_det_id, cloneReq) {
 	}
 
 	if (txn_qty !== 0) {
-		let query2 = `
-			insert into item_history (center_id, module, product_ref_id, purchase_id, purchase_det_id, actn, actn_type, txn_qty, stock_level, txn_date)
-			values ('${cloneReq.centerid}', 'Purchase', '${k.product_id}', '${purchase_id}', '${purchase_det_id}', 'PUR', '${actn_type}', '${txn_qty}', 
-							(select IFNULL(available_stock, 0) as available_stock  from stock where product_id = '${k.product_id}' and mrp = '${k.mrp}' ), '${today}' ) `;
-
-		pool.query(query2, function (err, data) {
-			if (err) {
-			} else {
-			}
-		});
+		let itemHistory = await insertItemHistoryTable(
+			cloneReq.centerid,
+			'Purchase',
+			k.product_id,
+			purchase_id,
+			purchase_det_id, //purchase_det_id
+			'0', // sale_id
+			'0', //sale_det_id
+			'PUR',
+			actn_type,
+			txn_qty, //txn_qty
+			res,
+		);
 	}
-}
+};
 
 module.exports = purchaseRouter;

@@ -108,9 +108,18 @@ u.centerid = '${center_id}' and status = '${status}'
 };
 
 const getOutstandingBalance = (center_id, limit) => {
-	let query = ` select * from customer where center_id = '${center_id}' 
-	and balance_amt != 0 
-	order by balance_amt desc `;
+	let query = ` 
+	select c.*,
+	count(s.id) as inv_count
+	 from 
+	customer as c,
+	sale as s
+	where 
+	c.id = s.customer_id and
+	c.center_id = '${center_id}'
+		and c.balance_amt != 0 
+		group by c.id
+		order by c.balance_amt desc 	 `;
 
 	if (limit !== 0) {
 		query = query + ` limit ${limit}`;
@@ -128,7 +137,7 @@ const getOutstandingBalance = (center_id, limit) => {
 
 const updateLogo = (center_id, logo_name, logo_url, position) => {
 	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
-	console.log('dinesh **' + position + '**');
+
 	let query = '';
 
 	if (position === 'main') {
@@ -142,10 +151,102 @@ const updateLogo = (center_id, logo_name, logo_url, position) => {
 	return new Promise(function (resolve, reject) {
 		pool.query(query, function (err, data) {
 			if (err) {
-				console.log('dinesh err ' + JSON.stringify(err));
 				reject(err);
 			}
 
+			resolve('success');
+		});
+	});
+};
+
+const insertBank = async (insertValues) => {
+	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
+
+	let query = `  INSERT INTO center_banks(center_id, bankname, accountname, accountno, ifsccode, branch,
+		isdefault,
+		createddate, createdby)
+VALUES
+	( '${insertValues.center_id}', '${insertValues.bankname}', '${insertValues.accountname}', 
+		'${insertValues.accountno}', '${insertValues.ifsccode}', '${insertValues.branchdetails}', 
+		'${insertValues.isdefault === true ? 'Y' : 'N'}',
+		'${today}', '${insertValues.createdby}') `;
+
+	return new Promise(function (resolve, reject) {
+		pool.query(query, function (err, data) {
+			if (err) {
+				reject(err);
+			}
+			resolve('success');
+		});
+	});
+};
+
+const updateBank = async (insertValues) => {
+	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
+
+	let query = `  update center_banks set
+	bankname = '${insertValues.bankname}',
+	accountname = '${insertValues.accountname}',
+	accountno = '${insertValues.accountno}',
+	ifsccode = '${insertValues.ifsccode}',
+	branch = '${insertValues.branchdetails}',
+	isdefault = '${insertValues.isdefault === true ? 'Y' : 'N'}',
+	updateddate = '${today}',
+	updatedby = '${insertValues.updatedby}' 
+	where id = '${insertValues.id}'
+	`;
+
+	return new Promise(function (resolve, reject) {
+		pool.query(query, function (err, data) {
+			if (err) {
+				reject(err);
+			}
+			resolve('success');
+		});
+	});
+};
+
+const updateCenterBankInfo = (updateValues) => {
+	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
+
+	let query = `  update center set  bankname = ?,
+	accountname = ?, accountno = ?, ifsccode = ?, branch = ?
+	where
+	id = ? `;
+
+	let values = [
+		`${updateValues.bankname}, IFSC: ${updateValues.ifsccode}`,
+		updateValues.accountname,
+		updateValues.accountno,
+		updateValues.ifsc,
+		updateValues.branchdetails,
+		updateValues.center_id,
+	];
+
+	return new Promise(function (resolve, reject) {
+		pool.query(query, values, function (err, data) {
+			if (err) {
+				reject(err);
+			}
+
+			resolve('success');
+		});
+	});
+};
+
+const updateBankDefaults = async (center_id) => {
+	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
+
+	let query = `  update center_banks set
+	isdefault = 'N'
+	where center_id = '${center_id}'
+	`;
+
+	return new Promise(function (resolve, reject) {
+		pool.query(query, function (err, data) {
+			if (err) {
+				reject(err);
+			}
 			resolve('success');
 		});
 	});
@@ -159,4 +260,8 @@ module.exports = {
 	getOutstandingBalance,
 	isUserExist,
 	updateLogo,
+	insertBank,
+	updateCenterBankInfo,
+	updateBank,
+	updateBankDefaults,
 };

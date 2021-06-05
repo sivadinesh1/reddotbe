@@ -8,13 +8,19 @@ const { toTimeZone, toTimeZoneFrmt } = require('./../helpers/utils');
 
 const { getProductInventoryReport, fullStockReport } = require('../modules/reports/inventoryreports.js');
 const { getProductSummaryReport } = require('../modules/reports/productsummaryreports.js');
-const { getStatement, getVendorStatement, getItemWiseSale } = require('../modules/reports/statementreports');
+const {
+	getStatement,
+	getVendorStatement,
+	getItemWiseSale,
+	getReceivablesClosingBalance,
+	getReceivablesOpeningBalance,
+} = require('../modules/reports/statementreports');
 var pool = require('./../helpers/db');
 
 reportsRouter.post('/full-inventory-report', async (req, res) => {
-	const [center_id] = Object.values(req.body);
+	const [center_id, mrp_split] = Object.values(req.body);
 
-	let data = await fullStockReport(center_id);
+	let data = await fullStockReport(center_id, mrp_split, res);
 	return res.status(200).json(data);
 
 	// fullStockReport(center_id, (err, data) => {
@@ -55,11 +61,11 @@ reportsRouter.post('/product-summary-report', (req, res) => {
 });
 
 reportsRouter.post('/customer-statement', async (req, res) => {
-	const [center_id, customer_id, start, end] = Object.values(req.body);
-	let start_date = toTimeZoneFrmt(start, 'Asia/Kolkata', 'YYYY-MM-DD') + ' 00:00:00';
-	let end_date = toTimeZoneFrmt(end, 'Asia/Kolkata', 'YYYY-MM-DD') + ' 23:59:59';
+	const [center_id, customer_id, start, end, sale_type] = Object.values(req.body);
+	let start_date = toTimeZoneFrmt(start, 'Asia/Kolkata', 'DD-MM-YYYY') + ' 00:00:00';
+	let end_date = toTimeZoneFrmt(end, 'Asia/Kolkata', 'DD-MM-YYYY') + ' 23:59:59';
 
-	let data = await getStatement(center_id, customer_id, start_date, end_date);
+	let data = await getStatement(center_id, customer_id, start_date, end_date, sale_type);
 	return res.status(200).json(data);
 });
 
@@ -69,6 +75,24 @@ reportsRouter.post('/vendor-statement', async (req, res) => {
 	let end_date = toTimeZoneFrmt(end, 'Asia/Kolkata', 'YYYY-MM-DD') + ' 23:59:59';
 
 	let data = await getVendorStatement(center_id, vendor_id, start_date, end_date);
+	return res.status(200).json(data);
+});
+
+reportsRouter.post('/customer-closing-balance-statement', async (req, res) => {
+	const [center_id, customer_id, start, end, sale_type] = Object.values(req.body);
+	let start_date = toTimeZoneFrmt(start, 'Asia/Kolkata', 'DD-MM-YYYY') + ' 00:00:00';
+	let end_date = toTimeZoneFrmt(end, 'Asia/Kolkata', 'DD-MM-YYYY') + ' 23:59:59';
+
+	let data = await getReceivablesClosingBalance(center_id, customer_id, start_date, end_date, sale_type);
+	return res.status(200).json(data);
+});
+
+reportsRouter.post('/customer-opening-balance-statement', async (req, res) => {
+	const [center_id, customer_id, start, end, sale_type] = Object.values(req.body);
+	let start_date = toTimeZoneFrmt(start, 'Asia/Kolkata', 'DD-MM-YYYY') + ' 00:00:00';
+	let end_date = toTimeZoneFrmt(end, 'Asia/Kolkata', 'DD-MM-YYYY') + ' 23:59:59';
+
+	let data = await getReceivablesOpeningBalance(center_id, customer_id, start_date, end_date, sale_type);
 	return res.status(200).json(data);
 });
 

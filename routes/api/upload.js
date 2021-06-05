@@ -10,7 +10,7 @@ const { updateLogo } = require('../modules/admin/admin');
 uploadRoute.post('/add/:centerid/:position', (req, res) => {
 	let center_id = req.params.centerid;
 	let position = req.params.position;
-	console.log('dinesh ' + position);
+
 	let logo_name = '';
 	let logo_url = '';
 

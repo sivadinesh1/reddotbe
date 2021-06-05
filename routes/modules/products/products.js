@@ -4,11 +4,26 @@ const logger = require('./../../helpers/log4js');
 const { handleError, ErrorHandler } = require('./../../helpers/error');
 const { toTimeZone, currentTimeInTimeZone } = require('./../../helpers/utils');
 
+const { insertItemHistoryTable } = require('../../modules/stock/stock.js');
+
 const insertProduct = async (insertValues, res) => {
 	let productId = await insertToProduct(insertValues, res);
 	let stockInsertRes = await insertToStock(productId, insertValues, res);
-	let historyAddRes = await newProductEntryToHistory(insertValues.center_id, productId, insertValues.currentstock, insertValues.mrp, res);
 
+	let historyAddRes = insertItemHistoryTable(
+		insertValues.center_id,
+		'Purchase',
+		productId,
+		'0',
+		'0',
+		'0',
+		'0',
+		'PUR',
+		'New Product',
+		insertValues.currentstock,
+		res,
+	);
+	console.log('dinesh1 ' + JSON.stringify(historyAddRes));
 	return historyAddRes;
 };
 
@@ -62,7 +77,8 @@ function insertToProduct(insertValues, res) {
 
 function insertToStock(productId, insertValues, res) {
 	let upDate = new Date();
-	todayYYMMDD = moment(upDate).format('YYYY-MM-DD');
+	todayYYMMDD = toTimeZoneFrmt(upDate, 'Asia/Kolkata', 'YYYY-MM-DD');
+
 	let query2 = `
 	insert into stock (product_id, mrp, available_stock, open_stock, updateddate)
 	values ('${productId}', '${insertValues.mrp}', '${insertValues.currentstock}', '${insertValues.currentstock}' , '${todayYYMMDD}')`;
@@ -74,24 +90,6 @@ function insertToStock(productId, insertValues, res) {
 			} else {
 				resolve(data1);
 			}
-		});
-	});
-}
-
-function newProductEntryToHistory(center_id, productId, txn_qty, mrp, res) {
-	let today = currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY HH:mm:ss');
-
-	let query2 = `
-			insert into item_history (center_id, module, product_ref_id, purchase_id, purchase_det_id, actn, actn_type, txn_qty, stock_level, txn_date)
-			values ('${center_id}', 'Purchase', '${productId}', '0', '0', 'PUR', 'New Product', '${txn_qty}', 
-							(select IFNULL(available_stock, 0) as available_stock  from stock where product_id = '${productId}' and mrp = '${mrp}' ), '${today}' ) `;
-
-	return new Promise(function (resolve, reject) {
-		pool.query(query2, function (err, data1) {
-			if (err) {
-				return handleError(new ErrorHandler('500', 'Error newProductEntryToHistory in Productjs', err), res);
-			}
-			resolve('success');
 		});
 	});
 }

@@ -15,6 +15,10 @@ const {
 	getUsers,
 	getOutstandingBalance,
 	isUserExist,
+	insertBank,
+	updateCenterBankInfo,
+	updateBank,
+	updateBankDefaults,
 } = require('../modules/admin/admin');
 
 const {
@@ -34,16 +38,10 @@ const {
 	inactivateCSA,
 } = require('../modules/customers/customers.js');
 
-const {
-	insertProduct,
-	updateProduct,
-} = require('../modules/products/products.js');
+const { insertProduct, updateProduct } = require('../modules/products/products.js');
 const { insertVendor, updateVendor } = require('../modules/vendors/vendors.js');
 const { insertBrand, updateBrand } = require('../modules/brands/brands');
-const {
-	getPermissions,
-	checkUsernameExists,
-} = require('../modules/auth/auth.js');
+const { getPermissions, checkUsernameExists } = require('../modules/auth/auth.js');
 
 adminRoute.get('/view-products-count/:centerid', (req, res) => {
 	let center_id = req.params.centerid;
@@ -53,14 +51,7 @@ adminRoute.get('/view-products-count/:centerid', (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler(
-					'500',
-					`view-products-count/:centerid ${center_id}`,
-					err
-				),
-				res
-			);
+			return handleError(new ErrorHandler('500', `view-products-count/:centerid ${center_id}`, err), res);
 		} else {
 			return res.status(200).json(data);
 		}
@@ -83,14 +74,7 @@ adminRoute.get('/view-product-info/:centerid/:productid', (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler(
-					'500',
-					`/view-product-info/:centerid/:productid ${center_id}, ${product_id}`,
-					err
-				),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/view-product-info/:centerid/:productid ${center_id}, ${product_id}`, err), res);
 		} else {
 			return res.status(200).json(data);
 		}
@@ -103,7 +87,7 @@ adminRoute.post('/add-product', async (req, res, next) => {
 
 	let returnResponse = await insertProduct(jsonObj, res);
 
-	if (returnResponse === 'success') {
+	if (returnResponse.affectedRows === 1) {
 		return res.status(200).json({
 			result: 'success',
 		});
@@ -140,14 +124,7 @@ adminRoute.get('/get-vendor-details/:centerid/:vendorid', (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler(
-					'500',
-					`/get-vendor-details/:centerid/:vendorid ${center_id} ${vendor_id}`,
-					err
-				),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/get-vendor-details/:centerid/:vendorid ${center_id} ${vendor_id}`, err), res);
 		} else {
 			return res.status(200).json(data);
 		}
@@ -183,10 +160,7 @@ adminRoute.get('/get-timezones', (req, res) => {
 adminRoute.put('/update-vendor/:id', (req, res) => {
 	updateVendor(req.body, req.params.id, (err, data) => {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', `/update-vendor/:id ${req.params.id}`, err),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/update-vendor/:id ${req.params.id}`, err), res);
 		} else {
 			return res.status(200).json({
 				result: 'success',
@@ -199,10 +173,7 @@ adminRoute.put('/update-vendor/:id', (req, res) => {
 adminRoute.put('/update-brand/:id', (req, res) => {
 	updateBrand(req.body, req.params.id, (err, data) => {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', `/update-brand/:id ${req.params.id}`, err),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/update-brand/:id ${req.params.id}`, err), res);
 		} else {
 			return res.status(200).json({
 				result: 'success',
@@ -244,26 +215,17 @@ adminRoute.post('/add-brand', (req, res, next) => {
 });
 
 // Customers
-adminRoute.get(
-	'/get-customer-details/:centerid/:customerid',
-	async (req, res) => {
-		let rows = await getCustomerDetails(
-			req.params.centerid,
-			req.params.customerid
-		);
-		return res.status(200).json(rows);
-	}
-);
+adminRoute.get('/get-customer-details/:centerid/:customerid', async (req, res) => {
+	let rows = await getCustomerDetails(req.params.centerid, req.params.customerid);
+	return res.status(200).json(rows);
+});
 
 // customers
 
 adminRoute.put('/update-customer/:id', (req, res) => {
 	updateCustomer(req.body, req.params.id, (err, data) => {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', `/update-customer/:id ${req.params.id}`, err),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/update-customer/:id ${req.params.id}`, err), res);
 		} else {
 			return res.status(200).json({
 				result: 'success',
@@ -359,10 +321,7 @@ adminRoute.get('/prod-exists/:pcode/:centerid', (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', `/prod-exists/:pcode ${pcode}`, err),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/prod-exists/:pcode ${pcode}`, err), res);
 		} else {
 			return res.status(200).json({
 				result: data,
@@ -375,12 +334,9 @@ adminRoute.get('/prod-exists/:pcode/:centerid', (req, res) => {
 
 adminRoute.post('/insert-customer-shipping-address', (req, res) => {
 	let jsonObj = req.body;
-	insertCustomerShippingAddress(jsonObj, (err, data) => {
+	insertCustomerShippingAddress(jsonObj, res, (err, data) => {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', '/insert-customer-shipping-address', err),
-				res
-			);
+			return handleError(new ErrorHandler('500', '/insert-customer-shipping-address', err), res);
 		} else {
 			let resdata = JSON.stringify(data);
 			return res.status(200).json({
@@ -393,15 +349,7 @@ adminRoute.post('/insert-customer-shipping-address', (req, res) => {
 adminRoute.get('/get-shipping-address/:customerid', (req, res) => {
 	// @from Customer file
 	getCustomerShippingAddress(`${req.params.customerid}`, (err, rows) => {
-		if (err)
-			return handleError(
-				new ErrorHandler(
-					'500',
-					`/get-shipping-address/:customerid ${req.params.customerid}`,
-					err
-				),
-				res
-			);
+		if (err) return handleError(new ErrorHandler('500', `/get-shipping-address/:customerid ${req.params.customerid}`, err), res);
 		return res.json(rows);
 	});
 });
@@ -411,15 +359,7 @@ adminRoute.put('/update-customer-shipping-address/:id', (req, res) => {
 	let jsonObj = req.body;
 
 	updateCustomerShippingAddress(req.body, req.params.id, (err, rows) => {
-		if (err)
-			return handleError(
-				new ErrorHandler(
-					'500',
-					`/update-customer-shipping-address/:id ${req.params.id}`,
-					err
-				),
-				res
-			);
+		if (err) return handleError(new ErrorHandler('500', `/update-customer-shipping-address/:id ${req.params.id}`, err), res);
 		return res.json(rows);
 	});
 });
@@ -440,100 +380,58 @@ adminRoute.post('/inactivate-csa', async (req, res) => {
 // get customer discount values
 adminRoute.get('/customer-discount/:centerid/:customerid', (req, res) => {
 	// @from Customer file
-	getCustomerDiscount(
-		`${req.params.centerid}`,
-		`${req.params.customerid}`,
-		(err, rows) => {
-			if (err)
-				return handleError(
-					new ErrorHandler(
-						'500',
-						`/customer-discount/:centerid/:customerid ${req.params.centerid} ${req.params.customerid}`,
-						err
-					),
-					res
-				);
-			return res.json(rows);
-		}
-	);
+	getCustomerDiscount(`${req.params.centerid}`, `${req.params.customerid}`, (err, rows) => {
+		if (err)
+			return handleError(
+				new ErrorHandler('500', `/customer-discount/:centerid/:customerid ${req.params.centerid} ${req.params.customerid}`, err),
+				res,
+			);
+		return res.json(rows);
+	});
 });
 
 // get customer discount values
-adminRoute.get(
-	'/all-customer-default-discounts/:centerid/:customerid',
-	(req, res) => {
-		getAllCustomerDefaultDiscounts(
-			`${req.params.centerid}`,
-			`${req.params.customerid}`,
-			(err, rows) => {
-				if (err)
-					return handleError(
-						new ErrorHandler(
-							'500',
-							`/all-customer-default-discounts/:centerid ${req.params.centerid} ${req.params.customerid}`,
-							err
-						),
-						res
-					);
-				return res.json(rows);
-			}
-		);
-	}
-);
-
-// get customer discount values BY CUSTOMER
-adminRoute.get('/discounts-customer/:centerid/:customerid', (req, res) => {
-	getDiscountsByCustomer(
-		`${req.params.centerid}`,
-		`${req.params.customerid}`,
-		(err, rows) => {
-			if (err)
-				return handleError(
-					new ErrorHandler(
-						'500',
-						`/discounts-customer/:centerid/:customerid ${req.params.centerid} ${req.params.customerid}`,
-						err
-					),
-					res
-				);
-			return res.json(rows);
-		}
-	);
+adminRoute.get('/all-customer-default-discounts/:centerid/:customerid', (req, res) => {
+	getAllCustomerDefaultDiscounts(`${req.params.centerid}`, `${req.params.customerid}`, (err, rows) => {
+		if (err)
+			return handleError(
+				new ErrorHandler('500', `/all-customer-default-discounts/:centerid ${req.params.centerid} ${req.params.customerid}`, err),
+				res,
+			);
+		return res.json(rows);
+	});
 });
 
 // get customer discount values BY CUSTOMER
-adminRoute.get(
-	'/discounts-customer-brands/:centerid/:customerid',
-	(req, res) => {
-		getDiscountsByCustomerByBrand(
-			`${req.params.centerid}`,
-			`${req.params.customerid}`,
-			(err, rows) => {
-				if (err)
-					return handleError(
-						new ErrorHandler(
-							'500',
-							`/discounts-customer-brands/:centerid/:customerid ${req.params.centerid} ${req.params.customerid}`,
-							err
-						),
-						res
-					);
-				return res.json(rows);
-			}
-		);
-	}
-);
+adminRoute.get('/discounts-customer/:centerid/:customerid', (req, res) => {
+	getDiscountsByCustomer(`${req.params.centerid}`, `${req.params.customerid}`, (err, rows) => {
+		if (err)
+			return handleError(
+				new ErrorHandler('500', `/discounts-customer/:centerid/:customerid ${req.params.centerid} ${req.params.customerid}`, err),
+				res,
+			);
+		return res.json(rows);
+	});
+});
+
+// get customer discount values BY CUSTOMER
+adminRoute.get('/discounts-customer-brands/:centerid/:customerid', (req, res) => {
+	getDiscountsByCustomerByBrand(`${req.params.centerid}`, `${req.params.customerid}`, (err, rows) => {
+		if (err)
+			return handleError(
+				new ErrorHandler('500', `/discounts-customer-brands/:centerid/:customerid ${req.params.centerid} ${req.params.customerid}`, err),
+				res,
+			);
+		return res.json(rows);
+	});
+});
 
 // get customer discount values BY CUSTOMER
 adminRoute.put('/update-default-customer-discount', (req, res) => {
 	let jsonObj = req.body;
 
 	updateDefaultCustomerDiscount(jsonObj, (err, rows) => {
-		if (err)
-			return handleError(
-				new ErrorHandler('500', `update-default-customer-discount`, err),
-				res
-			);
+		if (err) return handleError(new ErrorHandler('500', `update-default-customer-discount`, err), res);
 		return res.json(rows);
 	});
 });
@@ -544,11 +442,7 @@ adminRoute.put('/update-customer-discount', (req, res) => {
 
 	// @from Customer file
 	updateCustomerDiscount(jsonObj, (err, rows) => {
-		if (err)
-			return handleError(
-				new ErrorHandler('500', '/update-customer-discount', err),
-				res
-			);
+		if (err) return handleError(new ErrorHandler('500', '/update-customer-discount', err), res);
 		return res.json(rows);
 	});
 });
@@ -557,10 +451,7 @@ adminRoute.post('/add-discounts-brand', (req, res) => {
 	let jsonObj = req.body;
 	insertDiscountsByBrands(jsonObj, (err, data) => {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', '/add-discounts-brand', err),
-				res
-			);
+			return handleError(new ErrorHandler('500', '/add-discounts-brand', err), res);
 		} else {
 			let resdata = JSON.stringify(data);
 			return res.status(200).json({
@@ -624,4 +515,56 @@ adminRoute.post('/get-outstanding-balance', async (req, res) => {
 	let rows = await getOutstandingBalance(req.body.center_id, req.body.limit);
 
 	return res.status(200).json(rows);
+});
+
+adminRoute.post('/add-bank', async (req, res, next) => {
+	let insertValues = req.body;
+
+	let id = await insertBank(insertValues);
+
+	if (id === 'success') {
+		if (req.body.isdefault) {
+			// update center with this bank details, if isdefault is true
+			let response = await updateCenterBankInfo(insertValues);
+
+			if (response === 'success') {
+				return res.status(200).json({ message: 'success' });
+			} else {
+				return res.status(200).json({ message: 'Error' });
+			}
+		} else {
+			return res.status(200).json({ message: 'success' });
+		}
+	} else {
+		return res.status(200).json({ message: 'Error' });
+	}
+});
+
+adminRoute.post('/update-bank', async (req, res, next) => {
+	let insertValues = req.body;
+
+	// update BANK DEFAULT to N if default enabled
+	if (req.body.isdefault) {
+		let updateDefaults = await updateBankDefaults(insertValues.center_id);
+	}
+
+	// update bank details
+	let id = await updateBank(insertValues);
+
+	if (id === 'success') {
+		if (req.body.isdefault) {
+			// if default enabled, update center table
+			let response = await updateCenterBankInfo(insertValues);
+
+			if (response === 'success') {
+				return res.status(200).json({ message: 'success' });
+			} else {
+				return res.status(200).json({ message: 'Error' });
+			}
+		} else {
+			return res.status(200).json({ message: 'success' });
+		}
+	} else {
+		return res.status(200).json({ message: 'Error' });
+	}
 });

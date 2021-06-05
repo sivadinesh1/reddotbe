@@ -3,17 +3,16 @@ const stockRouter = express.Router();
 const logger = require('../../routes/helpers/log4js');
 const { toTimeZone, currentTimeInTimeZone } = require('./../helpers/utils');
 
+const { handleError, ErrorHandler } = require('./../helpers/error');
+
 const mysql = require('mysql');
 const moment = require('moment');
 
 var pool = require('./../helpers/db');
 
-const {
-	getSalesMaster,
-	getSalesDetails,
-} = require('../modules/sales/sales.js');
+const { getSalesMaster, getSalesDetails } = require('../modules/sales/sales.js');
 
-const { insertItemHistoryTable } = require('../modules/purchase/purchase.js');
+const { insertItemHistoryTable, updateStockViaId } = require('../modules/stock/stock.js');
 
 stockRouter.get('/search-all-draft-purchase/:centerid', (req, res) => {
 	let center_id = req.params.centerid;
@@ -33,14 +32,7 @@ stockRouter.get('/search-all-draft-purchase/:centerid', (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler(
-					'500',
-					`/search-all-draft-purchase/:centerid ${center_id}`,
-					err
-				),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/search-all-draft-purchase/:centerid ${center_id}`, err), res);
 		} else {
 			return res.json(data);
 		}
@@ -60,16 +52,10 @@ stockRouter.post('/search-purchase', (req, res) => {
 	let order = req.body.order;
 
 	if (from_date !== '') {
-		// from_date =
-		// 	moment(new Date(req.params.fromdate)).format('DD-MM-YYYY') +
-		// 	' 00:00:00';
 		from_date = toTimeZone(req.body.fromdate, 'Asia/Kolkata') + ' 00:00:00';
 	}
 
 	if (to_date !== '') {
-		// to_date =
-		// 	moment(new Date(req.params.todate)).format('DD-MM-YYYY') + ' 23:59:00';
-
 		to_date = toTimeZone(req.body.todate, 'Asia/Kolkata') + ' 23:59:00';
 	}
 
@@ -123,16 +109,10 @@ stockRouter.post('/search-sales', (req, res) => {
 
 	if (search_type === 'all') {
 		if (from_date !== '') {
-			// from_date =
-			// 	moment(new Date(req.body.fromdate)).format('DD-MM-YYYY') + ' 00:00:00';
-
 			from_date = toTimeZone(req.body.fromdate, 'Asia/Kolkata') + ' 00:00:00';
 		}
 
 		if (to_date !== '') {
-			// to_date =
-			// 	moment(new Date(req.body.todate)).format('DD-MM-YYYY') + ' 23:59:00';
-
 			to_date = toTimeZone(req.body.todate, 'Asia/Kolkata') + ' 23:59:00';
 		}
 
@@ -190,10 +170,7 @@ stockRouter.post('/search-sales', (req, res) => {
 
 	pool.query(search_type === 'all' ? sql : query, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', 'Error fetching search sales', err),
-				res
-			);
+			return handleError(new ErrorHandler('500', 'Error fetching search sales', err), res);
 		} else {
 			return res.json(data);
 		}
@@ -212,10 +189,7 @@ p.id = '${purchase_id}' `;
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', `/purchase-master/:id ${purchase_id}`, err),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/purchase-master/:id ${purchase_id}`, err), res);
 		} else {
 			return res.json(data);
 		}
@@ -250,10 +224,7 @@ stockRouter.post('/delete-sale-details', (req, res) => {
 
 	pool.query(query, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', '/delete-sale-details', err),
-				res
-			);
+			return handleError(new ErrorHandler('500', '/delete-sale-details', err), res);
 		} else {
 			return res.json({
 				result: 'success',
@@ -270,10 +241,7 @@ stockRouter.get('/delete-item-history/:saleid', (req, res) => {
 
 	pool.query(query, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', '/delete-item-history', err),
-				res
-			);
+			return handleError(new ErrorHandler('500', '/delete-item-history', err), res);
 		} else {
 			return res.json({
 				result: 'success',
@@ -317,10 +285,7 @@ pd.purchase_id = '${purchase_id}'
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', `/purchase-details/:id ${purchase_id}`, err),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/purchase-details/:id ${purchase_id}`, err), res);
 		} else {
 			return res.json(data);
 		}
@@ -357,12 +322,7 @@ stockRouter.post('/delete-purchase-details', async (req, res) => {
 	let auditPromise = await new Promise(function (resolve, reject) {
 		pool.query(auditQuery, function (err, data) {
 			if (err) {
-				return reject(
-					handleError(
-						new ErrorHandler('500', '/delete-purchase-details', err),
-						res
-					)
-				);
+				return reject(handleError(new ErrorHandler('500', '/delete-purchase-details', err), res));
 			}
 			resolve(data);
 		});
@@ -375,12 +335,7 @@ stockRouter.post('/delete-purchase-details', async (req, res) => {
 
 		pool.query(query, function (err, data) {
 			if (err) {
-				return reject(
-					handleError(
-						new ErrorHandler('500', 'Error deleting purchase_detail ', err),
-						res
-					)
-				);
+				return reject(handleError(new ErrorHandler('500', 'Error deleting purchase_detail ', err), res));
 			}
 			resolve(data);
 		});
@@ -389,19 +344,7 @@ stockRouter.post('/delete-purchase-details', async (req, res) => {
 	//
 
 	// step 3
-	let stockUpdatePromise = await new Promise(function (resolve, reject) {
-		let stockUpdateQuery = `update stock set available_stock =  available_stock - '${qty}'
-where product_id = '${product_id}' and id = '${stock_id}'  `;
-
-		pool.query(stockUpdateQuery, function (err, data) {
-			if (err) {
-				return reject(
-					handleError(new ErrorHandler('500', 'Error updating stock', err), res)
-				);
-			}
-			resolve(data);
-		});
-	});
+	let stockUpdatePromise = await updateStockViaId(qty, product_id, stock_id, 'minus', res);
 
 	// step 4 , reverse item history table entries.
 
@@ -410,11 +353,13 @@ where product_id = '${product_id}' and id = '${stock_id}'  `;
 		'Purchase',
 		product_id,
 		purchase_id,
-		id,
+		id, //purchase_det_id
+		'0', // sale_id
+		'0', //sale_det_id
 		'PUR',
 		'Mod/Del',
-		qty,
-		mrp
+		qty, //txn_qty
+		res,
 	);
 
 	return res.json({
@@ -501,16 +446,7 @@ function deletePurchaseDetailsRecs(purchaseDetails, purchase_id) {
 		let auditPromise = await new Promise(function (resolve, reject) {
 			pool.query(auditQuery, function (err, data) {
 				if (err) {
-					return reject(
-						handleError(
-							new ErrorHandler(
-								'500',
-								'Error adding sale audit. deletePurchaseDetailsRecs',
-								err
-							),
-							res
-						)
-					);
+					return reject(handleError(new ErrorHandler('500', 'Error adding sale audit. deletePurchaseDetailsRecs', err), res));
 				}
 				resolve(data);
 			});
@@ -523,12 +459,7 @@ function deletePurchaseDetailsRecs(purchaseDetails, purchase_id) {
 
 			pool.query(query, function (err, data) {
 				if (err) {
-					return reject(
-						handleError(
-							new ErrorHandler('500', 'Error deleting purchase_detail ', err),
-							res
-						)
-					);
+					return reject(handleError(new ErrorHandler('500', 'Error deleting purchase_detail ', err), res));
 				}
 				resolve(data);
 			});
@@ -537,22 +468,7 @@ function deletePurchaseDetailsRecs(purchaseDetails, purchase_id) {
 		//
 
 		// step 3
-		let stockUpdatePromise = await new Promise(function (resolve, reject) {
-			let stockUpdateQuery = `update stock set available_stock =  available_stock - '${element.qty}'
-where product_id = '${element.product_id}' and id = '${element.stock_id}'  `;
-
-			pool.query(stockUpdateQuery, function (err, data) {
-				if (err) {
-					return reject(
-						handleError(
-							new ErrorHandler('500', 'Error update stock ', err),
-							res
-						)
-					);
-				}
-				resolve(data);
-			});
-		});
+		let stockUpdatePromise = await updateStockViaId(element.qty, element.product_id, element.stock_id, 'minus', res);
 	});
 
 	if (purchaseDetails.length === idx) {
@@ -573,14 +489,7 @@ stockRouter.get('/delete-purchase-master/:id', async (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler(
-					'500',
-					`/delete-purchase-master/:id ${purchase_id}`,
-					err
-				),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/delete-purchase-master/:id ${purchase_id}`, err), res);
 		} else {
 			return res.json({
 				result: 'success',

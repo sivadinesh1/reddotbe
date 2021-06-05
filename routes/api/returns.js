@@ -10,6 +10,8 @@ const { handleError, ErrorHandler } = require('./../helpers/error');
 
 const { getReturns } = require('../modules/sales/returns.js');
 
+const { toTimeZone, currentTimeInTimeZone } = require('./../helpers/utils');
+
 const {
 	insertSaleReturns,
 	insertSaleReturnDetail,
@@ -40,18 +42,17 @@ returnsRouter.post('/search-sale-return', (req, res) => {
 
 	let search_type = req.body.searchtype;
 	let search_by = req.body.searchby;
-	//let credit_note_no = req.body.credit_note_no;
 
 	let sql = '';
 	let query = '';
 
 	if (search_type === 'all') {
 		if (from_date !== '') {
-			from_date = moment(new Date(req.body.fromdate)).format('DD-MM-YYYY') + ' 00:00:00';
+			from_date = toTimeZone(req.body.fromdate, 'Asia/Kolkata') + ' 00:00:00';
 		}
 
 		if (to_date !== '') {
-			to_date = moment(new Date(req.body.todate)).format('DD-MM-YYYY') + ' 23:59:00';
+			to_date = toTimeZone(req.body.todate, 'Asia/Kolkata') + ' 23:59:00';
 		}
 
 		let custsql = `and s.customer_id = '${customer_id}' `;
@@ -250,7 +251,7 @@ returnsRouter.post('/add-sale-return', async (req, res) => {
 
 	const sale_return_id = await insertSaleReturns(smd);
 
-	const job_completed = await insertSaleReturnDetail(srd, sale_return_id, smd);
+	const job_completed = await insertSaleReturnDetail(srd, sale_return_id, smd, res);
 
 	updateCRSequenceGenerator(smd.center_id);
 	let fetchCRNoteNo = await getSequenceCrNote(smd.center_id);

@@ -9,17 +9,19 @@ const { handleError, ErrorHandler } = require('./../helpers/error');
 const {
 	getSalesMaster,
 	getSalesDetails,
-	updateStockAsync,
+
 	updateProductAsync,
 	IUSaleDetailsAsync,
 	insertItemHistoryAsync,
 	getNextSaleInvoiceNoAsync,
 	insertAuditTblforDeleteSaleDetailsRecAsync,
 	deleteSaleDetailsRecAsync,
-	updateStockWhileDeleteAsync,
-	updateItemHistoryTable,
+	// updateStockWhileDeleteAsync,
 	updateLegerCustomerChange,
+	deleteSaleDetail,
 } = require('../modules/sales/sales.js');
+
+const { insertItemHistoryTable, updateStockViaId } = require('./../modules/stock/stock.js');
 
 const { addSaleLedgerRecord, addReverseSaleLedgerRecord, addSaleLedgerAfterReversalRecord } = require('../modules/accounts/accounts.js');
 
@@ -79,37 +81,14 @@ saleRouter.post('/delete-sales-details', async (req, res) => {
 	}
 
 	// step 2
-	let deletePromise = await new Promise(function (resolve, reject) {
-		let query = `
-				delete from sale_detail where id = '${id}' `;
+	let deletePromise = deleteSaleDetail(id, res);
 
-		pool.query(query, function (err, data) {
-			if (err) {
-				return reject(handleError(new ErrorHandler('500', 'Error deleting sale details', err), res));
-			}
-			resolve(data);
-		});
-	});
+	// step 3 - Update Stock
+	let stockUpdatePromise = await updateStockViaId(qty, product_id, stock_id, 'add', res);
 
-	//
-
-	// step 3
-	let stockUpdatePromise = await new Promise(function (resolve, reject) {
-		let stockUpdateQuery = `update stock set available_stock =  available_stock + '${qty}'
-where product_id = '${product_id}' and id = '${stock_id}'  `;
-
-		pool.query(stockUpdateQuery, function (err, data) {
-			if (err) {
-				return reject(handleError(new ErrorHandler('500', 'Error update stock ', err), res));
-			}
-			resolve(data);
-		});
-	});
-
+	// step 4 - update item history table. as items are deleted, items has to be reversed
 	if (stockUpdatePromise.affectedRows === 1) {
-		// step 4 - update item history table. as items are deleted, items has to be reversed
-
-		let updateitemhistorytbl = await updateItemHistoryTable(center_id, 'Sale', product_id, sales_id, id, 'SAL', 'Mod/Del', qty, mrp);
+		let updateitemhistorytbl = await insertItemHistoryTable(center_id, 'Sale', product_id, '0', '0', sales_id, id, 'SAL', 'Mod/Del', qty, res);
 
 		return res.json({
 			result: 'success',
@@ -172,7 +151,7 @@ saleRouter.post('/insert-sale-details', async (req, res) => {
 			}
 
 			// (3) - updates sale details
-			let process = processItems(cloneReq, newPK);
+			let process = processItems(cloneReq, newPK, res);
 
 			// Promise.all([process]).then(() => {
 			// ledger entry should NOT be done if status is draft ("D")
@@ -213,10 +192,6 @@ function updateSequenceGenerator(cloneReq) {
 		center_id = '${cloneReq.center_id}' and  
 		CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
 	} else if (cloneReq.invoicetype === 'stockissue') {
-		// qryUpdateSqnc = `
-		// update financialyear set stock_issue_seq = stock_issue_seq + 1 where
-		// center_id = '${cloneReq.center_id}' and
-		// CURDATE() between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') `;
 		qryUpdateSqnc = `		
 	update financialyear set 
 	stock_issue_seq = @stock_issue_seq:= stock_issue_seq + 1 where 
@@ -376,20 +351,25 @@ function updateEnquiry(newPK, enqref) {
 	});
 }
 
-async function processItems(cloneReq, newPK) {
+async function processItems(cloneReq, newPK, res) {
 	// if sale master insert success, then insert in sale details.
 
 	for (const k of cloneReq.productarr) {
 		//insert(sale_det_id == '')/update sale details.
 		let p_data = await IUSaleDetailsAsync(k);
-		let p_data1 = await updateStockAsync(k); // returns promise
+
+		// after sale details is updated, then update stock (as this is sale, reduce available stock) tbl & product tbl
+		let qty_to_update = k.qty - k.old_val;
+
+		let p_data1 = await updateStockViaId(qty_to_update, k.product_id, k.stock_pk, 'minus', res);
+
 		//	let p_data2 = await updateProductAsync(k); // updating product master is not necessary, check if needed
 		let p_data3;
 
 		// its a hack to avoid data.insertid fix it
 		if (p_data != null || p_data != undefined) {
 			if (cloneReq.status === 'C' || (cloneReq.status === 'D' && cloneReq.invoicetype === 'stockissue')) {
-				p_data3 = insertItemHistoryAsync(k, newPK, p_data.insertId, cloneReq); // returns promise
+				p_data3 = insertItemHistoryAsync(k, newPK, p_data.insertId, cloneReq, res); // returns promise
 			}
 		}
 
@@ -422,7 +402,7 @@ saleRouter.post('/convert-sale', async (req, res) => {
 		invoicedate: today,
 	});
 
-	let sql = ` update sale set invoice_no = '${invNo}', sale_type = "gstinvoice", status = "C", stock_issue_ref = '${old_invoice_no}',
+	let sql = ` update sale set invoice_no = '${invNo}', sale_type = "gstinvoice", status = "C", stock_issue_ref = '${old_invoice_no}', revision = '1',
 	invoice_date = '${today}', 
 	stock_issue_date_ref =
 	'${toTimeZone(old_stock_issued_date, 'Asia/Kolkata')}'
@@ -439,7 +419,7 @@ saleRouter.post('/convert-sale', async (req, res) => {
 					customerctrl: { id: customer_id },
 					net_total: net_total,
 				},
-				sales_id
+				sales_id,
 			);
 
 			return res.status(200).json({
@@ -486,11 +466,9 @@ saleRouter.get('/delete-sale-master/:id', async (req, res) => {
 });
 
 function deleteSaleDetailsRecs(saleDetails, sale_id) {
-	let idx = 0;
+	let idx = 1;
 
 	saleDetails.forEach(async (element, index) => {
-		idx = index + 1;
-
 		// step 1
 		let p_audit = await insertAuditTblforDeleteSaleDetailsRecAsync(element, sale_id);
 
@@ -498,16 +476,19 @@ function deleteSaleDetailsRecs(saleDetails, sale_id) {
 		let p_delete = await deleteSaleDetailsRecAsync(element);
 
 		// step 3
-		let p_stock_update = await updateStockWhileDeleteAsync(element);
-	});
 
-	if (saleDetails.length === idx) {
-		return new Promise(function (resolve, reject) {
-			resolve('done');
-		}).catch(() => {
-			/* do whatever you want here */
-		});
-	}
+		let p_stock_update = await updateStockViaId(element.qty, element.product_id, element.stock_id, 'add', res);
+
+		if (saleDetails.length === idx) {
+			return new Promise(function (resolve, reject) {
+				resolve('done');
+			}).catch(() => {
+				/* do whatever you want here */
+			});
+		}
+
+		idx = idx + 1;
+	});
 }
 
 // get sale master to display in sale invoice component

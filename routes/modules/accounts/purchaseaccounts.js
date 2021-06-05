@@ -1,7 +1,9 @@
 var pool = require('../../helpers/db');
 // const logger = require("../../helpers/log4js");
 const logger = require('../../helpers/log4js');
-const { toTimeZone, currentTimeInTimeZone } = require('../../helpers/utils');
+const { toTimeZone, currentTimeInTimeZone, toTimeZoneFrmt } = require('../../helpers/utils');
+
+const { handleError, ErrorHandler } = require('../../helpers/error');
 
 const moment = require('moment');
 
@@ -19,21 +21,14 @@ VALUES
     LIMIT 1) a), 0) + '${insertValues.net_total}', '${today}'
   ) `;
 
-	let values = [
-		insertValues.centerid,
-		insertValues.vendorctrl.id,
-		purchase_ref_id,
-		insertValues.net_total,
-	];
+	let values = [insertValues.centerid, insertValues.vendorctrl.id, purchase_ref_id, insertValues.net_total];
 
 	return new Promise(function (resolve, reject) {
 		pool.query(query, values, async function (err, data) {
 			if (err) {
 				reject(err);
 			}
-			let updateVendorBalance = await updateVendorBalanceAmount(
-				insertValues.vendorctrl.id
-			);
+			let updateVendorBalance = await updateVendorBalanceAmount(insertValues.vendorctrl.id);
 			resolve(data);
 		});
 	});
@@ -75,29 +70,20 @@ VALUES
 		), '${today}'
   ) `;
 
-	let values = [
-		insertValues.centerid,
-		insertValues.vendorctrl.id,
-		purchase_ref_id,
-	];
+	let values = [insertValues.centerid, insertValues.vendorctrl.id, purchase_ref_id];
 
 	return new Promise(function (resolve, reject) {
 		pool.query(query, values, async function (err, data) {
 			if (err) {
 				return reject(err);
 			}
-			let updateVendorBalance = await updateVendorBalanceAmount(
-				insertValues.vendorctrl.id
-			);
+			let updateVendorBalance = await updateVendorBalanceAmount(insertValues.vendorctrl.id);
 			return resolve(data);
 		});
 	});
 };
 
-const addPurchaseLedgerAfterReversalRecord = (
-	insertValues,
-	purchase_ref_id
-) => {
+const addPurchaseLedgerAfterReversalRecord = (insertValues, purchase_ref_id) => {
 	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 
 	// balance amount is taken from querying purchase ledger table, with Limit 1, check the subquery.
@@ -111,21 +97,14 @@ VALUES
     LIMIT 1) a), 0)), '${today}'
   ) `;
 
-	let values = [
-		insertValues.centerid,
-		insertValues.vendorctrl.id,
-		purchase_ref_id,
-		insertValues.net_total,
-	];
+	let values = [insertValues.centerid, insertValues.vendorctrl.id, purchase_ref_id, insertValues.net_total];
 
 	return new Promise(function (resolve, reject) {
 		pool.query(query, values, async function (err, data) {
 			if (err) {
 				return reject(err);
 			}
-			let updateVendorBalance = await updateVendorBalanceAmount(
-				insertValues.vendorctrl.id
-			);
+			let updateVendorBalance = await updateVendorBalanceAmount(insertValues.vendorctrl.id);
 			return resolve(data);
 		});
 	});
@@ -153,15 +132,7 @@ const updateVendorBalanceAmount = (vendor_id) => {
 	});
 };
 
-const getPurchaseInvoiceByCenter = (
-	center_id,
-	from_date,
-	to_date,
-	vendor_id,
-	searchtype,
-	invoiceno,
-	callback
-) => {
+const getPurchaseInvoiceByCenter = (center_id, from_date, to_date, vendor_id, searchtype, invoiceno, callback) => {
 	let query = `	select p.id as purchase_id, 
 	p.center_id as center_id, 
 	p.vendor_id as vendor_id, 
@@ -212,7 +183,7 @@ const getPurchaseInvoiceByCenter = (
 	}
 
 	if (searchtype === 'invonly') {
-		query = query + ` and p.invoice_no = '${invoiceno}' `;
+		query = query + ` and p.invoice_no like '%${invoiceno}%' `;
 	}
 
 	pool.query(query, function (err, data) {
@@ -244,10 +215,10 @@ const updateVendorPymtSequenceGenerator = (center_id) => {
 const getVendorPymtSequenceNo = (cloneReq) => {
 	let pymtNoQry = '';
 
-	pymtNoQry = ` select concat('${moment(cloneReq.pymt_date).format(
-		'YY'
-	)}', "/", '${moment(cloneReq.pymt_date).format(
-		'MM'
+	pymtNoQry = ` select concat("VP-",'${toTimeZoneFrmt(cloneReq.accountarr[0].receiveddate, 'Asia/Kolkata', 'YY')}', "/", '${toTimeZoneFrmt(
+		cloneReq.accountarr[0].receiveddate,
+		'Asia/Kolkata',
+		'MM',
 	)}', "/", lpad(vendor_pymt_seq, 5, "0")) as pymtNo from financialyear 
 				where 
 				center_id = '${cloneReq.centerid}' and  
@@ -263,15 +234,18 @@ const getVendorPymtSequenceNo = (cloneReq) => {
 	});
 };
 
-const addVendorPaymentMaster = async (
-	cloneReq,
-	pymtNo,
-	insertValues,
-	callback
-) => {
+const addVendorPaymentMaster = (cloneReq, pymtNo, insertValues, res) => {
 	// (1) Updates payment seq in tbl financialyear, then {returns} formated sequence {YY/MM/PYMTSEQ}
 
 	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
+
+	if (cloneReq.bank_id === 0 || cloneReq.bank_id === '') {
+		cloneReq.bank_id = null;
+	}
+
+	if (cloneReq.bank_name === 0 || cloneReq.bank_name === '') {
+		cloneReq.bank_name = null;
+	}
 
 	let values = [
 		cloneReq.centerid,
@@ -279,39 +253,36 @@ const addVendorPaymentMaster = async (
 		pymtNo,
 		insertValues.receivedamount,
 		cloneReq.vendor.credit_amt,
-		moment(insertValues.receiveddate).format('DD-MM-YYYY'),
+		toTimeZone(insertValues.receiveddate, 'Asia/Kolkata'),
 		insertValues.pymtmode,
 		insertValues.bankref,
 		insertValues.pymtref,
+		cloneReq.bank_id,
+		cloneReq.bank_name,
+		cloneReq.createdby,
 	];
 
 	let query = `
-		INSERT INTO vendor_payment ( center_id, vendor_id, vendor_payment_no, payment_now_amt, advance_amt_used, pymt_date, pymt_mode_ref_id, bank_ref, pymt_ref, last_updated)
-		VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, '${today}' ) `;
+		INSERT INTO vendor_payment ( center_id, vendor_id, vendor_payment_no, payment_now_amt, advance_amt_used, pymt_date, pymt_mode_ref_id, bank_ref, pymt_ref, last_updated, bank_id, bank_name, createdby)
+		VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, '${today}', ?, ?, ? ) `;
 
 	return new Promise(function (resolve, reject) {
 		pool.query(query, values, async function (err, data) {
 			if (err) {
-				return reject(callback(err));
+				return handleError(
+					new ErrorHandler('500', `Error addVendorPaymentMaster of purchaseaccounts.js ${query} and values are ${values}`, err),
+					res,
+				);
 			}
 
-			await updateVendorLastPaidDate(
-				cloneReq.vendor.id,
-				insertValues.receiveddate
-			);
+			await updateVendorLastPaidDate(cloneReq.vendor.id, insertValues.receiveddate);
 
-			return resolve(callback(null, data));
+			return resolve(data.insertId);
 		});
 	});
 };
 
-const addVendorPaymentLedgerRecord = (
-	insertValues,
-	payment_ref_id,
-	receivedamount,
-	purchase_ref_id,
-	callback
-) => {
+const addVendorPaymentLedgerRecord = (insertValues, payment_ref_id, receivedamount, purchase_ref_id, callback) => {
 	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 
 	let query = `
@@ -324,20 +295,13 @@ const addVendorPaymentLedgerRecord = (
 			LIMIT 1) a), 0) - '${receivedamount}', '${today}'
 		) `;
 
-	let values = [
-		insertValues.vendor.center_id,
-		insertValues.vendor.id,
-		payment_ref_id,
-		receivedamount,
-	];
+	let values = [insertValues.vendor.center_id, insertValues.vendor.id, payment_ref_id, receivedamount];
 
 	pool.query(query, values, async function (err, data) {
 		if (err) {
 			return callback(err);
 		}
-		let updateVendorBalance = await updateVendorBalanceAmount(
-			insertValues.vendor.id
-		);
+		let updateVendorBalance = await updateVendorBalanceAmount(insertValues.vendor.id);
 		return callback(null, data);
 	});
 };
@@ -384,7 +348,8 @@ const updateVendorCreditMinus = (creditusedamount, center_id, vendor_id) => {
 };
 
 const updateVendorLastPaidDate = (vendor_id, last_paid_date) => {
-	let dt = moment(last_paid_date).format('YYYY-MM-DD');
+	let dt = toTimeZoneFrmt(last_paid_date, 'Asia/Kolkata', 'YYYY-MM-DD');
+
 	let qryUpdate = `
 	update vendor c set c.last_paid_date = '${dt}' 
 		where c.id = '${vendor_id}' 
@@ -400,15 +365,7 @@ const updateVendorLastPaidDate = (vendor_id, last_paid_date) => {
 	});
 };
 
-const getVendorPaymentsByCenter = (
-	center_id,
-	from_date,
-	to_date,
-	vendor_id,
-	searchtype,
-	invoiceno,
-	callback
-) => {
+const getVendorPaymentsByCenter = (center_id, from_date, to_date, vendor_id, searchtype, invoiceno, callback) => {
 	let query = `
 	select 
 	c.name as vendor_name,
@@ -451,7 +408,7 @@ const getVendorPaymentsByCenter = (
 	}
 
 	if (searchtype === 'invonly') {
-		query = query + ` and s.invoice_no = '${invoiceno}' `;
+		query = query + ` and s.invoice_no like '%${invoiceno}%' `;
 	}
 
 	query = query + ` order by pymt_date desc  `;
@@ -464,15 +421,7 @@ const getVendorPaymentsByCenter = (
 	});
 };
 
-const getPurchaseInvoiceByVendors = (
-	center_id,
-	vendor_id,
-	from_date,
-	to_date,
-	searchtype,
-	invoiceno,
-	callback
-) => {
+const getPurchaseInvoiceByVendors = (center_id, vendor_id, from_date, to_date, searchtype, invoiceno, callback) => {
 	let query = `	select s.id as purchase_id, s.center_id as center_id, s.vendor_id as vendor_id, s.invoice_no as invoice_no, 
 	s.invoice_date as invoice_date, 
 	abs(datediff(STR_TO_DATE(s.invoice_date,'%d-%m-%Y'), CURDATE())) as aging_days,
@@ -529,15 +478,7 @@ const getPurchaseInvoiceByVendors = (
 	});
 };
 
-const getPaymentsByVendors = (
-	center_id,
-	vendor_id,
-	from_date,
-	to_date,
-	searchtype,
-	invoiceno,
-	callback
-) => {
+const getPaymentsByVendors = (center_id, vendor_id, from_date, to_date, searchtype, invoiceno, callback) => {
 	let query = ` select p.*, pd.applied_amount as applied_amount, s.invoice_no as invoice_no, 
 	s.invoice_date as invoice_date, s.net_total as invoice_amount,  pm.pymt_mode_name as pymt_mode from 
         vendor_payment p,

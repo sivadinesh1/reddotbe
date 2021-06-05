@@ -1,9 +1,13 @@
 var pool = require('../../helpers/db');
 const logger = require('./../../helpers/log4js');
-const { toTimeZone, currentTimeInTimeZone } = require('./../../helpers/utils');
+const { toTimeZone, currentTimeInTimeZone, toTimeZoneFrmt } = require('./../../helpers/utils');
+
+const { insertItemHistoryTable } = require('./../../modules/stock/stock.js');
 
 const getSalesMaster = (sales_id, callback) => {
-	let sql = `select s.* from sale s where s.id = '${sales_id}' `;
+	let sql = `select s.*, c.name, c.address1, c.address2, c.district 
+	from sale s,
+	customer c where s.customer_id = c.id and s.id = '${sales_id}' `;
 
 	return new Promise(function (resolve, reject) {
 		pool.query(sql, function (err, data) {
@@ -58,55 +62,24 @@ const insertSaleDetails = (k, callback) => {
 const IUSaleDetailsAsync = (k) => {
 	let insQuery100 = `INSERT INTO sale_detail(sale_id, product_id, qty, disc_percent, disc_value, disc_type, unit_price, mrp, batchdate, tax,
 		igst, cgst, sgst, taxable_value, total_value, stock_id) VALUES
-		( '${newPK}', '${k.product_id}', '${k.qty}', '${k.disc_percent}', '${
-		k.disc_value
-	}', '${k.disc_type}', '${(k.total_value - k.disc_value) / k.qty}', '${
-		k.mrp
-	}', 
+		( '${newPK}', '${k.product_id}', '${k.qty}', '${k.disc_percent}', '${k.disc_value}', '${k.disc_type}', '${
+		(k.total_value - k.disc_value) / k.qty
+	}', '${k.mrp}', 
 	
 		'${currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY')}',
 		'${k.taxrate}', '${k.igst}', 
-		'${k.cgst}', '${k.sgst}', '${k.taxable_value}', '${k.total_value}', '${
-		k.stock_pk
-	}')`;
+		'${k.cgst}', '${k.sgst}', '${k.taxable_value}', '${k.total_value}', '${k.stock_pk}')`;
 
-	let upQuery100 = `update sale_detail set product_id = '${
-		k.product_id
-	}', qty = '${k.qty}', disc_percent = '${k.disc_percent}', 
-disc_value = '${k.disc_value}',	disc_type= '${k.disc_type}', unit_price = '${
-		(k.total_value - k.disc_value) / k.qty
-	}', mrp = '${k.mrp}', 
-		batchdate = '${currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY')}', tax = '${
-		k.taxrate
-	}',
+	let upQuery100 = `update sale_detail set product_id = '${k.product_id}', qty = '${k.qty}', disc_percent = '${k.disc_percent}', 
+disc_value = '${k.disc_value}',	disc_type= '${k.disc_type}', unit_price = '${(k.total_value - k.disc_value) / k.qty}', mrp = '${k.mrp}', 
+		batchdate = '${currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY')}', tax = '${k.taxrate}',
 		igst = '${k.igst}', cgst = '${k.cgst}', sgst = '${k.sgst}', 
-		taxable_value = '${k.taxable_value}', total_value = '${
-		k.total_value
-	}', stock_id = '${k.stock_pk}'
+		taxable_value = '${k.taxable_value}', total_value = '${k.total_value}', stock_id = '${k.stock_pk}'
 		where
 		id = '${k.sale_det_id}' `;
 
 	return new Promise(function (resolve, reject) {
-		pool.query(
-			k.sale_det_id === '' ? insQuery100 : upQuery100,
-			function (err, data) {
-				if (err) {
-					reject(err);
-				}
-				resolve(data);
-			}
-		);
-	});
-};
-
-const updateStockAsync = (k) => {
-	// after sale details is updated, then update stock (as this is sale, reduce available stock) tbl & product tbl
-	let qty_to_update = k.qty - k.old_val;
-
-	let query2 = `update stock set available_stock =  available_stock - '${qty_to_update}' where product_id = '${k.product_id}' and id = '${k.stock_pk}'  `;
-
-	return new Promise(function (resolve, reject) {
-		pool.query(query2, function (err, data) {
+		pool.query(k.sale_det_id === '' ? insQuery100 : upQuery100, function (err, data) {
 			if (err) {
 				reject(err);
 			}
@@ -130,7 +103,7 @@ const updateProductAsync = (k) => {
 	});
 };
 
-const insertItemHistoryAsync = (k, vSale_id, vSale_det_id, cloneReq) => {
+const insertItemHistoryAsync = async (k, vSale_id, vSale_det_id, cloneReq, res) => {
 	// to avoid duplicate entry of history items when editing completed records
 	// with same qty. (status = 'c'). If status=C & k.qty - k.old_val !== 0 then updatehistorytable
 	let skipHistoryUpdate = false;
@@ -150,10 +123,14 @@ const insertItemHistoryAsync = (k, vSale_id, vSale_det_id, cloneReq) => {
 	}
 
 	//txn -ve means subtract from qty
+	// example old value (5) Edited and sold (3)
+	// now txn_qty will be (3) (sold qty)
 	if (txn_qty < 0) {
 		actn_type = 'Edited';
+		txn_qty = k.qty;
 	}
 
+	// completed txn (if revision > 0) txn_qty 0 means not changeshappened
 	if (cloneReq.revision > 0 && txn_qty === 0) {
 		skipHistoryUpdate = true;
 	}
@@ -163,20 +140,19 @@ const insertItemHistoryAsync = (k, vSale_id, vSale_det_id, cloneReq) => {
 	txn_qty = ~txn_qty + 1;
 
 	if (txn_qty !== 0 && !skipHistoryUpdate) {
-		let query2 = `
-			insert into item_history (center_id, module, product_ref_id, sale_id, sale_det_id, actn, actn_type, txn_qty, stock_level, txn_date)
-			values ('${cloneReq.center_id}', 'Sale', '${k.product_id}', '${sale_id}', '${sale_det_id}', 'SAL', '${actn_type}', '${txn_qty}', 
-							(select (available_stock)  from stock where product_id = '${k.product_id}' and mrp = '${k.mrp}' ), '${today}' ) `;
-
-		return new Promise(function (resolve, reject) {
-			pool.query(query2, function (err, data) {
-				if (err) {
-					reject(err); // failure
-				}
-				// success
-				resolve(data);
-			});
-		});
+		let result = await insertItemHistoryTable(
+			cloneReq.center_id,
+			'Sale',
+			k.product_id,
+			'0',
+			'0',
+			sale_id,
+			sale_det_id,
+			'SAL',
+			actn_type,
+			txn_qty,
+			res,
+		);
 	}
 };
 
@@ -248,55 +224,12 @@ const deleteSaleDetailsRecAsync = (element) => {
 	});
 };
 
-const updateStockWhileDeleteAsync = (element) => {
-	let query = `update stock set available_stock =  available_stock + '${element.qty}'
-	where product_id = '${element.product_id}' and id = '${element.stock_id}'  `;
-
-	return new Promise(function (resolve, reject) {
-		pool.query(query, function (err, data) {
-			if (err) {
-				reject(err);
-			}
-			resolve(data);
-		});
-	});
-};
-
-const updateItemHistoryTable = (
-	center_id,
-	module,
-	product_id,
-	sale_id,
-	sale_det_id,
-	actn,
-	actn_type,
-	txn_qty,
-	mrp
-) => {
-	let today = currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY HH:mm:ss');
-
-	let query2 = `
-insert into item_history (center_id, module, product_ref_id, sale_id, sale_det_id, actn, actn_type, txn_qty, stock_level, txn_date)
-values ('${center_id}', '${module}', '${product_id}', '${sale_id}', '${sale_det_id}', '${actn}', '${actn_type}', '${txn_qty}', 
-				(select (available_stock)  from stock where product_id = '${product_id}' and mrp = '${mrp}' ), '${today}' ) `;
-
-	return new Promise(function (resolve, reject) {
-		pool.query(query2, function (err, data) {
-			if (err) {
-				reject(err); // failure
-			}
-			// success
-			resolve(data);
-		});
-	});
-};
-
 const updateLegerCustomerChange = (
 	center_id,
 	sale_id,
 	customer_id,
 
-	old_customer_id
+	old_customer_id,
 ) => {
 	let today = currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY HH:mm:ss');
 
@@ -328,18 +261,32 @@ const updateLegerCustomerChange = (
 	});
 };
 
+const deleteSaleDetail = async (id, res) => {
+	let query = `
+				delete from sale_detail where id = '${id}' `;
+
+	let deletePromise = await new Promise(function (resolve, reject) {
+		pool.query(query, function (err, data) {
+			if (err) {
+				return reject(handleError(new ErrorHandler('500', 'Error deleting sale details', err), res));
+			}
+			resolve(data);
+		});
+	});
+};
+
 module.exports = {
 	getSalesMaster,
 	getSalesDetails,
 	insertSaleDetails,
 	IUSaleDetailsAsync,
-	updateStockAsync,
+
 	updateProductAsync,
 	insertItemHistoryAsync,
 	getNextSaleInvoiceNoAsync,
 	insertAuditTblforDeleteSaleDetailsRecAsync,
 	deleteSaleDetailsRecAsync,
-	updateStockWhileDeleteAsync,
-	updateItemHistoryTable,
+
 	updateLegerCustomerChange,
+	deleteSaleDetail,
 };

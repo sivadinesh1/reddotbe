@@ -13,6 +13,10 @@ const {
 	insertEnquiryDetail,
 	fetchEnquiryDetailByEnqId,
 	fetchCustomerDetailsByEnqId,
+	updateEnquiryDetail,
+	insertBackOrder,
+	updateEnquiry,
+	getSuccessfullyProcessedItems,
 } = require('../modules/enquiry/enquiry');
 
 enquiryRoute.post('/draft-enquiry', (req, res) => {
@@ -33,10 +37,7 @@ enquiryRoute.post('/draft-enquiry', (req, res) => {
 
 		pool.query(upQry1, function (err, data) {
 			if (err) {
-				return handleError(
-					new ErrorHandler('500', '/draft-enquiry update enquiry', err),
-					res
-				);
+				return handleError(new ErrorHandler('500', '/draft-enquiry update enquiry', err), res);
 			}
 		});
 
@@ -63,10 +64,7 @@ enquiryRoute.post('/draft-enquiry', (req, res) => {
 
 		pool.query(uQrys, function (err, data) {
 			if (err) {
-				return handleError(
-					new ErrorHandler('500', '/draft-enquiry update enquiry_detail', err),
-					res
-				);
+				return handleError(new ErrorHandler('500', '/draft-enquiry update enquiry_detail', err), res);
 			}
 		});
 	});
@@ -76,8 +74,9 @@ enquiryRoute.post('/draft-enquiry', (req, res) => {
 	});
 });
 
-enquiryRoute.post('/move-to-sale', (req, res) => {
-	let jsonObj = req.body;
+enquiryRoute.post('/move-to-sale', async (req, res) => {
+	let jsonObj = req.body.enquries;
+	let userid = req.body.userid;
 
 	let today = new Date();
 	let now = new Date();
@@ -86,7 +85,11 @@ enquiryRoute.post('/move-to-sale', (req, res) => {
 	now = currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY');
 
 	var objectKeysArray = Object.keys(jsonObj);
-	objectKeysArray.forEach(function (objKey) {
+
+	let idx = 1;
+
+	// iterate each record from enquiry detail
+	objectKeysArray.forEach(async (objKey, index) => {
 		var objValue = jsonObj[objKey];
 
 		/** No Product Id, obviously its a backorder */
@@ -95,82 +98,25 @@ enquiryRoute.post('/move-to-sale', (req, res) => {
 			// updt enq_det_tbl status as B , giveqty = 0
 			// insert backorder tbl with reason prodcut code not found
 
-			let upQuery = `update enquiry_detail
-			set
-			giveqty = '0',
-			status = 'B'
-			where id = '${objValue.id}' `;
-
-			pool.query(upQuery, function (err, data) {
-				if (err) {
-					return handleError(
-						new ErrorHandler(
-							'500',
-							'Error Updating move to sale. Backorder failure',
-							err
-						),
-						res
-					);
-				}
-			});
-
-			let insQry = `INSERT INTO backorder (center_id, customer_id, enquiry_detail_id, qty, reason, status, order_date)
-			VALUES ('${objValue.center_id}', '${objValue.customer_id}', '${objValue.id}', '${objValue.askqty}', 'Product Code Not found', 'O', '${now}') `;
-
-			pool.query(insQry, function (err, data) {
-				if (err) {
-					return handleError(
-						new ErrorHandler(
-							'500',
-							'Error inserting to backorder, move to sale.',
-							err
-						),
-						res
-					);
-				}
-			});
+			let result = await updateEnquiryDetail('', '', '0', '', 'B', objValue.id, userid, res);
+			let result1 = await insertBackOrder(
+				objValue.center_id,
+				objValue.customer_id,
+				objValue.id,
+				objValue.askqty,
+				'Product Code Not found',
+				'O',
+				userid,
+				res,
+			);
 		} else if (objValue.askqty > objValue.giveqty && objValue.giveqty === 0) {
 			// item code is present but given qty is 0, so effectively this goes in to backorder straight
 
 			const bqty = objValue.askqty - objValue.giveqty;
 
-			let upQuery1 = `update enquiry_detail
-			set
-			product_id = '${objValue.product_id}',
-			stock_id = '${objValue.stockid}',
-			giveqty = '${objValue.giveqty}',
-			processed = '${objValue.processed}',
-			status = 'B'
-			where id = '${objValue.id}' `;
+			let result = await updateEnquiryDetail(objValue.product_id, objValue.stockid, '0', objValue.processed, 'B', objValue.id, userid, res);
 
-			pool.query(upQuery1, function (err, data) {
-				if (err) {
-					return handleError(
-						new ErrorHandler(
-							'500',
-							'Error Updating enquiry details move to sale.',
-							err
-						),
-						res
-					);
-				}
-			});
-
-			let insQry2 = `INSERT INTO backorder (center_id, customer_id, enquiry_detail_id, qty, reason, status, order_date)
-			VALUES ('${objValue.center_id}', '${objValue.customer_id}', '${objValue.id}', '${bqty}', 'Zero Quantity Alloted', 'O', '${now}') `;
-
-			pool.query(insQry2, function (err, data) {
-				if (err) {
-					return handleError(
-						new ErrorHandler(
-							'500',
-							'Error inserting backoerder,  move to sale.',
-							err
-						),
-						res
-					);
-				}
-			});
+			let result1 = await insertBackOrder(objValue.center_id, objValue.customer_id, objValue.id, bqty, 'Zero Quantity Alloted', 'O', userid, res);
 		} else if (objValue.askqty > objValue.giveqty && objValue.giveqty !== 0) {
 			// p - partial fullfilment, customer asks 100 Nos, given 50 Nos
 			// updt enq_det_tbl status as P (Partial), give qty = actual given
@@ -178,93 +124,64 @@ enquiryRoute.post('/move-to-sale', (req, res) => {
 
 			const bqty = objValue.askqty - objValue.giveqty;
 
-			let upQuery1 = `update enquiry_detail
-			set
-			product_id = '${objValue.product_id}',
-			stock_id = '${objValue.stockid}',
-			giveqty = '${objValue.giveqty}',
-			processed = '${objValue.processed}',
-			status = 'P'
-			where id = '${objValue.id}' `;
+			let result = await updateEnquiryDetail(
+				objValue.product_id,
+				objValue.stockid,
+				objValue.giveqty,
+				objValue.processed,
+				'P',
+				objValue.id,
+				userid,
+				res,
+			);
 
-			pool.query(upQuery1, function (err, data) {
-				if (err) {
-					return handleError(
-						new ErrorHandler(
-							'500',
-							'Error Updating enquiry_details move to sale.',
-							err
-						),
-						res
-					);
-				}
-			});
-
-			let insQry2 = `INSERT INTO backorder (center_id, customer_id, enquiry_detail_id, qty, reason, status, order_date)
-			VALUES ('${objValue.center_id}', '${objValue.customer_id}', '${objValue.id}', '${bqty}', 'Partial fullfillmeent', 'O', '${now}') `;
-
-			pool.query(insQry2, function (err, data) {
-				if (err) {
-					return handleError(
-						new ErrorHandler(
-							'500',
-							'Error insert into backorder move to sale.',
-							err
-						),
-						res
-					);
-				}
-			});
-		} else if (
-			objValue.giveqty >= objValue.askqty &&
-			objValue.product_id !== '' &&
-			objValue.product_id !== null
-		) {
+			let result1 = await insertBackOrder(objValue.center_id, objValue.customer_id, objValue.id, bqty, 'Partial fullfillmeent', 'O', userid, res);
+		} else if (objValue.giveqty >= objValue.askqty && objValue.product_id !== '' && objValue.product_id !== null) {
 			// F- fullfilled
 			// updt enq_det_tbl status as F, give qty = actual given
 
-			let upQuery3 = `update enquiry_detail
-			set
-			product_id = '${objValue.product_id}',
-			stock_id = '${objValue.stockid}',
-			giveqty = '${objValue.giveqty}',
-			processed = '${objValue.processed}',
-			status = 'F'
-			where id = '${objValue.id}' `;
-
-			pool.query(upQuery3, function (err, data) {
-				if (err) {
-					return handleError(
-						new ErrorHandler(
-							'500',
-							'Error Updating enquiry_detail move to sale.',
-							err
-						),
-						res
-					);
-				}
-			});
+			let result = await updateEnquiryDetail(
+				objValue.product_id,
+				objValue.stockid,
+				objValue.giveqty,
+				objValue.processed,
+				'F',
+				objValue.id,
+				userid,
+				res,
+			);
 		}
 
-		let upQuery4 = `update enquiry
-		set
-		estatus = 'P', processed_date = '${today}'
-		where id = '${objValue.enquiry_id}' `;
-
-		pool.query(upQuery4, function (err, data) {
-			if (err) {
-				return handleError(
-					new ErrorHandler('500', 'Error Updating enquiry move to sale.', err),
-					res
-				);
-			}
-		});
-	});
-
-	res.json({
-		result: 'success',
+		if (objectKeysArray.length === idx) {
+			finalEnquiryStatusUpdte(jsonObj, userid, res);
+		}
+		idx = idx + 1;
 	});
 });
+
+const finalEnquiryStatusUpdte = async (jsonObj, userid, res) => {
+	let rows = await getSuccessfullyProcessedItems(jsonObj[0].enquiry_id);
+
+	let finalresult = '';
+
+	if (rows === 0) {
+		// E - executed means will not appear in open enquiry page
+		finalresult = await updateEnquiry('E', jsonObj[0].enquiry_id, userid, res);
+	} else {
+		// P - processed, ready for sale in open qneuiry page
+		finalresult = await updateEnquiry('P', jsonObj[0].enquiry_id, userid, res);
+	}
+
+	if (finalresult === 'success') {
+		res.json({
+			result: 'success',
+		});
+	} else {
+		res.json({
+			result: 'failure',
+		});
+	}
+};
 
 // todo this end point not used, check and delete
 enquiryRoute.post('/update-giveqty-enquiry-details', (req, res) => {
@@ -278,14 +195,7 @@ enquiryRoute.post('/update-giveqty-enquiry-details', (req, res) => {
 
 	pool.query(query, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler(
-					'500',
-					'Error Updating enquiry details move to sale.',
-					err
-				),
-				res
-			);
+			return handleError(new ErrorHandler('500', 'Error Updating enquiry details move to sale.', err), res);
 		} else {
 		}
 	});
@@ -301,14 +211,7 @@ enquiryRoute.get('/update-customer/:id/:enqid', (req, res) => {
 
 	pool.query(query, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler(
-					'500',
-					`/update-customer/:id/:enqid ${id} ${enqid}`,
-					err
-				),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/update-customer/:id/:enqid ${id} ${enqid}`, err), res);
 		} else {
 			res.json({
 				result: 'success',
@@ -331,14 +234,7 @@ enquiryRoute.post('/update-status-enquiry-details', (req, res) => {
 
 		pool.query(query, function (err, data) {
 			if (err) {
-				return handleError(
-					new ErrorHandler(
-						'500',
-						`/update-status-enquiry-details ${status} ${id}`,
-						err
-					),
-					res
-				);
+				return handleError(new ErrorHandler('500', `/update-status-enquiry-details ${status} ${id}`, err), res);
 			} else {
 			}
 		});
@@ -367,14 +263,7 @@ enquiryRoute.post('/insert-enquiry-details', (req, res) => {
 
 	pool.query(query, async function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler(
-					'500',
-					'error /insert-enquiry-details insert enquiry..step1..',
-					err
-				),
-				res
-			);
+			return handleError(new ErrorHandler('500', 'error /insert-enquiry-details insert enquiry..step1..', err), res);
 		} else {
 			let tmpid = data.insertId;
 
@@ -385,10 +274,7 @@ enquiryRoute.post('/insert-enquiry-details', (req, res) => {
 					if (err) {
 						let errTxt = err.message;
 
-						return handleError(
-							new ErrorHandler('500', '/insert-enquiry-details', err),
-							res
-						);
+						return handleError(new ErrorHandler('500', '/insert-enquiry-details', err), res);
 					} else {
 						let newPK = data.insertId;
 						// do nothing...
@@ -426,10 +312,7 @@ enquiryRoute.post('/add-more-enquiry-details', (req, res) => {
 
 	pool.query(query1, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', '/add-more-enquiry-details', err),
-				res
-			);
+			return handleError(new ErrorHandler('500', '/add-more-enquiry-details', err), res);
 		} else {
 			res.json({
 				result: data.insertId,
@@ -455,14 +338,7 @@ enquiryRoute.get('/open-enquiries/:centerid/:status', (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler(
-					'500',
-					`/open-enquiries/:centerid/:status ${centerid} ${status}`,
-					err
-				),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/open-enquiries/:centerid/:status ${centerid} ${status}`, err), res);
 		} else {
 			return res.json(data);
 		}
@@ -479,10 +355,7 @@ enquiryRoute.get('/get-enquiry-details/:enqid', async (req, res) => {
 		if (err) {
 			let errTxt = err.message;
 
-			return handleError(
-				new ErrorHandler('500', `/get-enquiry-details/:enqid ${enqid}`, err),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/get-enquiry-details/:enqid ${enqid}`, err), res);
 		} else {
 			enquiryDetails = data;
 			// do nothing...
@@ -493,14 +366,7 @@ enquiryRoute.get('/get-enquiry-details/:enqid', async (req, res) => {
 		if (err) {
 			let errTxt = err.message;
 
-			return handleError(
-				new ErrorHandler(
-					'500',
-					`/get-enquiry-details/:enqid ${enqid} fetchCustomerDetailsByEnqId .`,
-					err
-				),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/get-enquiry-details/:enqid ${enqid} fetchCustomerDetailsByEnqId .`, err), res);
 		} else {
 			customerDetails = data;
 			// do nothing...
@@ -545,10 +411,7 @@ enquiryRoute.get('/get-enquiry-master/:enqid', (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', `/get-enquiry-master/:enqid ${enqid}`, err),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/get-enquiry-master/:enqid ${enqid}`, err), res);
 		} else {
 			return res.json(data);
 		}
@@ -571,26 +434,21 @@ enquiryRoute.get('/get-customer-data/:enqid', (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', `/get-customer-data/:enqid ${enqid}`, err),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/get-customer-data/:enqid ${enqid}`, err), res);
 		} else {
 			return res.json(data);
 		}
 	});
 });
 
-enquiryRoute.get(
-	'/get-enquired-product-data/:centerid/:customerid/:enqid/:invdt',
-	(req, res) => {
-		let centerid = req.params.centerid;
-		let customerid = req.params.customerid;
-		let enqid = req.params.enqid;
-		let orderdate = req.params.invdt;
+enquiryRoute.get('/get-enquired-product-data/:centerid/:customerid/:enqid/:invdt', (req, res) => {
+	let centerid = req.params.centerid;
+	let customerid = req.params.customerid;
+	let enqid = req.params.enqid;
+	let orderdate = req.params.invdt;
 
-		// fetch values only of enq detail status in {P - processed, F - fullfilled} B- backorder is ignored
-		let sql = `select a.product_code as product_code, a.description, a.mrp, a.taxrate, b.available_stock,
+	// fetch values only of enq detail status in {P - processed, F - fullfilled} B- backorder is ignored
+	let sql = `select a.product_code as product_code, a.description, a.mrp, a.taxrate, b.available_stock,
 	ed.giveqty as qty, a.unit_price, a.id as product_id, b.id as stock_pk, e.enquiry_date,
 	IFNULL(
 	(
@@ -606,7 +464,7 @@ enquiryRoute.get(
 	
 	(  select concat(value,'~',type) 
 from discount 
-where str_to_date('28-07-2020','%d-%m-%Y')  
+where str_to_date('${orderdate}','%d-%m-%Y')  
 between str_to_date(startdate, '%d-%m-%Y') and str_to_date(enddate, '%d-%m-%Y') and
 customer_id = '${customerid}' and
 gst_slab = a.taxrate and
@@ -630,22 +488,17 @@ discount.brand_id = 0 )
 	e.id = ${enqid}
 	`;
 
-		pool.query(sql, function (err, data) {
-			if (err) {
-				return handleError(
-					new ErrorHandler(
-						'500',
-						`/get-enquired-product-data/:centerid/:customerid/:enqid/:invdt ${centerid} ${customerid} ${enqid} ${invdt}`,
-						err
-					),
-					res
-				);
-			} else {
-				return res.json(data);
-			}
-		});
-	}
-);
+	pool.query(sql, function (err, data) {
+		if (err) {
+			return handleError(
+				new ErrorHandler('500', `/get-enquired-product-data/:centerid/:customerid/:enqid/:invdt ${centerid} ${customerid} ${enqid} ${invdt}`, err),
+				res,
+			);
+		} else {
+			return res.json(data);
+		}
+	});
+});
 
 enquiryRoute.get('/back-order/:centerid', (req, res) => {
 	let centerid = req.params.centerid;
@@ -676,10 +529,7 @@ enquiryRoute.get('/back-order/:centerid', (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', `/back-order/:centerid ${centerid}`, err),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/back-order/:centerid ${centerid}`, err), res);
 		} else {
 			return res.json(data);
 		}
@@ -695,13 +545,10 @@ enquiryRoute.post('/search-enquiries', (req, res) => {
 	let order = req.body.order;
 
 	if (from_date !== '') {
-		// from_date = moment(new Date(req.params.fromdate)).format("DD-MM-YYYY");
 		from_date = toTimeZone(req.body.fromdate, 'Asia/Kolkata');
 	}
 
 	if (to_date !== '') {
-		// to_date = moment(new Date(req.params.todate)).format("DD-MM-YYYY");
-
 		to_date = toTimeZone(req.body.todate, 'Asia/Kolkata');
 	}
 
@@ -750,10 +597,7 @@ enquiryRoute.post('/search-enquiries', (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', '/search-enquiries', err),
-				res
-			);
+			return handleError(new ErrorHandler('500', '/search-enquiries', err), res);
 		} else {
 			return res.json(data);
 		}
@@ -788,12 +632,7 @@ enquiryRoute.post('/delete-enquiry-details', async (req, res) => {
 	let auditPromise = await new Promise(function (resolve, reject) {
 		pool.query(auditQuery, function (err, data) {
 			if (err) {
-				return reject(
-					handleError(
-						new ErrorHandler('500', '/delete-enquiry-details', err),
-						res
-					)
-				);
+				return reject(handleError(new ErrorHandler('500', '/delete-enquiry-details', err), res));
 			}
 			resolve(data);
 		});
@@ -806,12 +645,7 @@ enquiryRoute.post('/delete-enquiry-details', async (req, res) => {
 
 		pool.query(query, function (err, data) {
 			if (err) {
-				return reject(
-					handleError(
-						new ErrorHandler('500', '/delete-enquiry-details', err),
-						res
-					)
-				);
+				return reject(handleError(new ErrorHandler('500', '/delete-enquiry-details', err), res));
 			}
 			resolve(data);
 		});

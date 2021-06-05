@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const axios = require('axios');
 
 const mysql = require('mysql');
 const moment = require('moment');
@@ -12,11 +13,7 @@ const { getSearchVendors } = require('../modules/vendors/vendors.js');
 
 const { createInvoice } = require('./createInvoice.js');
 var pool = require('./../helpers/db');
-const {
-	getAllBrands,
-	getBrandsMissingDiscountsByCustomer,
-	getSearchBrands,
-} = require('../modules/brands/brands');
+const { getAllBrands, getBrandsMissingDiscountsByCustomer, getSearchBrands } = require('../modules/brands/brands');
 
 const invoice = {
 	shipping: {
@@ -93,10 +90,7 @@ a.description like '%${searchstr}%' ) limit 50
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', '/search-product-information', err),
-				res
-			);
+			return handleError(new ErrorHandler('500', '/search-product-information', err), res);
 		} else {
 			return res.json(data);
 		}
@@ -107,22 +101,61 @@ router.post('/search-product', (req, res) => {
 	const [centerid, searchstr, searchby] = Object.values(req.body);
 
 	let sql = '';
-
-	sql = `select a.product_code as product_code, a.description, b.mrp, a.taxrate, b.available_stock,
-		a.packetsize, a.unit_price, a.purchase_price as purchase_price, a.id as product_id, b.id as stock_pk, a.packetsize as qty, a.rackno, bd.name,
-		bd.id as brand_id, a.unit as uom, a.hsncode as hsncode, a.minqty as minqty, a.avgpurprice as avgpurprice,
-		a.unit_price as unit_price, a.salesprice as salesprice,  a.maxdiscount as maxdiscount, a.currentstock as currentstock
+	// -- select Produsct based on this query --
+	// -- combiles multiple MRP stock to one sum --
+	// -- can be used for Regular search and product purchase --
+	// --- b.available_stock,
+	// -- b.id as stock_pk, -- commented this out, if needed in sales then implement the same way as earlier --
+	// 	-- 		LEFT outer JOIN   stock b
+	// -- 		ON b.product_id = a.id
+	sql = `
+	select a.product_code as product_code, 
+  		a.description, 
+  		a.mrp, 
+  		a.taxrate, 
+  		(select sum(s2.available_stock) from stock s2 where s2.product_id = a.id ) as available_stock, 
+  		
+  		a.packetsize, a.unit_price, a.purchase_price as purchase_price, a.id as product_id, 
+		
+		a.packetsize as qty, 
+		a.rackno, 
+		bd.name,
+		bd.id as brand_id, 
+		a.unit as uom, 
+		a.hsncode as hsncode, 
+		a.minqty as minqty, 
+		a.avgpurprice as avgpurprice,
+		a.unit_price as unit_price, 
+		a.salesprice as salesprice,  
+		a.maxdiscount as maxdiscount, 
+		a.currentstock as currentstock
 		from 
 		brand bd,
 		product a
-		LEFT outer JOIN   stock b
-		ON b.product_id = a.id
+
 		where 
 		a.center_id = '${centerid}' and
 		a.brand_id = bd.id and
 		( a.product_code like '%${searchstr}%' or
-		a.description like '%${searchstr}%' ) limit 50 
-	 `;
+		a.description like '%${searchstr}%' ) limit 50
+	`;
+
+	// old wrong query - can be deleted after etesting ATTN
+	// sql = `select a.product_code as product_code, a.description, b.mrp, a.taxrate, b.available_stock,
+	// 	a.packetsize, a.unit_price, a.purchase_price as purchase_price, a.id as product_id, b.id as stock_pk, a.packetsize as qty, a.rackno, bd.name,
+	// 	bd.id as brand_id, a.unit as uom, a.hsncode as hsncode, a.minqty as minqty, a.avgpurprice as avgpurprice,
+	// 	a.unit_price as unit_price, a.salesprice as salesprice,  a.maxdiscount as maxdiscount, a.currentstock as currentstock
+	// 	from
+	// 	brand bd,
+	// 	product a
+	// 	LEFT outer JOIN   stock b
+	// 	ON b.product_id = a.id
+	// 	where
+	// 	a.center_id = '${centerid}' and
+	// 	a.brand_id = bd.id and
+	// 	( a.product_code like '%${searchstr}%' or
+	// 	a.description like '%${searchstr}%' ) limit 50
+	//  `;
 
 	pool.query(sql, function (err, data) {
 		if (err) {
@@ -208,14 +241,7 @@ router.get('/all-active-vendors/:centerid', (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler(
-					'500',
-					`/all-active-vendors/:centerid ${centerid}`,
-					err
-				),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/all-active-vendors/:centerid ${centerid}`, err), res);
 		} else {
 			res.json(data);
 		}
@@ -226,14 +252,7 @@ router.get('/all-active-vendors/:centerid', (req, res) => {
 router.get('/all-active-brands/:centerid/:status', (req, res) => {
 	getAllBrands(req.params.centerid, req.params.status, (err, rows) => {
 		if (err) {
-			return handleError(
-				new ErrorHandler(
-					'500',
-					`/all-active-brands/:centerid/:status ${req.params.centerid} ${req.params.status}`,
-					err
-				),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/all-active-brands/:centerid/:status ${req.params.centerid} ${req.params.status}`, err), res);
 		} else {
 			return res.json(rows);
 		}
@@ -249,14 +268,7 @@ router.get('/vendor-exists/:name/:center_id', (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler(
-					'500',
-					`/vendor-exists/:name/:center_id ${name} ${center_id}`,
-					err
-				),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/vendor-exists/:name/:center_id ${name} ${center_id}`, err), res);
 		} else {
 			return res.status(200).json({
 				result: data,
@@ -274,14 +286,7 @@ router.get('/brand-exists/:name/:center_id', (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler(
-					'500',
-					`/brand-exists/:name/:center_id ${name} ${center_id}`,
-					err
-				),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/brand-exists/:name/:center_id ${name} ${center_id}`, err), res);
 		} else {
 			return res.status(200).json({
 				result: data,
@@ -299,14 +304,7 @@ router.get('/customer-exists/:name/:centerid', (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler(
-					'500',
-					`/customer-exists/:name ${name} ${center_id}`,
-					err
-				),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/customer-exists/:name ${name} ${center_id}`, err), res);
 		} else {
 			return res.status(200).json({
 				result: data,
@@ -322,10 +320,7 @@ router.get('/brand-delete/:id', (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', `/brand-delete/:id ${id}`, err),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/brand-delete/:id ${id}`, err), res);
 		} else {
 			return res.status(200).json({
 				result: data,
@@ -341,10 +336,7 @@ router.get('/enquiry-delete/:id', (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', `/enquiry-delete/:id ${id}`, err),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/enquiry-delete/:id ${id}`, err), res);
 		} else {
 			return res.status(200).json({
 				result: data,
@@ -360,10 +352,7 @@ router.get('/vendor-delete/:id', (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', `/vendor-delete/:id ${id}`, err),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/vendor-delete/:id ${id}`, err), res);
 		} else {
 			return res.status(200).json({
 				result: data,
@@ -373,30 +362,22 @@ router.get('/vendor-delete/:id', (req, res) => {
 });
 
 // get all active brands
-router.get(
-	'/brands-missing-discounts/:centerid/:status/:customerid',
-	(req, res) => {
-		getBrandsMissingDiscountsByCustomer(
-			req.params.centerid,
-			req.params.status,
-			req.params.customerid,
-			(err, rows) => {
-				if (err) {
-					return handleError(
-						new ErrorHandler(
-							'500',
-							`/brands-missing-discounts/:centerid/:status/:customerid ${req.params.centerid} ${req.params.status} ${req.params.customerid}`,
-							err
-						),
-						res
-					);
-				} else {
-					return res.json(rows);
-				}
-			}
-		);
-	}
-);
+router.get('/brands-missing-discounts/:centerid/:status/:customerid', (req, res) => {
+	getBrandsMissingDiscountsByCustomer(req.params.centerid, req.params.status, req.params.customerid, (err, rows) => {
+		if (err) {
+			return handleError(
+				new ErrorHandler(
+					'500',
+					`/brands-missing-discounts/:centerid/:status/:customerid ${req.params.centerid} ${req.params.status} ${req.params.customerid}`,
+					err,
+				),
+				res,
+			);
+		} else {
+			return res.json(rows);
+		}
+	});
+});
 
 router.get('/all-active-customers/:centerid', (req, res) => {
 	let centerid = req.params.centerid;
@@ -413,14 +394,7 @@ router.get('/all-active-customers/:centerid', (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler(
-					'500',
-					`/all-active-customers/:centerid ${centerid}`,
-					err
-				),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/all-active-customers/:centerid ${centerid}`, err), res);
 		} else {
 			return res.json(data);
 		}
@@ -438,10 +412,7 @@ router.post('/add-parts-details-enquiry', (req, res) => {
 
 		pool.query(query, function (err, data) {
 			if (err) {
-				return handleError(
-					new ErrorHandler('500', '/add-parts-details-enquiry', err),
-					res
-				);
+				return handleError(new ErrorHandler('500', '/add-parts-details-enquiry', err), res);
 			}
 		});
 	});
@@ -465,10 +436,7 @@ router.get('/get-enquiry/:enquiryid', (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler('500', `/get-enquiry/:enquiryid ${enquiryid}`, err),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/get-enquiry/:enquiryid ${enquiryid}`, err), res);
 		} else {
 			return res.json(data);
 		}
@@ -488,14 +456,7 @@ em.id = ${enquiryid}`;
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler(
-					'404',
-					`/get-customer-details/:enquiryid ${enquiryid}`,
-					err
-				),
-				res
-			);
+			return handleError(new ErrorHandler('404', `/get-customer-details/:enquiryid ${enquiryid}`, err), res);
 		} else {
 			return res.json(data);
 		}
@@ -532,23 +493,13 @@ router.get('/purchase/:purchaseid/:status', (req, res) => {
 
 		pool.query(sql, function (err, data) {
 			if (err) {
-				return handleError(
-					new ErrorHandler(
-						'500',
-						`/purchase/:purchaseid/:status ${centerid}`,
-						err
-					),
-					res
-				);
+				return handleError(new ErrorHandler('500', `/purchase/:purchaseid/:status ${centerid}`, err), res);
 			} else {
 				res.json(data);
 			}
 		});
 	} catch (error) {
-		return handleError(
-			new ErrorHandler('500', 'Error processing request', err),
-			res
-		);
+		return handleError(new ErrorHandler('500', 'Error processing request', err), res);
 	}
 });
 
@@ -558,16 +509,67 @@ router.get('/all-pymt-modes/:center_id/:status', (req, res) => {
 
 	pool.query(sql, function (err, data) {
 		if (err) {
-			return handleError(
-				new ErrorHandler(
-					'500',
-					`/all-pymt-modes/:center_id/:status ${req.params.center_id} ${req.params.status}`,
-					err
-				),
-				res
-			);
+			return handleError(new ErrorHandler('500', `/all-pymt-modes/:center_id/:status ${req.params.center_id} ${req.params.status}`, err), res);
 		} else {
 			return res.json(data);
 		}
 	});
 });
+
+router.get('/all-meetings', (req, res) => {
+	let data = 'dinesh';
+	const access_token =
+		'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOm51bGwsImlzcyI6ImtFTFlKRWRkUmlPMV93bDc2czFEbkEiLCJleHAiOjE2MjEwNjA4OTIsImlhdCI6MTYyMDQ1NjA5M30.KIcNG45pta74WMsdjchQrrmW1Akb-AGT06-HUvrSQx8';
+
+	axios
+		.get('https://api.zoom.us/v2/users/sivadinesh@squapl.com/meetings', {
+			headers: {
+				Authorization: `Bearer ${access_token}`,
+			},
+		})
+		.then((res) => {
+			console.log(res.data);
+		})
+		.catch((error) => {
+			console.error(error);
+		});
+});
+
+router.post('/create-meeting', (req, res) => {
+	const url = `https://api.zoom.us/v2/users/sivadinesh@squapl.com/meetings`;
+
+	const access_token =
+		'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOm51bGwsImlzcyI6ImtFTFlKRWRkUmlPMV93bDc2czFEbkEiLCJleHAiOjE2MjEwNjA4OTIsImlhdCI6MTYyMDQ1NjA5M30.KIcNG45pta74WMsdjchQrrmW1Akb-AGT06-HUvrSQx8';
+
+	axios
+		.post(
+			url,
+			{
+				topic: 'Test Meeting',
+				start_time: '2021-06-05T18:00:00Z',
+				type: 3,
+				duration: 20,
+				timezone: 'Asia/Calcutta',
+				agenda: 'Testing the Url',
+			},
+			{
+				headers: {
+					Authorization: `Bearer ${access_token}`,
+				},
+			},
+		)
+		.then((res) => {
+			console.log(res.data);
+		})
+		.catch((error) => {
+			console.error(error);
+		});
+});
+
+// axios.post(url, {
+//   //...data
+// }, {
+//   headers: {
+//     'Authorization': `Basic ${token}`
+//   }
+// })

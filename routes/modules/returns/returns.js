@@ -3,6 +3,8 @@ const moment = require('moment');
 const logger = require('./../../helpers/log4js');
 const { toTimeZone, currentTimeInTimeZone, toTimeZoneFrmt } = require('./../../helpers/utils');
 
+const { updateStock } = require('./../../modules/stock/stock.js');
+
 // param: smd : sale_master_data
 // NR: Not Received, A: Approved
 const insertSaleReturns = (smd) => {
@@ -27,12 +29,12 @@ const insertSaleReturns = (smd) => {
 // Insert sale_return_detail table with details of what is returned and at what price
 // Increase the stock
 // srd: sale_return_details array, sale_master_data (smd)
-const insertSaleReturnDetail = async (srd, sale_return_id, smd) => {
+const insertSaleReturnDetail = async (srd, sale_return_id, smd, res) => {
 	return new Promise(async (resolve, reject) => {
 		for (const k of srd) {
 			let insertSaleDetailReturnFlag = await insertSaleDetailReturn(k, sale_return_id, smd);
 			let updateSaleDetailFlag = await updateSaleDetail(k);
-			let updateStockAfterReturnFlag = await updateStockAfterReturn(k.product_id, k.mrp, k.received_now);
+			let updateStockAfterReturnFlag = await updateStock(k.received_now, k.product_id, k.mrp, 'add', res);
 		}
 		resolve('done');
 	});
@@ -73,21 +75,6 @@ const updateSaleDetail = (smd) => {
 	});
 };
 
-const updateStockAfterReturn = (product_id, mrp, received_now) => {
-	let sql = ` update stock set available_stock = available_stock + '${received_now}' where
-  product_id = '${product_id}' and mrp = '${mrp}'  `;
-
-	return new Promise((resolve, reject) => {
-		pool.query(sql, function (err, data) {
-			if (err) {
-				reject('Error while updating sale details with returns' + JSON.stringify(err));
-			} else {
-				resolve('success');
-			}
-		});
-	});
-};
-
 const createCreditNote = (credit_note_no, credit_note_total_amount, refund_status) => {
 	let sql = ` INSERT INTO credit_note(credit_note_no, credit_note_total_amount, refund_status)
               VALUES
@@ -110,7 +97,7 @@ function getSequenceCrNote(center_id) {
 
 	invNoQry = ` select concat('${currentTimeInTimeZone('Asia/Kolkata', 'YY')}', "/", '${currentTimeInTimeZone(
 		'Asia/Kolkata',
-		'MM'
+		'MM',
 	)}', "/", lpad(cr_note_seq, 5, "0")) as crNoteNo from financialyear 
 				where 
 				center_id = '${center_id}' and  
@@ -184,7 +171,7 @@ module.exports = {
 	insertSaleReturnDetail,
 	insertSaleDetailReturn,
 	updateSaleDetail,
-	updateStockAfterReturn,
+
 	createCreditNote,
 	updateCRAmntToCustomer,
 	updateCRSequenceGenerator,

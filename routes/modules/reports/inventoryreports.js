@@ -1,8 +1,8 @@
-var pool = require('../../helpers/db');
-const moment = require('moment');
-const logger = require('./../../helpers/log4js');
+var pool = require('../../helpers/db')
+const moment = require('moment')
+const logger = require('./../../helpers/log4js')
 
-const { handleError, ErrorHandler } = require('./../../helpers/error');
+const { handleError, ErrorHandler } = require('./../../helpers/error')
 
 const getProductInventoryReport = (center_id, product_code, product_id, callback) => {
 	let query = ` select ih.id, module, p.id as product_id, p.product_code as product_code, p.description as product_description,
@@ -35,45 +35,67 @@ const getProductInventoryReport = (center_id, product_code, product_id, callback
   order by ih.id desc
   
   
-  `;
+  `
 	// product_ref_id = '${product_id}'
 	// lateer include this to the search, as of now, fetch all
 
 	pool.query(query, function (err, data) {
-		if (err) return callback(err);
-		return callback(null, data);
-	});
-};
+		if (err) return callback(err)
+		return callback(null, data)
+	})
+}
 
-const fullStockReport = (center_id) => {
-	let query = `
-	select b.name, p.product_code, p.description,
-s.product_id, s.mrp, s.available_stock,
-p.unit, p.packetsize, p.hsncode, 
- p.mrp, p.purchase_price,
-p.rackno, p.taxrate
-from 
-product p,
-brand b,
-stock s
-where 
-s.product_id = p.id and
-p.brand_id = b.id and
-p.center_id = ${center_id}
-group by
-s.product_id, s.mrp, s.available_stock `;
+const fullStockReport = (center_id, mrp_split, res) => {
+	let query = ''
+
+	if (mrp_split === true) {
+		query = `
+      select b2.name,  
+      product_code, 
+      description, 
+      mrp, 
+      (select sum(s2.available_stock) from stock s2 where s2.product_id = p.id ) available_stock, 
+      unit,
+      packetsize, 
+      purchase_price , 
+      hsncode, 
+      taxrate,  
+      rackno 
+      from product p , brand b2 
+      where p.center_id = '${center_id}'
+      and p.brand_id = b2.id 
+      and p.center_id = b2.center_id
+      `
+	} else {
+		query = `
+      select b.name, p.product_code, p.description,
+      s.product_id, s.mrp, s.available_stock,
+      p.unit, p.packetsize, p.hsncode, 
+      p.mrp, p.purchase_price,
+      p.rackno, p.taxrate
+      from 
+      product p,
+      brand b,
+      stock s
+      where 
+      s.product_id = p.id and
+      p.brand_id = b.id and
+      p.center_id = '${center_id}'
+      group by
+      s.product_id, s.mrp, s.available_stock `
+	}
 
 	return new Promise(function (resolve, reject) {
 		pool.query(query, function (err, data) {
 			if (err) {
-				new ErrorHandler('500', 'fullStockReport', err), reject(err);
+				return handleError(new ErrorHandler('500', `fullStockReport ${query} `, err), res)
 			}
-			resolve(data);
-		});
-	});
-};
+			resolve(data)
+		})
+	})
+}
 
 module.exports = {
 	getProductInventoryReport,
 	fullStockReport,
-};
+}

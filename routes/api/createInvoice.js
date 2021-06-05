@@ -100,13 +100,13 @@ function generateHeader(doc, centerdata, print_type) {
 
 		.text('Phone : ' + centerdata.phone + ' & ' + centerdata.mobile, 410, 92);
 
-	// doc.image('upload/' + centerdata.logo_name, 475, 62, { width: 80 });
+	doc.image('upload/' + centerdata.side_logo_name, 475, 62, { width: 80 });
 
-	if (centerdata.id === 3) {
-		doc.image('sonalika.png', 475, 62, { width: 80 });
-	} else {
-		doc.image('swaraj.png', 475, 62, { width: 80 });
-	}
+	// if (centerdata.id === 3) {
+	// 	doc.image('sonalika.png', 475, 62, { width: 80 });
+	// } else {
+	// 	doc.image('swaraj.png', 475, 62, { width: 80 });
+	// }
 
 	doc.moveDown();
 }
