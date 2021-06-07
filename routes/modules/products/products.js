@@ -21,9 +21,13 @@ const insertProduct = async (insertValues, res) => {
 		'PUR',
 		'New Product',
 		insertValues.currentstock,
+		'0', // sale_return_id
+		'0', // sale_return_det_id
+		'0', // purchase_return_id
+		'0', // purchase_return_det_id
 		res,
 	);
-	console.log('dinesh1 ' + JSON.stringify(historyAddRes));
+
 	return historyAddRes;
 };
 

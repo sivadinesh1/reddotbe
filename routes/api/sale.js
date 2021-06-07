@@ -88,7 +88,23 @@ saleRouter.post('/delete-sales-details', async (req, res) => {
 
 	// step 4 - update item history table. as items are deleted, items has to be reversed
 	if (stockUpdatePromise.affectedRows === 1) {
-		let updateitemhistorytbl = await insertItemHistoryTable(center_id, 'Sale', product_id, '0', '0', sales_id, id, 'SAL', 'Mod/Del', qty, res);
+		let updateitemhistorytbl = await insertItemHistoryTable(
+			center_id,
+			'Sale',
+			product_id,
+			'0',
+			'0',
+			sales_id,
+			id,
+			'SAL',
+			'Mod/Del',
+			qty,
+			'0', // sale_return_id
+			'0', // sale_return_det_id
+			'0', // purchase_return_id
+			'0', // purchase_return_det_id
+			res,
+		);
 
 		return res.json({
 			result: 'success',

@@ -48,7 +48,7 @@ accountsRouter.post('/add-payment-received', async (req, res) => {
 
 		// add payment master
 		let newPK = await addPaymentMaster(cloneReq, pymtNo, k, res);
-		console.log('dinesh9 ' + newPK);
+
 		// (3) - updates pymt details
 		let process = processItems(cloneReq, newPK, k.sale_ref_id, k.receivedamount);
 
@@ -64,15 +64,13 @@ function processItems(cloneReq, newPK, sale_ref_id, receivedamount) {
 	let sql = `INSERT INTO payment_detail(pymt_ref_id, sale_ref_id, applied_amount) VALUES
 		( '${newPK}', '${sale_ref_id}', '${receivedamount}' )`;
 
-	console.log('dinesh9 ' + sql);
-
 	let pymtdetailsTblPromise = new Promise(function (resolve, reject) {
 		pool.query(sql, function (err, data) {
 			if (err) {
 				reject(err);
 			} else {
 				// check if there is any credit balance for the customer, if yes, first apply that
-				console.log('dinesh9 ' + JSON.stringify(data));
+
 				addPaymentLedgerRecord(cloneReq, newPK, receivedamount, sale_ref_id, (err, data) => {
 					if (err) {
 						let errTxt = err.message;

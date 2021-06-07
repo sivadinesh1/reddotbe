@@ -292,6 +292,10 @@ const insertItemHistory = async (k, vPurchase_id, vPurchase_det_id, cloneReq, re
 			'PUR',
 			actn_type,
 			txn_qty, //txn_qty
+			'0', // sale_return_id
+			'0', // sale_return_det_id
+			'0', // purchase_return_id
+			'0', // purchase_return_det_id
 			res,
 		);
 	}

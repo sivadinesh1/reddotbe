@@ -109,8 +109,6 @@ purchaseaccountsRouter.post('/add-bulk-vendor-payment-received', async (req, res
 		// add payment master
 		let newPK = await addVendorPaymentMaster(cloneReq, pymtNo, k, res);
 
-		console.log('dinesh1' + JSON.stringify(newPK));
-
 		//dinesh check
 		// (3) - updates pymt details
 		let process = processBulkItems(cloneReq, newPK, invoicesplit);

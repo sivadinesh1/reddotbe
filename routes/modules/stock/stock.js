@@ -4,15 +4,31 @@ const { toTimeZone, currentTimeInTimeZone } = require('./../../helpers/utils');
 
 const { handleError, ErrorHandler } = require('./../../helpers/error');
 
-const insertItemHistoryTable = (center_id, module, product_id, purchase_id, purchase_det_id, sale_id, sale_det_id, actn, actn_type, txn_qty, res) => {
+const insertItemHistoryTable = (
+	center_id,
+	module,
+	product_id,
+	purchase_id,
+	purchase_det_id,
+	sale_id,
+	sale_det_id,
+	actn,
+	actn_type,
+	txn_qty,
+	sale_return_id,
+	sale_return_det_id,
+	purchase_return_id,
+	purchase_return_det_id,
+	res,
+) => {
 	let today = currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY HH:mm:ss');
 
 	let query2 = `
-insert into item_history (center_id, module, product_ref_id, purchase_id, purchase_det_id, sale_id, sale_det_id, actn, actn_type, txn_qty, stock_level, txn_date)
+insert into item_history (center_id, module, product_ref_id, purchase_id, purchase_det_id, sale_id, sale_det_id, actn, actn_type, txn_qty, stock_level, txn_date, sale_return_id, sale_return_det_id, purchase_return_id, purchase_return_det_id)
 values ('${center_id}', '${module}', '${product_id}', '${purchase_id}', '${purchase_det_id}',
 '${sale_id}', '${sale_det_id}',
 '${actn}', '${actn_type}', '${txn_qty}',
-				(select IFNULL(sum(available_stock), 0) as available_stock  from stock where product_id = '${product_id}'  ), '${today}' ) `;
+				(select IFNULL(sum(available_stock), 0) as available_stock  from stock where product_id = '${product_id}'  ), '${today}', '${sale_return_id}', '${sale_return_det_id}', '${purchase_return_id}', '${purchase_return_det_id}' ) `;
 
 	return new Promise(function (resolve, reject) {
 		pool.query(query2, function (err, data) {

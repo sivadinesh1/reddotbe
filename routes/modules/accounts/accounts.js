@@ -704,7 +704,6 @@ const paymentBankRef = (center_id, ref, id, mode) => {
 		sql = `select count(*) as count from vendor_payment where center_id = '${center_id}' and bank_ref = '${ref}' and vendor_id = '${id}' `;
 	}
 
-	console.log('dinesh2 ' + sql);
 	return new Promise((resolve, reject) => {
 		pool.query(sql, function (err, data) {
 			if (err) {

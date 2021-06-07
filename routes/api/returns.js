@@ -8,9 +8,11 @@ const logger = require('../../routes/helpers/log4js');
 
 const { handleError, ErrorHandler } = require('./../helpers/error');
 
-const { getReturns } = require('../modules/sales/returns.js');
+const { getReturns, saleReturnPaymentMaster } = require('../modules/sales/returns.js');
 
 const { toTimeZone, currentTimeInTimeZone } = require('./../helpers/utils');
+
+const { updatePymtSequenceGenerator, getPymtSequenceNo } = require('../modules/accounts/accounts.js');
 
 const {
 	insertSaleReturns,
@@ -20,6 +22,7 @@ const {
 	updateCRSequenceGenerator,
 	getSequenceCrNote,
 	updateCrNoteIdInSaleReturnTable,
+	getSaleReturnDetails,
 } = require('../modules/returns/returns.js');
 
 const moment = require('moment');
@@ -162,23 +165,9 @@ returnsRouter.get('/get-sale-return-details/:center_id/:salre_return_id', (req, 
 	let center_id = req.params.center_id;
 	let sale_return_id = req.params.salre_return_id;
 
-	let sql = ` select p.id, p.product_code, p.description, srd.* from 
-	sale_return_detail srd,
-	product p,
-	sale_detail sd
-	where 
-	p.id = sd.product_id and
-	sd.id = srd.sale_detail_id and
-	srd.sale_return_id = ${sale_return_id}
-		`;
+	let data = getSaleReturnDetails(center_id, sale_return_id);
 
-	pool.query(sql, function (err, data) {
-		if (err) {
-			return handleError(new ErrorHandler('500', `/get-sale-return-details/:center_id/:salre_return_id ${center_id} ${sale_return_id}`, err), res);
-		} else {
-			return res.json(data);
-		}
-	});
+	return res.json(data);
 });
 
 returnsRouter.post('/update-sale-returns-received', (req, res) => {
@@ -244,6 +233,9 @@ Steps:
 4. Increase the stock
 */
 returnsRouter.post('/add-sale-return', async (req, res) => {
+	var today = new Date();
+	today = currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY');
+
 	let reqObject = req.body;
 
 	let smd = reqObject[1]; // sale master data
@@ -258,12 +250,57 @@ returnsRouter.post('/add-sale-return', async (req, res) => {
 
 	let cr_note_id_created = await createCreditNote(fetchCRNoteNo, smd.to_return_amount, 'R');
 	updateCrNoteIdInSaleReturnTable(cr_note_id_created, sale_return_id);
-	let cr_note_updated = await updateCRAmntToCustomer(smd.sale_id, smd.to_return_amount);
 
-	Promise.all([sale_return_id, job_completed, fetchCRNoteNo, cr_note_id_created, cr_note_updated]).then((result) => {
+	// dinesh - delete this logic
+	//let cr_note_updated = await updateCRAmntToCustomer(smd.sale_id, smd.to_return_amount);
+
+	// add a payment entry
+	await updatePymtSequenceGenerator(smd.center_id);
+
+	let cloneReq = {
+		centerid: smd.center_id,
+		bank_id: 0,
+		accountarr: [{ receivedamount: smd.to_return_amount, receiveddate: today }],
+	};
+	let pymtNo = await getPymtSequenceNo(cloneReq);
+
+	// add payment master
+	// nst saleReturnPaymentMaster = (center_id, customer_id, payment_no,
+	// 	payment_now_amt, advance_amt_used, pymt_date ) => {
+	let newPK = await saleReturnPaymentMaster(smd.center_id, smd.customer_id, pymtNo, smd.to_return_amount, '0', today, res);
+
+	// (3) - updates pymt details
+	let process = await processItems(newPK.insertId, smd.sale_id, sale_return_id, smd.to_return_amount);
+
+	Promise.all([sale_return_id, job_completed, fetchCRNoteNo, cr_note_id_created, process]).then((result) => {
 		return res.json('success');
 	});
 });
+
+function processItems(newPK, sale_ref_id, sale_return_ref_id, receivedamount) {
+	let sql = `INSERT INTO payment_detail(pymt_ref_id, sale_ref_id, sale_return_ref_id, applied_amount) VALUES
+		( '${newPK}', '${sale_ref_id}', '${sale_return_ref_id}', '${receivedamount}'  )`;
+
+	return new Promise(function (resolve, reject) {
+		pool.query(sql, function (err, data) {
+			if (err) {
+				reject(err);
+			} else {
+				// check if there is any credit balance for the customer, if yes, first apply that
+
+				// addPaymentLedgerRecord(cloneReq, newPK, receivedamount, sale_ref_id, (err, data) => {
+				// 	if (err) {
+				// 		let errTxt = err.message;
+				// 	} else {
+				// 		// todo
+				// 	}
+				// });
+
+				resolve(data);
+			}
+		});
+	});
+}
 
 module.exports = returnsRouter;
 
