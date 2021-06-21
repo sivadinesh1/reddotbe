@@ -62,7 +62,7 @@ const insertCustomer = (insertValues, callback) => {
 
 			let query1 = `
 	INSERT INTO customer_shipping_address (customer_id, address1, address2, address3, district, state_id, pin, def_address, is_active)
-	VALUES (?, ?, ?, ?, ?, ?, ?, 'Y', 'Y' ) `;
+	VALUES (?, ?, ?, ?, ?, ?, ?, 'Y', 'A' ) `;
 			let values1 = [
 				data.insertId,
 

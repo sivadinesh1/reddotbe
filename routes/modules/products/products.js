@@ -2,7 +2,7 @@ var pool = require('../../helpers/db');
 const moment = require('moment');
 const logger = require('./../../helpers/log4js');
 const { handleError, ErrorHandler } = require('./../../helpers/error');
-const { toTimeZone, currentTimeInTimeZone } = require('./../../helpers/utils');
+const { toTimeZone, toTimeZoneFrmt, currentTimeInTimeZone } = require('./../../helpers/utils');
 
 const { insertItemHistoryTable } = require('../../modules/stock/stock.js');
 

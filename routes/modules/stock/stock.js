@@ -57,11 +57,15 @@ const updateStock = (qty_to_update, product_id, mrp, mode, res) => {
 	});
 };
 
+// dinesh check
+// multiply by * -1 so that qty_to_update is minus, query works as expected
 const updateStockViaId = (qty_to_update, product_id, stock_id, mode, res) => {
 	let query =
 		mode === 'add'
 			? `update stock set available_stock =  available_stock + '${qty_to_update}' where product_id = '${product_id}' and id = '${stock_id}' `
-			: `update stock set available_stock =  available_stock - '${qty_to_update}' where product_id = '${product_id}' and id = '${stock_id}' `;
+			: `update stock set available_stock =  available_stock - '${qty_to_update}' * -1 where product_id = '${product_id}' and id = '${stock_id}' `;
+
+	console.log('dinesh ** ' + query);
 
 	return new Promise(function (resolve, reject) {
 		pool.query(query, function (err, data) {

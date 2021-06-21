@@ -139,7 +139,7 @@ saleRouter.post('/insert-sale-details', async (req, res) => {
 	}
 
 	let invNo = '';
-	// always very first insert will increment revision to 1, on consicutive inserts, it will be +1
+	// always very first insert will increment revision to 1, on consecutive inserts, it will be +1
 	if (cloneReq.status === 'C' && cloneReq.revision === 0) {
 		invNo = await getSequenceNo(cloneReq);
 	} else if (cloneReq.status === 'D') {
@@ -454,7 +454,8 @@ saleRouter.get('/delete-sale/:id', async (req, res) => {
 
 	let idx = 0;
 
-	let retValue = await deleteSaleDetailsRecs(saleDetails, sale_id);
+	let retValue = await deleteSaleDetailsRecs(saleDetails, sale_id, res);
+	console.log('dinesh * ' + retValue);
 
 	if (retValue === 'done') {
 		return res.json({
@@ -481,10 +482,11 @@ saleRouter.get('/delete-sale-master/:id', async (req, res) => {
 	});
 });
 
-function deleteSaleDetailsRecs(saleDetails, sale_id) {
+function deleteSaleDetailsRecs(saleDetails, sale_id, res) {
 	let idx = 1;
 
 	saleDetails.forEach(async (element, index) => {
+		idx = index + 1;
 		// step 1
 		let p_audit = await insertAuditTblforDeleteSaleDetailsRecAsync(element, sale_id);
 
@@ -494,17 +496,15 @@ function deleteSaleDetailsRecs(saleDetails, sale_id) {
 		// step 3
 
 		let p_stock_update = await updateStockViaId(element.qty, element.product_id, element.stock_id, 'add', res);
-
-		if (saleDetails.length === idx) {
-			return new Promise(function (resolve, reject) {
-				resolve('done');
-			}).catch(() => {
-				/* do whatever you want here */
-			});
-		}
-
-		idx = idx + 1;
 	});
+
+	if (saleDetails.length === idx) {
+		return new Promise(function (resolve, reject) {
+			resolve('done');
+		}).catch(() => {
+			/* do whatever you want here */
+		});
+	}
 }
 
 // get sale master to display in sale invoice component

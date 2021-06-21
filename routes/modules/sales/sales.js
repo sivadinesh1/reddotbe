@@ -117,7 +117,7 @@ const insertItemHistoryAsync = async (k, vSale_id, vSale_det_id, cloneReq, res) 
 	let actn_type = 'Sold';
 	let sale_id = vSale_id === '' ? k.sale_id : vSale_id;
 
-	// revision '0' is Status 'C' new record
+	// revision '0' is Status 'C' new record. txn_qty === 0 means (k.qty - k.old_val)
 	if (cloneReq.revision === 0 && txn_qty === 0) {
 		txn_qty = k.qty;
 	}
@@ -130,7 +130,7 @@ const insertItemHistoryAsync = async (k, vSale_id, vSale_det_id, cloneReq, res) 
 		txn_qty = k.qty;
 	}
 
-	// completed txn (if revision > 0) txn_qty 0 means not changeshappened
+	// completed txn (if revision > 0) txn_qty 0 means no changes happened
 	if (cloneReq.revision > 0 && txn_qty === 0) {
 		skipHistoryUpdate = true;
 	}

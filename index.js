@@ -13,11 +13,11 @@ const http = require('http');
 const cors = require('cors');
 const fs = require('fs');
 
-var options = {
-	key: fs.readFileSync('/etc/letsencrypt/live/demo.squapl.com/privkey.pem'),
-	cert: fs.readFileSync('/etc/letsencrypt/live/demo.squapl.com/cert.pem'),
-	ca: fs.readFileSync('/etc/letsencrypt/live/demo.squapl.com/chain.pem'),
-};
+// var options = {
+// 	key: fs.readFileSync('/etc/letsencrypt/live/demo.squapl.com/privkey.pem'),
+// 	cert: fs.readFileSync('/etc/letsencrypt/live/demo.squapl.com/cert.pem'),
+// 	ca: fs.readFileSync('/etc/letsencrypt/live/demo.squapl.com/chain.pem'),
+// };
 
 // var options = {
 // 	key: fs.readFileSync('/etc/letsencrypt/live/launchpad.squapl.com/privkey.pem'),
@@ -97,8 +97,8 @@ const PORT = process.env.PORT || 5050;
 
 // app.listen(PORT);
 //devlopment en
-// http.createServer(app).listen(5050);
+http.createServer(app).listen(5050);
 //demo
-https.createServer(options, app).listen(8440);
+// https.createServer(options, app).listen(8440);
 // prod
 // https.createServer(options, app).listen(8441);
