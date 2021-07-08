@@ -88,8 +88,8 @@ disc_value = '${k.disc_value}',	disc_type= '${k.disc_type}', unit_price = '${(k.
 	});
 };
 
+// check
 const updateProductAsync = (k) => {
-	// query is wrong - if this transaction need rewrite query
 	let query = ` update product set currentstock = (select sum(available_stock) 
 								from stock where product_id = '${k.product_id}' ) where id = '${k.product_id}' `;
 
@@ -111,6 +111,9 @@ const insertItemHistoryAsync = async (k, vSale_id, vSale_det_id, cloneReq, res) 
 
 	today = currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY HH:mm:ss');
 
+	console.log('dinesh >> ' + k.qty);
+	console.log('dinesh >> ' + k.old_val);
+
 	// if sale details id is missing its new else update
 	let sale_det_id = k.sale_det_id === '' ? vSale_det_id : k.sale_det_id;
 	let txn_qty = k.sale_det_id === '' ? k.qty : k.qty - k.old_val;
@@ -118,7 +121,7 @@ const insertItemHistoryAsync = async (k, vSale_id, vSale_det_id, cloneReq, res) 
 	let sale_id = vSale_id === '' ? k.sale_id : vSale_id;
 
 	// revision '0' is Status 'C' new record. txn_qty === 0 means (k.qty - k.old_val)
-	if (cloneReq.revision === 0 && txn_qty === 0) {
+	if (cloneReq.revision === 0 && txn_qty === 0 && cloneReq.invoicetype !== 'stockissue') {
 		txn_qty = k.qty;
 	}
 
@@ -126,12 +129,19 @@ const insertItemHistoryAsync = async (k, vSale_id, vSale_det_id, cloneReq, res) 
 	// example old value (5) Edited and sold (3)
 	// now txn_qty will be (3) (sold qty)
 	if (txn_qty < 0) {
-		actn_type = 'Edited';
+		actn_type = `Edited: ${k.old_val}`;
 		txn_qty = k.qty;
 	}
 
 	// completed txn (if revision > 0) txn_qty 0 means no changes happened
-	if (cloneReq.revision > 0 && txn_qty === 0) {
+	if (cloneReq.revision > 0 && txn_qty === 0 && cloneReq.invoicetype !== 'stockissue') {
+		skipHistoryUpdate = true;
+	}
+	console.log('dinesh @ ' + cloneReq.revision);
+	console.log('dinesh @ ' + txn_qty);
+	console.log('dinesh @ ' + cloneReq.invoicetype);
+
+	if (cloneReq.revision === 0 && txn_qty === 0 && cloneReq.invoicetype === 'stockissue') {
 		skipHistoryUpdate = true;
 	}
 

@@ -514,6 +514,7 @@ enquiryRoute.get('/back-order/:centerid', (req, res) => {
 	s.product_id = p.id and c.id = b.customer_id and
 	b.enquiry_detail_id = ed.id and
 	p.id = ed.product_id and
+	b.center_id = '${centerid}' and
 	str_to_date(order_date, '%d-%m-%YYYY') BETWEEN DATE_SUB(NOW(), INTERVAL 30 DAY) AND NOW()
 	union all
 	SELECT c.name as customer_name, "N/A" as product_code, "N/A" as product_id, "N/A" as description, ed.notes, ed.askqty, ed.giveqty, b.reason, 
@@ -524,6 +525,7 @@ enquiryRoute.get('/back-order/:centerid', (req, res) => {
 	b.enquiry_detail_id = ed.id and
 	c.id = b.customer_id and
 	ed.product_id is null and
+	b.center_id = '${centerid}' and
 	str_to_date(order_date, '%d-%m-%YYYY') BETWEEN DATE_SUB(NOW(), INTERVAL 30 DAY) AND NOW();
 	`;
 

@@ -10,7 +10,6 @@ const {
 	getSalesMaster,
 	getSalesDetails,
 
-	updateProductAsync,
 	IUSaleDetailsAsync,
 	insertItemHistoryAsync,
 	getNextSaleInvoiceNoAsync,
@@ -379,7 +378,6 @@ async function processItems(cloneReq, newPK, res) {
 
 		let p_data1 = await updateStockViaId(qty_to_update, k.product_id, k.stock_pk, 'minus', res);
 
-		//	let p_data2 = await updateProductAsync(k); // updating product master is not necessary, check if needed
 		let p_data3;
 
 		// its a hack to avoid data.insertid fix it

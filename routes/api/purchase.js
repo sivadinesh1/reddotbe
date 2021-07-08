@@ -140,11 +140,15 @@ async function processItems(cloneReq, newPK, res) {
 					}
 				} else {
 					updateLatestPurchasePrice(k);
+					console.log('dineshLL ' + data.insertId);
+					console.log('dineshXX ' + k.pur_det_id);
 
 					let pdetailid = k.pur_det_id === '' ? data.insertId : k.pur_det_id;
 
 					// check if productId + mrp exist, if exists (count ===1) then update stock else create new stock
 					let stockidExist = await isStockIdExist(k, res);
+					console.log('dinesh:: ' + k.mrp_change_flag);
+					console.log('dinesh:: ' + stockidExist);
 
 					if (`${k.mrp_change_flag}` === 'Y' && stockidExist === 0) {
 						// get pur_det_id for both insert and update - check
@@ -214,36 +218,13 @@ function updatePurchaseDetail(purchaseDetailId, stockid) {
 	});
 }
 
-// function insertStock(k, pdetailid) {
-// 	todayYYMMDD = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD');
-// 	let query2 = `
-// 	insert into stock (product_id, mrp, available_stock, open_stock, updateddate)
-// 	values ('${k.product_id}', '${k.mrp}', '${k.qty}', 0, '${todayYYMMDD}')`;
-
-// 	pool.query(query2, function (err, data) {
-// 		if (err) {
-// 		} else {
-// 			let query3 = `
-
-// 			update purchase_detail set stock_id =  '${data.insertId}'
-// 			where id  = '${pdetailid}' `;
-
-// 			pool.query(query3, function (err, data) {
-// 				if (err) {
-// 				} else {
-// 				}
-// 			});
-// 		}
-// 	});
-// }
-
 // UPDATE PRODUCT TABLE when purchasing, for company both unit_price (use in sales screen reports) & purchase_price are same
 const updateLatestPurchasePrice = (k) => {
 	let query2 = `
 
 update product set purchase_price = '${k.purchase_price}', unit_price = '${k.purchase_price}', mrp = '${k.mrp}'
 where id = '${k.product_id}'  `;
-
+	console.log('dineshAA ' + query2);
 	pool.query(query2, function (err, data) {
 		if (err) {
 			console.log('error while inserting updateLatestPurchasePrice ' + JSON.stringify(err));

@@ -4,13 +4,13 @@ const logger = require('./../../helpers/log4js');
 const { handleError, ErrorHandler } = require('./../../helpers/error');
 const { toTimeZone, toTimeZoneFrmt, currentTimeInTimeZone } = require('./../../helpers/utils');
 
-const { insertItemHistoryTable } = require('../../modules/stock/stock.js');
+const { insertItemHistoryTable, insertToStock } = require('../../modules/stock/stock.js');
 
 const insertProduct = async (insertValues, res) => {
 	let productId = await insertToProduct(insertValues, res);
-	let stockInsertRes = await insertToStock(productId, insertValues, res);
+	let stockInsertRes = await insertToStock(productId, insertValues.mrp, insertValues.currentstock, insertValues.currentstock, res);
 
-	let historyAddRes = insertItemHistoryTable(
+	let historyAddRes = await insertItemHistoryTable(
 		insertValues.center_id,
 		'Purchase',
 		productId,
@@ -79,26 +79,26 @@ function insertToProduct(insertValues, res) {
 	});
 }
 
-function insertToStock(productId, insertValues, res) {
-	let upDate = new Date();
-	todayYYMMDD = toTimeZoneFrmt(upDate, 'Asia/Kolkata', 'YYYY-MM-DD');
+// function insertToStock(productId, insertValues, res) {
+// 	let upDate = new Date();
+// 	todayYYMMDD = toTimeZoneFrmt(upDate, 'Asia/Kolkata', 'YYYY-MM-DD');
 
-	let query2 = `
-	insert into stock (product_id, mrp, available_stock, open_stock, updateddate)
-	values ('${productId}', '${insertValues.mrp}', '${insertValues.currentstock}', '${insertValues.currentstock}' , '${todayYYMMDD}')`;
+// 	let query2 = `
+// 	insert into stock (product_id, mrp, available_stock, open_stock, updateddate)
+// 	values ('${productId}', '${insertValues.mrp}', '${insertValues.currentstock}', '${insertValues.currentstock}' , '${todayYYMMDD}')`;
 
-	return new Promise(function (resolve, reject) {
-		pool.query(query2, function (err, data1) {
-			if (err) {
-				return handleError(new ErrorHandler('500', 'Error insertToStock in Productjs', err), res);
-			} else {
-				resolve(data1);
-			}
-		});
-	});
-}
+// 	return new Promise(function (resolve, reject) {
+// 		pool.query(query2, function (err, data1) {
+// 			if (err) {
+// 				return handleError(new ErrorHandler('500', 'Error insertToStock in Productjs', err), res);
+// 			} else {
+// 				resolve(data1);
+// 			}
+// 		});
+// 	});
+// }
 
-const updateProduct = (updateValues, callback) => {
+const updateProduct = (updateValues, res) => {
 	let today = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD HH:mm:ss');
 
 	let query = `
@@ -114,10 +114,14 @@ const updateProduct = (updateValues, callback) => {
 			where
 			id = '${updateValues.product_id}'
 	`;
-
-	pool.query(query, function (err, data) {
-		if (err) return callback(err);
-		return callback(null, data);
+	return new Promise(function (resolve, reject) {
+		pool.query(query, function (err, data) {
+			if (err) {
+				return handleError(new ErrorHandler('500', 'Error insertToStock in Productjs', err), res);
+			} else {
+				resolve('success');
+			}
+		});
 	});
 };
 

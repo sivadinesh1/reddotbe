@@ -75,6 +75,8 @@ app.use('/api/dashboard', require('./routes/api/dashboard'));
 app.use('/api/returns', require('./routes/api/returns'));
 app.use('/api/upload', require('./routes/api/upload'));
 
+app.use('/api/excel', require('./routes/api/excel'));
+
 app.get('/openCV/:id/:filename', function (req, res) {
 	var dir = process.env.UPLOAD_PATH;
 

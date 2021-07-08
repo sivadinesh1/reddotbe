@@ -43,6 +43,8 @@ const { insertVendor, updateVendor } = require('../modules/vendors/vendors.js');
 const { insertBrand, updateBrand } = require('../modules/brands/brands');
 const { getPermissions, checkUsernameExists } = require('../modules/auth/auth.js');
 
+const { isStockIdExist, insertToStock, insertItemHistoryTable } = require('../modules/stock/stock.js');
+
 adminRoute.get('/view-products-count/:centerid', (req, res) => {
 	let center_id = req.params.centerid;
 
@@ -95,17 +97,45 @@ adminRoute.post('/add-product', async (req, res, next) => {
 });
 
 // update product master
-adminRoute.post('/update-product', (req, res) => {
+adminRoute.post('/update-product', async (req, res) => {
 	let jsonObj = req.body;
 
-	updateProduct(jsonObj, (err, data) => {
-		if (err) {
-			return handleError(new ErrorHandler('500', `update-product`, err), res);
-		} else {
-			res.status(200).json({
-				result: 'success',
-			});
+	const response = await updateProduct(jsonObj);
+	console.log('dinesh11 ' + response);
+
+	if (response === 'success') {
+		const stockcount = await isStockIdExist({ product_id: jsonObj.product_id, mrp: jsonObj.mrp });
+
+		console.log('dinesh22 ' + JSON.stringify(stockcount));
+
+		if (stockcount === 0) {
+			console.log('dinesh inside stock ');
+			// add entry to stock with new mrp and stock as 0
+			// add entry in history table with new mrp and stock as same old stock
+			let stockid = await insertToStock(jsonObj.product_id, jsonObj.mrp, '0', '0', res);
+			console.log('dinesh inside stockid ' + stockid);
+			let historyAddRes = await insertItemHistoryTable(
+				jsonObj.center_id,
+				'Product',
+				jsonObj.product_id,
+				'0',
+				'0',
+				'0',
+				'0',
+				'PRD',
+				'MRP Change',
+				'0',
+				'0', // sale_return_id
+				'0', // sale_return_det_id
+				'0', // purchase_return_id
+				'0', // purchase_return_det_id
+				res,
+			);
 		}
+	}
+
+	res.status(200).json({
+		result: 'success',
 	});
 });
 
