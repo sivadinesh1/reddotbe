@@ -101,19 +101,15 @@ adminRoute.post('/update-product', async (req, res) => {
 	let jsonObj = req.body;
 
 	const response = await updateProduct(jsonObj);
-	console.log('dinesh11 ' + response);
 
 	if (response === 'success') {
 		const stockcount = await isStockIdExist({ product_id: jsonObj.product_id, mrp: jsonObj.mrp });
 
-		console.log('dinesh22 ' + JSON.stringify(stockcount));
-
 		if (stockcount === 0) {
-			console.log('dinesh inside stock ');
 			// add entry to stock with new mrp and stock as 0
 			// add entry in history table with new mrp and stock as same old stock
 			let stockid = await insertToStock(jsonObj.product_id, jsonObj.mrp, '0', '0', res);
-			console.log('dinesh inside stockid ' + stockid);
+
 			let historyAddRes = await insertItemHistoryTable(
 				jsonObj.center_id,
 				'Product',
@@ -123,7 +119,7 @@ adminRoute.post('/update-product', async (req, res) => {
 				'0',
 				'0',
 				'PRD',
-				'MRP Change',
+				`MRP Change - ${jsonObj.mrp}`,
 				'0',
 				'0', // sale_return_id
 				'0', // sale_return_det_id

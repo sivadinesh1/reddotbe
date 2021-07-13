@@ -88,7 +88,6 @@ a.center_id = '${centerid}' and
 a.description like '%${searchstr}%' ) limit 50 
 `;
 
-	console.log('dinesh @ ' + sql);
 	pool.query(sql, function (err, data) {
 		if (err) {
 			return handleError(new ErrorHandler('500', '/search-product-information', err), res);

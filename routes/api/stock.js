@@ -12,7 +12,7 @@ var pool = require('./../helpers/db');
 
 const { getSalesMaster, getSalesDetails } = require('../modules/sales/sales.js');
 
-const { insertItemHistoryTable, updateStockViaId } = require('../modules/stock/stock.js');
+const { insertItemHistoryTable, updateStockViaId, correctStock, getProductWithAllMRP, deleteProductFromStock } = require('../modules/stock/stock.js');
 
 stockRouter.get('/search-all-draft-purchase/:centerid', (req, res) => {
 	let center_id = req.params.centerid;
@@ -495,5 +495,38 @@ stockRouter.get('/delete-purchase-master/:id', async (req, res) => {
 				result: 'success',
 			});
 		}
+	});
+});
+
+// called from sale details list delete
+stockRouter.get('/all-products-with-mrp/:productid', async (req, res) => {
+	let product_id = req.params.productid;
+	let data = await getProductWithAllMRP(product_id);
+
+	res.status(200).json({
+		result: data,
+	});
+});
+
+stockRouter.delete('/delete-product-from-stock/:productid/:mrp', async (req, res) => {
+	let product_id = req.params.productid;
+	let mrp = req.params.mrp;
+
+	let data = await deleteProductFromStock(product_id, mrp);
+
+	res.status(200).json({
+		result: data,
+	});
+});
+
+stockRouter.post('/stock-correction', async (req, res) => {
+	let product_id = req.body.productid;
+	let mrp = req.body.mrp;
+	let stock_qty = req.body.qty;
+
+	let data = await deleteProductFromStock(product_id, mrp, stock_qty);
+
+	res.status(200).json({
+		result: data,
 	});
 });

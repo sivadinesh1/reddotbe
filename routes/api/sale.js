@@ -383,7 +383,7 @@ async function processItems(cloneReq, newPK, res) {
 		// its a hack to avoid data.insertid fix it
 		if (p_data != null || p_data != undefined) {
 			if (cloneReq.status === 'C' || (cloneReq.status === 'D' && cloneReq.invoicetype === 'stockissue')) {
-				p_data3 = insertItemHistoryAsync(k, newPK, p_data.insertId, cloneReq, res); // returns promise
+				p_data3 = await insertItemHistoryAsync(k, newPK, p_data.insertId, cloneReq, res); // returns promise
 			}
 		}
 
@@ -453,7 +453,6 @@ saleRouter.get('/delete-sale/:id', async (req, res) => {
 	let idx = 0;
 
 	let retValue = await deleteSaleDetailsRecs(saleDetails, sale_id, res);
-	console.log('dinesh * ' + retValue);
 
 	if (retValue === 'done') {
 		return res.json({

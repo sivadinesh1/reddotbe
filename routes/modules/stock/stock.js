@@ -27,9 +27,17 @@ const insertItemHistoryTable = (
 insert into item_history (center_id, module, product_ref_id, purchase_id, purchase_det_id, sale_id, sale_det_id, actn, actn_type, txn_qty, stock_level, txn_date, sale_return_id, sale_return_det_id, purchase_return_id, purchase_return_det_id)
 values ('${center_id}', '${module}', '${product_id}', '${purchase_id}', '${purchase_det_id}',
 '${sale_id}', '${sale_det_id}',
-'${actn}', '${actn_type}', '${txn_qty}',
-				(select IFNULL(sum(available_stock), 0) as available_stock  from stock where product_id = '${product_id}'  ), '${today}', '${sale_return_id}', '${sale_return_det_id}', '${purchase_return_id}', '${purchase_return_det_id}' ) `;
-	console.log('dinesh AAA ' + query2);
+'${actn}', '${actn_type}', '${txn_qty}', `;
+
+	// if (module !== 'Product') {
+	query2 = query2 + `	(select IFNULL(sum(available_stock), 0) as available_stock  from stock where product_id = '${product_id}'  ), `;
+	// }
+
+	query2 =
+		query2 +
+		`	
+			 '${today}', '${sale_return_id}', '${sale_return_det_id}', '${purchase_return_id}', '${purchase_return_det_id}' ) `;
+
 	return new Promise(function (resolve, reject) {
 		pool.query(query2, function (err, data) {
 			if (err) {
@@ -46,8 +54,6 @@ const updateStock = (qty_to_update, product_id, mrp, mode, res) => {
 		mode === 'add'
 			? `update stock set available_stock =  available_stock + '${qty_to_update}' where product_id = '${product_id}' and mrp = '${mrp}' `
 			: `update stock set available_stock =  available_stock - '${qty_to_update}' where product_id = '${product_id}' and mrp = '${mrp}' `;
-
-	console.log('dinesh WW' + query);
 
 	return new Promise(function (resolve, reject) {
 		pool.query(query, function (err, data) {
@@ -67,8 +73,6 @@ const updateStockViaId = (qty_to_update, product_id, stock_id, mode, res) => {
 			? `update stock set available_stock =  available_stock + '${qty_to_update}' where product_id = '${product_id}' and id = '${stock_id}' `
 			: `update stock set available_stock =  available_stock - '${qty_to_update}' where product_id = '${product_id}' and id = '${stock_id}' `;
 
-	console.log('dinesh ** ' + query);
-
 	return new Promise(function (resolve, reject) {
 		pool.query(query, function (err, data) {
 			if (err) {
@@ -83,14 +87,12 @@ const isStockIdExist = (k, res) => {
 	todayYYMMDD = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD');
 	let query2 = `
 	select count(*) as count from stock where product_id = '${k.product_id}' and mrp  = '${k.mrp}' `;
-	console.log('dinesh' + query2);
+
 	return new Promise(function (resolve, reject) {
 		pool.query(query2, function (err, data) {
 			if (err) {
 				return reject(new ErrorHandler('500', `Error checkStockIdPresent in Purchasejs. ${query2}`, err), res);
 			} else {
-				console.log('dinesh ' + data);
-				console.log('dinesh ' + data[0].count);
 				resolve(data[0].count);
 			}
 		});
@@ -116,10 +118,101 @@ const insertToStock = (product_id, mrp, available_stock, open_stock, res) => {
 	});
 };
 
+const correctStock = (product_id, mrp, stock_qty, res) => {
+	let query = `update stock set available_stock =  '${stock_qty}' where product_id = '${product_id}' and mrp = '${mrp}' `;
+
+	return new Promise(function (resolve, reject) {
+		pool.query(query, function (err, data) {
+			if (err) {
+				return reject(new ErrorHandler('500', `Error correctStock in Stockjs. QUERY: ${query}`, err), res);
+			}
+			return resolve(data);
+		});
+	});
+};
+
+const getProductWithAllMRP = (product_id, res) => {
+	todayYYMMDD = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD');
+	let sql = ` select 
+	s.id as stock_id, 
+	s.product_id as product_id,
+	p.description as product_description,
+	s.mrp, 
+	s.available_stock, 
+	s.open_stock 
+	from 
+	stock s,
+	product p
+	where
+	p.id = s.product_id and
+	s.product_id = '${product_id}'
+	 `;
+
+	return new Promise(function (resolve, reject) {
+		pool.query(sql, function (err, data) {
+			if (err) {
+				return reject(new ErrorHandler('500', `Error getProductWithAllMRP in stock.js. ${sql}`, err), res);
+			} else {
+				resolve(data);
+			}
+		});
+	});
+};
+
+const deleteProductFromStock = async (product_id, mrp, res) => {
+	todayYYMMDD = currentTimeInTimeZone('Asia/Kolkata', 'YYYY-MM-DD');
+
+	let query = `delete from stock where product_id = ${product_id} and mrp = ${mrp}`;
+
+	let disableFK = await disableFKConstraintCheck();
+	console.log('dinesh ' + query);
+	return new Promise(function (resolve, reject) {
+		pool.query(query, async function (err, data) {
+			if (err) {
+				return reject(new ErrorHandler('500', `Error getProductWithAllMRP in stock.js. ${query}`, err), res);
+			} else {
+				let enableFK = await enableFKConstraintCheck();
+				resolve('deleted');
+			}
+		});
+	});
+};
+
+const disableFKConstraintCheck = () => {
+	let query = `SET foreign_key_checks = 0;`;
+
+	return new Promise(function (resolve, reject) {
+		pool.query(query, function (err, data) {
+			if (err) {
+				return reject(new ErrorHandler('500', `Error disableFKConstraintCheck in stock.js. ${query}`, err), res);
+			} else {
+				resolve('disabled');
+			}
+		});
+	});
+};
+
+const enableFKConstraintCheck = () => {
+	let query = `SET foreign_key_checks = 1;`;
+
+	return new Promise(function (resolve, reject) {
+		pool.query(query, function (err, data) {
+			if (err) {
+				return reject(new ErrorHandler('500', `Error enableFKConstraintCheck in stock.js. ${query}`, err), res);
+			} else {
+				resolve('enabled');
+			}
+		});
+	});
+};
+
 module.exports = {
 	insertItemHistoryTable,
 	updateStock,
 	updateStockViaId,
 	isStockIdExist,
 	insertToStock,
+	correctStock,
+	getProductWithAllMRP,
+	deleteProductFromStock,
 };

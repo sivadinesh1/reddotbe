@@ -111,9 +111,6 @@ const insertItemHistoryAsync = async (k, vSale_id, vSale_det_id, cloneReq, res) 
 
 	today = currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY HH:mm:ss');
 
-	console.log('dinesh >> ' + k.qty);
-	console.log('dinesh >> ' + k.old_val);
-
 	// if sale details id is missing its new else update
 	let sale_det_id = k.sale_det_id === '' ? vSale_det_id : k.sale_det_id;
 	let txn_qty = k.sale_det_id === '' ? k.qty : k.qty - k.old_val;
@@ -129,17 +126,17 @@ const insertItemHistoryAsync = async (k, vSale_id, vSale_det_id, cloneReq, res) 
 	// example old value (5) Edited and sold (3)
 	// now txn_qty will be (3) (sold qty)
 	if (txn_qty < 0) {
-		actn_type = `Edited: ${k.old_val}`;
-		txn_qty = k.qty;
+		actn_type = `Edited: ${k.old_val} To: ${k.qty}`;
+		txn_qty = k.old_val - k.qty;
+	} else if (txn_qty > 0 && cloneReq.revision > 0) {
+		actn_type = `Edited: ${k.old_val} To: ${k.qty}`;
+		txn_qty = k.qty - k.old_val;
 	}
 
 	// completed txn (if revision > 0) txn_qty 0 means no changes happened
 	if (cloneReq.revision > 0 && txn_qty === 0 && cloneReq.invoicetype !== 'stockissue') {
 		skipHistoryUpdate = true;
 	}
-	console.log('dinesh @ ' + cloneReq.revision);
-	console.log('dinesh @ ' + txn_qty);
-	console.log('dinesh @ ' + cloneReq.invoicetype);
 
 	if (cloneReq.revision === 0 && txn_qty === 0 && cloneReq.invoicetype === 'stockissue') {
 		skipHistoryUpdate = true;

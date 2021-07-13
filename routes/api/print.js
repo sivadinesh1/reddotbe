@@ -81,7 +81,7 @@ printRouter.post('/credit-note-pdf', async (req, res) => {
 
 	// using saleid get SALE MASTER & SALE DETAILS
 	let saleMaster = await getSalesMaster(sale_id);
-	console.log('dinesh >> ' + sale_return_id);
+
 	let saleReturnDetails = await getSaleReturnDetails(center_id, sale_return_id, res);
 
 	// get CUSTOMER & CENTER DETAILS

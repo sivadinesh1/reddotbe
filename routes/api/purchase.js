@@ -40,7 +40,7 @@ purchaseRouter.post('/insert-purchase-details', async (req, res) => {
 		// });
 		res.json({ result: 'success', id: newPK });
 	} catch (err) {
-		return handleError(new ErrorHandler('500', 'Error saleMasterEntry > /insert-purchase-details', err), res);
+		return handleError(new ErrorHandler('500', 'Error purchaseMasterEntry > /insert-purchase-details', err), res);
 	}
 });
 
@@ -238,7 +238,7 @@ where id = '${k.product_id}'  `;
 // k - looped purchase details array
 const insertItemHistory = async (k, vPurchase_id, vPurchase_det_id, cloneReq, res) => {
 	let today = currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY HH:mm:ss');
-
+	let purchase = 'Purchase';
 	// if purchase details id is missing its new else update
 	let purchase_det_id = k.pur_det_id === '' ? vPurchase_det_id : k.pur_det_id;
 	let txn_qty = k.pur_det_id === '' ? k.qty : k.qty - k.old_val;
@@ -257,14 +257,26 @@ const insertItemHistory = async (k, vPurchase_id, vPurchase_det_id, cloneReq, re
 	//	let purchase_id = k.purchase_id;
 
 	//txn -ve means subtract from qty
+	// if (txn_qty < 0) {
+	// 	actn_type = 'Mod/Del';
+	// }
+
 	if (txn_qty < 0) {
-		actn_type = 'Mod/Del';
+		actn_type = `Edited: ${k.old_val} To: ${k.qty}`;
+		txn_qty = k.old_val - k.qty;
+	} else if (txn_qty > 0 && cloneReq.revision > 0) {
+		actn_type = `Edited: ${k.old_val} To: ${k.qty}`;
+		txn_qty = k.qty - k.old_val;
+	}
+
+	if (k.mrp_change_flag === 'Y') {
+		purchase = purchase + ' MRP Change - ' + k.mrp;
 	}
 
 	if (txn_qty !== 0) {
 		let itemHistory = await insertItemHistoryTable(
 			cloneReq.centerid,
-			'Purchase',
+			purchase,
 			k.product_id,
 			purchase_id,
 			purchase_det_id, //purchase_det_id
