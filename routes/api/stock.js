@@ -12,7 +12,14 @@ var pool = require('./../helpers/db');
 
 const { getSalesMaster, getSalesDetails } = require('../modules/sales/sales.js');
 
-const { insertItemHistoryTable, updateStockViaId, correctStock, getProductWithAllMRP, deleteProductFromStock } = require('../modules/stock/stock.js');
+const {
+	insertItemHistoryTable,
+	updateStockViaId,
+	correctStock,
+	getProductWithAllMRP,
+	deleteProductFromStock,
+	updateLatestProductMRP,
+} = require('../modules/stock/stock.js');
 
 stockRouter.get('/search-all-draft-purchase/:centerid', (req, res) => {
 	let center_id = req.params.centerid;
@@ -508,11 +515,32 @@ stockRouter.get('/all-products-with-mrp/:productid', async (req, res) => {
 	});
 });
 
-stockRouter.delete('/delete-product-from-stock/:productid/:mrp', async (req, res) => {
+stockRouter.delete('/delete-product-from-stock/:productid/:mrp/:centerid', async (req, res) => {
 	let product_id = req.params.productid;
 	let mrp = req.params.mrp;
+	let center_id = req.params.centerid;
 
 	let data = await deleteProductFromStock(product_id, mrp);
+
+	let historyAddRes = await insertItemHistoryTable(
+		center_id,
+		'Product',
+		product_id,
+		'0',
+		'0',
+		'0',
+		'0',
+		'PRD',
+		`Deleted MRP - ${mrp}`,
+		'0',
+		'0', // sale_return_id
+		'0', // sale_return_det_id
+		'0', // purchase_return_id
+		'0', // purchase_return_det_id
+		res,
+	);
+
+	let update = await updateLatestProductMRP(product_id, center_id);
 
 	res.status(200).json({
 		result: data,
@@ -520,11 +548,30 @@ stockRouter.delete('/delete-product-from-stock/:productid/:mrp', async (req, res
 });
 
 stockRouter.post('/stock-correction', async (req, res) => {
-	let product_id = req.body.productid;
+	let product_id = req.body.product_id;
 	let mrp = req.body.mrp;
-	let stock_qty = req.body.qty;
+	let stock_qty = req.body.corrected_stock;
+	let center_id = req.body.center_id;
 
-	let data = await deleteProductFromStock(product_id, mrp, stock_qty);
+	let data = await correctStock(product_id, mrp, stock_qty);
+
+	let historyAddRes = await insertItemHistoryTable(
+		center_id,
+		'Product',
+		product_id,
+		'0',
+		'0',
+		'0',
+		'0',
+		'PRD',
+		`Stock Correction: MRP - ${mrp} : Qty - ${stock_qty}`,
+		'0',
+		'0', // sale_return_id
+		'0', // sale_return_det_id
+		'0', // purchase_return_id
+		'0', // purchase_return_det_id
+		res,
+	);
 
 	res.status(200).json({
 		result: data,

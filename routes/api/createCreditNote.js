@@ -167,7 +167,7 @@ function generateCustomerInformation(doc, customerdata, salemasterdata, credit_n
 
 	doc
 		.fillColor('#000000')
-		.text('State: ' + customerdata.code + '-' + customerdata.description, 40, 181)
+		.text('State: ' + customerdata.description + ' Pin: ' + customerdata.pin, 40, 181)
 		.font('Helvetica-Bold')
 		.text('Phone: ' + customerdata.mobile + ' GSTIN: ' + customerdata.gst, 40, 196)
 		.font('Helvetica')

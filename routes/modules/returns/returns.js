@@ -201,6 +201,9 @@ const getSaleReturnDetails = (center_id, sale_return_id, res) => {
 	sd.id = srd.sale_detail_id and
 	srd.sale_return_id = '${sale_return_id}'
 		`;
+
+	console.log('dinesh ' + sql);
+
 	return new Promise(function (resolve, reject) {
 		pool.query(sql, function (err, data) {
 			if (err) {

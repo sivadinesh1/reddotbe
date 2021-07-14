@@ -126,7 +126,7 @@ const correctStock = (product_id, mrp, stock_qty, res) => {
 			if (err) {
 				return reject(new ErrorHandler('500', `Error correctStock in Stockjs. QUERY: ${query}`, err), res);
 			}
-			return resolve(data);
+			resolve('updated');
 		});
 	});
 };
@@ -164,44 +164,33 @@ const deleteProductFromStock = async (product_id, mrp, res) => {
 
 	let query = `delete from stock where product_id = ${product_id} and mrp = ${mrp}`;
 
-	let disableFK = await disableFKConstraintCheck();
-	console.log('dinesh ' + query);
 	return new Promise(function (resolve, reject) {
 		pool.query(query, async function (err, data) {
 			if (err) {
 				return reject(new ErrorHandler('500', `Error getProductWithAllMRP in stock.js. ${query}`, err), res);
 			} else {
-				let enableFK = await enableFKConstraintCheck();
 				resolve('deleted');
 			}
 		});
 	});
 };
 
-const disableFKConstraintCheck = () => {
-	let query = `SET foreign_key_checks = 0;`;
+const updateLatestProductMRP = (product_id, center_id, res) => {
+	let query = `
+	update product set 
+mrp = (select max(mrp) from stock where
+product_id = '${product_id}')
+where 
+id = '${product_id}' and
+center_id = '${center_id}'
+`;
 
 	return new Promise(function (resolve, reject) {
 		pool.query(query, function (err, data) {
 			if (err) {
-				return reject(new ErrorHandler('500', `Error disableFKConstraintCheck in stock.js. ${query}`, err), res);
-			} else {
-				resolve('disabled');
+				return reject(new ErrorHandler('500', `Error updateLatestProductMRP in Stockjs. QUERY: ${query}`, err), res);
 			}
-		});
-	});
-};
-
-const enableFKConstraintCheck = () => {
-	let query = `SET foreign_key_checks = 1;`;
-
-	return new Promise(function (resolve, reject) {
-		pool.query(query, function (err, data) {
-			if (err) {
-				return reject(new ErrorHandler('500', `Error enableFKConstraintCheck in stock.js. ${query}`, err), res);
-			} else {
-				resolve('enabled');
-			}
+			return resolve(data);
 		});
 	});
 };
@@ -215,4 +204,5 @@ module.exports = {
 	correctStock,
 	getProductWithAllMRP,
 	deleteProductFromStock,
+	updateLatestProductMRP,
 };
