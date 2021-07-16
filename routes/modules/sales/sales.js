@@ -286,6 +286,36 @@ const deleteSaleDetail = async (id, res) => {
 	});
 };
 
+const updatePrintCounter = (sale_id) => {
+	let today = currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY HH:mm:ss');
+
+	let query = `update sale set print_count = print_count + 1 where id = '${sale_id}' `;
+
+	return new Promise(function (resolve, reject) {
+		pool.query(query, function (err, data) {
+			if (err) {
+				reject(err); // failure
+			}
+			resolve('updated');
+		});
+	});
+};
+
+const getPrintCounter = (sale_id) => {
+	let today = currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY HH:mm:ss');
+
+	let query = ` select print_count from sale where id = '${sale_id}'  `;
+
+	return new Promise(function (resolve, reject) {
+		pool.query(query, function (err, data) {
+			if (err) {
+				reject(err); // failure
+			}
+			resolve(data);
+		});
+	});
+};
+
 module.exports = {
 	getSalesMaster,
 	getSalesDetails,
@@ -300,4 +330,6 @@ module.exports = {
 
 	updateLegerCustomerChange,
 	deleteSaleDetail,
+	updatePrintCounter,
+	getPrintCounter,
 };

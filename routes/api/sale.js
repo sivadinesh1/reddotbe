@@ -18,6 +18,8 @@ const {
 	// updateStockWhileDeleteAsync,
 	updateLegerCustomerChange,
 	deleteSaleDetail,
+	updatePrintCounter,
+	getPrintCounter,
 } = require('../modules/sales/sales.js');
 
 const { insertItemHistoryTable, updateStockViaId } = require('./../modules/stock/stock.js');
@@ -515,6 +517,14 @@ saleRouter.get('/get-sale-details/:sale_id', async (req, res) => {
 	let sale_id = req.params.sale_id;
 	let saleDetails = await getSalesDetails(sale_id);
 	return res.json(saleDetails);
+});
+
+saleRouter.get('/update-get-print-counter/:sale_id', async (req, res) => {
+	let sale_id = req.params.sale_id;
+	let response = await updatePrintCounter(sale_id);
+	let counter = await getPrintCounter(sale_id);
+
+	return res.json(counter);
 });
 
 module.exports = saleRouter;
