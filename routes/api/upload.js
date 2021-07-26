@@ -15,7 +15,6 @@ uploadRoute.post('/add/:centerid/:position', (req, res) => {
 	let logo_url = '';
 
 	var form = new IncomingForm();
-	console.log('111111');
 
 	var fileNames = [];
 

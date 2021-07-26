@@ -20,6 +20,7 @@ const {
 	deleteSaleDetail,
 	updatePrintCounter,
 	getPrintCounter,
+	duplicateInvoiceNoCheck,
 } = require('../modules/sales/sales.js');
 
 const { insertItemHistoryTable, updateStockViaId } = require('./../modules/stock/stock.js');
@@ -98,7 +99,7 @@ saleRouter.post('/delete-sales-details', async (req, res) => {
 			sales_id,
 			id,
 			'SAL',
-			'Mod/Del',
+			`Deleted MRP - ${mrp}`,
 			qty,
 			'0', // sale_return_id
 			'0', // sale_return_det_id
@@ -127,9 +128,9 @@ saleRouter.post('/insert-sale-details', async (req, res) => {
 	const cloneReq = { ...req.body };
 
 	// (1) Updates invseq in tbl financialyear, then {returns} formated sequence {YY/MM/INVSEQ}
-	if (cloneReq.status === 'C' && cloneReq.revision === 0) {
+	if (cloneReq.status === 'C' && cloneReq.revision === 0 && cloneReq.inv_gen_mode === 'A') {
 		await updateSequenceGenerator(cloneReq);
-	} else if (cloneReq.status === 'D') {
+	} else if (cloneReq.status === 'D' && cloneReq.inv_gen_mode === 'A') {
 		if (cloneReq.invoiceno !== undefined && cloneReq.invoiceno !== null) {
 			if (cloneReq.invoiceno.startsWith('D') || cloneReq.invoiceno.startsWith('SI')) {
 				// do nothing
@@ -141,9 +142,9 @@ saleRouter.post('/insert-sale-details', async (req, res) => {
 
 	let invNo = '';
 	// always very first insert will increment revision to 1, on consecutive inserts, it will be +1
-	if (cloneReq.status === 'C' && cloneReq.revision === 0) {
+	if (cloneReq.status === 'C' && cloneReq.revision === 0 && cloneReq.inv_gen_mode === 'A') {
 		invNo = await getSequenceNo(cloneReq);
-	} else if (cloneReq.status === 'D') {
+	} else if (cloneReq.status === 'D' && cloneReq.inv_gen_mode === 'A') {
 		if (cloneReq.invoiceno !== undefined && cloneReq.invoiceno !== null) {
 			if (cloneReq.invoiceno.startsWith('D') || cloneReq.invoiceno.startsWith('SI')) {
 				invNo = cloneReq.invoiceno;
@@ -153,10 +154,12 @@ saleRouter.post('/insert-sale-details', async (req, res) => {
 		}
 	} else if (cloneReq.status === 'C' && cloneReq.revision !== 0) {
 		invNo = cloneReq.invoiceno;
+	} else if (cloneReq.inv_gen_mode === 'M') {
+		invNo = cloneReq.invoiceno;
 	}
 
 	// (2)
-	saleMasterEntry(cloneReq, invNo)
+	saleMasterEntry(cloneReq, invNo, res)
 		.then(async (data) => {
 			const start = Date.now();
 
@@ -288,7 +291,7 @@ function getSequenceNo(cloneReq) {
 }
 
 // format and send sequence #
-function saleMasterEntry(cloneReq, invNo) {
+function saleMasterEntry(cloneReq, invNo, res) {
 	let revisionCnt = 0;
 
 	let invoicedate = toTimeZone(cloneReq.invoicedate, 'Asia/Kolkata');
@@ -313,7 +316,7 @@ function saleMasterEntry(cloneReq, invNo) {
 			INSERT INTO sale (center_id, customer_id, invoice_no, invoice_date, order_no, order_date, 
 			lr_no, lr_date, sale_type,  total_qty, no_of_items, taxable_value, cgst, sgst, igst, 
 			total_value, net_total, transport_charges, unloading_charges, misc_charges, status, 
-			sale_datetime, roundoff, revision, retail_customer_name, retail_customer_address,retail_customer_phone )
+			sale_datetime, roundoff, revision, retail_customer_name, retail_customer_address,retail_customer_phone, inv_gen_mode )
 			VALUES
 			('${cloneReq.center_id}', '${cloneReq.customerctrl.id}', 
 			'${invNo}',
@@ -323,7 +326,7 @@ function saleMasterEntry(cloneReq, invNo) {
 			'${cloneReq.net_total}', '${cloneReq.transport_charges}', '${cloneReq.unloading_charges}', '${cloneReq.misc_charges}', '${cloneReq.status}',
 			'${currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY HH:mm:ss')}', '${cloneReq.roundoff}', '${revisionCnt}', '${cloneReq.retail_customer_name}', '${
 		cloneReq.retail_customer_address
-	}', '${cloneReq.retail_customer_phone}'
+	}', '${cloneReq.retail_customer_phone}', '${cloneReq.inv_gen_mode}'
 			)`;
 
 	let upQry = `
@@ -338,13 +341,18 @@ function saleMasterEntry(cloneReq, invNo) {
 			sale_datetime = 	'${currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY HH:mm:ss')}', revision = '${revisionCnt}', roundoff = '${cloneReq.roundoff}', 
 			retail_customer_name = '${cloneReq.retail_customer_name}',
 			retail_customer_address = '${cloneReq.retail_customer_address}',
-			retail_customer_phone = '${cloneReq.retail_customer_phone}'
+			retail_customer_phone = '${cloneReq.retail_customer_phone}',
+			inv_gen_mode = '${cloneReq.inv_gen_mode}'
 			where id= '${cloneReq.salesid}' `;
 
 	return new Promise(function (resolve, reject) {
 		pool.query(cloneReq.salesid === '' ? insQry : upQry, function (err, data) {
 			if (err) {
-				reject(err);
+				return handleError(
+					new ErrorHandler('500', `Error saleMasterEntry Query ${cloneReq.salesid === '' ? insQry : upQry} and ERROR: ${err}> `, err),
+					res,
+				);
+				//reject(err);
 			}
 			resolve(data);
 		});
@@ -525,6 +533,23 @@ saleRouter.get('/update-get-print-counter/:sale_id', async (req, res) => {
 	let counter = await getPrintCounter(sale_id);
 
 	return res.json(counter);
+});
+
+saleRouter.get('/get-print-counter/:sale_id', async (req, res) => {
+	let sale_id = req.params.sale_id;
+
+	let counter = await getPrintCounter(sale_id);
+
+	return res.json(counter);
+});
+
+saleRouter.post('/duplicate-invoiceno-check', async (req, res) => {
+	let invoice_no = req.body.invoice_no;
+	let center_id = req.body.center_id;
+
+	let data = await duplicateInvoiceNoCheck(invoice_no, center_id);
+
+	return res.json(data[0].count);
 });
 
 module.exports = saleRouter;

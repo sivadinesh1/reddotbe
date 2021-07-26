@@ -316,6 +316,21 @@ const getPrintCounter = (sale_id) => {
 	});
 };
 
+const duplicateInvoiceNoCheck = (invoice_no, center_id) => {
+	let today = currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY HH:mm:ss');
+
+	let query = ` select count(*) as count from sale where invoice_no = '${invoice_no}' and center_id = '${center_id}' `;
+
+	return new Promise(function (resolve, reject) {
+		pool.query(query, function (err, data) {
+			if (err) {
+				reject(err); // failure
+			}
+			resolve(data);
+		});
+	});
+};
+
 module.exports = {
 	getSalesMaster,
 	getSalesDetails,
@@ -332,4 +347,5 @@ module.exports = {
 	deleteSaleDetail,
 	updatePrintCounter,
 	getPrintCounter,
+	duplicateInvoiceNoCheck,
 };

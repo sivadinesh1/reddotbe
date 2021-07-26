@@ -6,14 +6,21 @@ const env = require('dotenv/config');
 var pool = require('./../helpers/db');
 const { handleError, ErrorHandler } = require('./../helpers/error');
 
-const {
-	getPermissions,
-	checkUsernameExists,
-} = require('../modules/auth/auth.js');
+const { getPermissions, checkUsernameExists, updateCenterForSuperAdmin } = require('../modules/auth/auth.js');
 const e = require('express');
 
 // if(await bcrypt.compare(password, user.hashed_password)) {
 // 	console.log('object ::: password matched' )
+
+authRoute.post('/super-admin', (req, res) => {
+	let center_id = req.body.center_id;
+
+	const result = updateCenterForSuperAdmin(center_id);
+
+	return res.status(200).json({
+		result: 'success',
+	});
+});
 
 authRoute.post('/login', async (req, res) => {
 	const [username, password] = Object.values(req.body);
@@ -21,14 +28,7 @@ authRoute.post('/login', async (req, res) => {
 	let user = await checkUsernameExists(username);
 	console.log('dinesh ' + user);
 	if (user == '') {
-		return handleError(
-			new ErrorHandler(
-				'601',
-				'User not found',
-				`invalid credentials: ${username} ${password}`
-			),
-			res
-		);
+		return handleError(new ErrorHandler('601', 'User not found', `invalid credentials: ${username} ${password}`), res);
 	}
 	if (user != null) {
 		// check password
@@ -41,25 +41,11 @@ authRoute.post('/login', async (req, res) => {
 				obj: user[0],
 			});
 		} else {
-			return handleError(
-				new ErrorHandler(
-					'600',
-					'Invalid Credentials.',
-					`invalid credentials: ${username} ${password}`
-				),
-				res
-			);
+			return handleError(new ErrorHandler('600', 'Invalid Credentials.', `invalid credentials: ${username} ${password}`), res);
 		}
 	} else {
 		// res.json({ 'message': 'Error while authenticating' });
-		return handleError(
-			new ErrorHandler(
-				'100',
-				'Error while authenticating.',
-				`invalid credentials: ${username} ${password}`
-			),
-			res
-		);
+		return handleError(new ErrorHandler('100', 'Error while authenticating.', `invalid credentials: ${username} ${password}`), res);
 	}
 
 	// let query = `select u.id as userid, u.username, u.firstname, r.name as role, r.id as role_id, c.id as center_id, c.name as center_name, cm.id as company_id,

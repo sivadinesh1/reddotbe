@@ -140,15 +140,11 @@ async function processItems(cloneReq, newPK, res) {
 					}
 				} else {
 					updateLatestPurchasePrice(k);
-					console.log('dineshLL ' + data.insertId);
-					console.log('dineshXX ' + k.pur_det_id);
 
 					let pdetailid = k.pur_det_id === '' ? data.insertId : k.pur_det_id;
 
 					// check if productId + mrp exist, if exists (count ===1) then update stock else create new stock
 					let stockidExist = await isStockIdExist(k, res);
-					console.log('dinesh:: ' + k.mrp_change_flag);
-					console.log('dinesh:: ' + stockidExist);
 
 					if (`${k.mrp_change_flag}` === 'Y' && stockidExist === 0) {
 						// get pur_det_id for both insert and update - check
@@ -224,12 +220,12 @@ const updateLatestPurchasePrice = (k) => {
 
 update product set purchase_price = '${k.purchase_price}', unit_price = '${k.purchase_price}', mrp = '${k.mrp}'
 where id = '${k.product_id}'  `;
-	console.log('dineshAA ' + query2);
+
 	pool.query(query2, function (err, data) {
 		if (err) {
 			console.log('error while inserting updateLatestPurchasePrice ' + JSON.stringify(err));
 		} else {
-			console.log('updated mrp/purchase price in product table');
+			//updated mrp/purchase price in product table
 		}
 	});
 };

@@ -190,8 +190,6 @@ function updateCrNoteIdInSaleReturnTable(cr_note_id, sale_return_id) {
 }
 
 const getSaleReturnDetails = (center_id, sale_return_id, res) => {
-	console.log('dinesh ' + sale_return_id);
-
 	let sql = ` select p.id, p.product_code, p.description, srd.* from 
 	sale_return_detail srd,
 	product p,
@@ -201,8 +199,6 @@ const getSaleReturnDetails = (center_id, sale_return_id, res) => {
 	sd.id = srd.sale_detail_id and
 	srd.sale_return_id = '${sale_return_id}'
 		`;
-
-	console.log('dinesh ' + sql);
 
 	return new Promise(function (resolve, reject) {
 		pool.query(sql, function (err, data) {

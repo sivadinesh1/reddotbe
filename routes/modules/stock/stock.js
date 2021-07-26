@@ -41,6 +41,8 @@ values ('${center_id}', '${module}', '${product_id}', '${purchase_id}', '${purch
 	return new Promise(function (resolve, reject) {
 		pool.query(query2, function (err, data) {
 			if (err) {
+				console.log('dinesh ' + JSON.stringify(err));
+				console.log('dinesh ' + query2);
 				return handleError(new ErrorHandler('500', 'Error insertItemHistoryTable in Stockjs', err), res);
 			}
 			// success

@@ -89,7 +89,7 @@ stockRouter.post('/search-purchase', (req, res) => {
 		sql = sql + statussql;
 	}
 
-	sql = sql + `order by received_date ${order}`;
+	sql = sql + `order by str_to_date(received_date,  '%d-%m-%Y %T') ${order}`;
 
 	pool.query(sql, function (err, data) {
 		if (err) {
@@ -154,7 +154,7 @@ stockRouter.post('/search-sales', (req, res) => {
 				sql = sql + " and s.sale_type = 'stockissue' ";
 			}
 		}
-
+		// check dinesh
 		if (invoice_no.trim().length > 0) {
 			sql = sql + `and invoice_no = '${invoice_no.trim()}' `;
 		}
@@ -364,8 +364,12 @@ stockRouter.post('/delete-purchase-details', async (req, res) => {
 		'0', // sale_id
 		'0', //sale_det_id
 		'PUR',
-		'Mod/Del',
+		`Deleted MRP - ${mrp}`,
 		qty, //txn_qty
+		'0', // sale_return_id
+		'0', // sale_return_det_id
+		'0', // purchase_return_id
+		'0', // purchase_return_det_id
 		res,
 	);
 
@@ -577,3 +581,5 @@ stockRouter.post('/stock-correction', async (req, res) => {
 		result: data,
 	});
 });
+
+// let itemHistory = await insertItemHistoryTable( dinesh check update (delete products)
