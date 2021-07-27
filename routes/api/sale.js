@@ -293,6 +293,7 @@ function getSequenceNo(cloneReq) {
 // format and send sequence #
 function saleMasterEntry(cloneReq, invNo, res) {
 	let revisionCnt = 0;
+	let printcount = cloneReq.print_count || 0;
 
 	let invoicedate = toTimeZone(cloneReq.invoicedate, 'Asia/Kolkata');
 
@@ -306,6 +307,7 @@ function saleMasterEntry(cloneReq, invNo, res) {
 		revisionCnt = 1;
 	} else if (cloneReq.status === 'C' && cloneReq.revision !== 0) {
 		revisionCnt = cloneReq.revision + 1;
+		printcount = '-1';
 	}
 
 	let orderdate = cloneReq.orderdate !== '' && cloneReq.orderdate !== null ? toTimeZone(cloneReq.orderdate, 'Asia/Kolkata') : '';
@@ -342,7 +344,8 @@ function saleMasterEntry(cloneReq, invNo, res) {
 			retail_customer_name = '${cloneReq.retail_customer_name}',
 			retail_customer_address = '${cloneReq.retail_customer_address}',
 			retail_customer_phone = '${cloneReq.retail_customer_phone}',
-			inv_gen_mode = '${cloneReq.inv_gen_mode}'
+			inv_gen_mode = '${cloneReq.inv_gen_mode}',
+			print_count= '${printcount}'
 			where id= '${cloneReq.salesid}' `;
 
 	return new Promise(function (resolve, reject) {

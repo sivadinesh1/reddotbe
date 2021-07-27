@@ -1,5 +1,7 @@
 const express = require('express');
 
+require('dotenv').config({ path: `./.env.${process.env.NODE_ENV}` });
+
 const mysql = require('mysql');
 const moment = require('moment');
 const { handleError, ErrorHandler } = require('./routes/helpers/error');
@@ -12,6 +14,8 @@ const http = require('http');
 
 const cors = require('cors');
 const fs = require('fs');
+
+console.log(`./.env.${process.env.NODE_ENV}`);
 
 // var options = {
 // 	key: fs.readFileSync('/etc/letsencrypt/live/demo.squapl.com/privkey.pem'),
@@ -95,21 +99,22 @@ app.use((err, req, res) => {
 	handleError(err, res);
 });
 
-const PORT = process.env.PORT || 5050;
-
 // app.listen(PORT);
 //devlopment en
-http.createServer(app).listen(5050);
+
 //demo
 // https.createServer(options, app).listen(8440);
 // prod
 // https.createServer(options, app).listen(8441);
 
-// select  any_value(id), purchase_id, sale_id, sum(txn_qty)  from item_history where
-// product_ref_id = '65454'
-// group by
-// purchase_id, sale_id
-// order by any_value(id)
+// if (process.env.NODE_ENV === 'development') {
+http.createServer(app).listen(5050);
+// } else {
+// 	var options = {
+// 		key: fs.readFileSync(process.env.SSL_KEY),
+// 		cert: fs.readFileSync(process.env.SSL_CERT),
+// 		ca: fs.readFileSync(process.env.SSL_CHAIN),
+// 	};
 
-// select * from item_history where
-// product_ref_id = '65454'
+// 	https.createServer(options, app).listen(process.env.PORT);
+// }

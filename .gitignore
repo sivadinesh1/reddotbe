@@ -30,3 +30,7 @@ npm-debug.log*
 /plugins
 /www
 /logs
+
+.env.development
+.env.production
+.env.uat

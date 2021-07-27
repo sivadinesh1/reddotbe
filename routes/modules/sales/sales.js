@@ -289,7 +289,14 @@ const deleteSaleDetail = async (id, res) => {
 const updatePrintCounter = (sale_id) => {
 	let today = currentTimeInTimeZone('Asia/Kolkata', 'DD-MM-YYYY HH:mm:ss');
 
-	let query = `update sale set print_count = print_count + 1 where id = '${sale_id}' `;
+	// let query = `update sale set print_count = print_count + 1 where id = '${sale_id}' `;
+
+	let query = ` update sale
+	set print_count = CASE
+		 WHEN print_count= -1 then print_count + 2
+		 ELSE print_count + 1
+		END
+		where id = '${sale_id}' `;
 
 	return new Promise(function (resolve, reject) {
 		pool.query(query, function (err, data) {
