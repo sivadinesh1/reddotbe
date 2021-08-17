@@ -169,7 +169,7 @@ const deleteProductFromStock = async (product_id, mrp, res) => {
 	return new Promise(function (resolve, reject) {
 		pool.query(query, async function (err, data) {
 			if (err) {
-				return reject(new ErrorHandler('500', `Error getProductWithAllMRP in stock.js. ${query}`, err), res);
+				return reject(new ErrorHandler('500', `Error deleteProductFromStock in stock.js. ${query}`, err), res);
 			} else {
 				resolve('deleted');
 			}

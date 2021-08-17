@@ -6,7 +6,7 @@ const moment = require('moment');
 const logger = require('../../routes/helpers/log4js');
 const { toTimeZone, toTimeZoneFrmt } = require('./../helpers/utils');
 
-const { getProductInventoryReport, fullStockReport } = require('../modules/reports/inventoryreports.js');
+const { getProductInventoryReport, getProductInventoryReportShort, fullStockReport } = require('../modules/reports/inventoryreports.js');
 const { getProductSummaryReport } = require('../modules/reports/productsummaryreports.js');
 const {
 	getStatement,
@@ -40,6 +40,18 @@ reportsRouter.post('/inventory-report', (req, res) => {
 	const [center_id, product_code, product_id] = Object.values(req.body);
 
 	getProductInventoryReport(center_id, product_code, product_id, (err, data) => {
+		if (err) {
+			return handleError(new ErrorHandler('500', 'inventory-report', err), res);
+		} else {
+			return res.status(200).json(data);
+		}
+	});
+});
+
+reportsRouter.post('/inventory-report-short', (req, res) => {
+	const [center_id, product_code, product_id] = Object.values(req.body);
+
+	getProductInventoryReportShort(center_id, product_code, product_id, (err, data) => {
 		if (err) {
 			return handleError(new ErrorHandler('500', 'inventory-report', err), res);
 		} else {

@@ -1,6 +1,6 @@
 const express = require('express');
 
-require('dotenv').config({ path: `./.env.${process.env.NODE_ENV}` });
+// require('dotenv').config({ path: `./.env.${process.env.NODE_ENV}` });
 
 const mysql = require('mysql');
 const moment = require('moment');
@@ -15,7 +15,7 @@ const http = require('http');
 const cors = require('cors');
 const fs = require('fs');
 
-console.log(`./.env.${process.env.NODE_ENV}`);
+// console.log(`./.env.${process.env.NODE_ENV}`);
 
 // var options = {
 // 	key: fs.readFileSync('/etc/letsencrypt/live/demo.squapl.com/privkey.pem'),
